@@ -102,7 +102,7 @@
                     </div>
 
                     <?php if(empty($data['reviews'])): ?>
-                        <div class="bg-slate-50 rounded-2xl p-10 text-center border border-dashed border-slate-200">
+                        <div id="noReviewsState" class="bg-slate-50 rounded-2xl p-10 text-center border border-dashed border-slate-200">
                             <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm">
                                 <i class="fas fa-comment-alt text-2xl"></i>
                             </div>
@@ -111,8 +111,9 @@
                                 <a href="<?= BASE_URL ?>/login" class="text-navy-800 font-bold text-sm mt-4 inline-block hover:underline">Login to review</a>
                             <?php endif; ?>
                         </div>
+                        <div id="reviewsList" class="space-y-6"></div>
                     <?php else: ?>
-                        <div class="space-y-6">
+                        <div id="reviewsList" class="space-y-6">
                             <?php foreach($data['reviews'] as $review): ?>
                                 <div class="flex gap-4 p-4 hover:bg-slate-50 rounded-2xl transition duration-200">
                                     <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 border border-slate-200">
@@ -145,22 +146,73 @@
                     document.getElementById('ratingForm')?.addEventListener('submit', async function(e) {
                         e.preventDefault();
                         const formData = new FormData(this);
+                        const rating = formData.get('rating');
+                        const comment = formData.get('comment');
                         
                         try {
+                            const submitBtn = this.querySelector('button[type="submit"]');
+                            submitBtn.disabled = true;
+                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
+
                             const response = await fetch('<?= BASE_URL ?>/api/place/review', {
                                 method: 'POST',
                                 body: formData
                             });
+                            
                             const res = await response.json();
                             
                             if(res.success) {
-                                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 1500, showConfirmButton: false });
-                                setTimeout(() => location.reload(), 1500);
+                                Swal.fire({ 
+                                    icon: 'success', 
+                                    title: 'สำเร็จ', 
+                                    text: res.message, 
+                                    timer: 2000, 
+                                    showConfirmButton: false 
+                                });
+
+                                // Dynamic DOM Update
+                                const reviewsList = document.getElementById('reviewsList');
+                                const noReviewsState = document.getElementById('noReviewsState');
+                                if(noReviewsState) noReviewsState.remove();
+
+                                // Prepend new review
+                                const newReviewHtml = `
+                                    <div class="flex gap-4 p-4 bg-primary-50 rounded-2xl border border-primary-100 animate-fade-in">
+                                        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 border border-slate-200">
+                                            <img src="<?= isset($_SESSION['profile_image']) ? BASE_URL . '/../' . $_SESSION['profile_image'] : 'https://ui-avatars.com/api/?name=' . ($_SESSION['user_name'] ?? 'User') ?>" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex justify-between items-start mb-1">
+                                                <h5 class="font-bold text-slate-800 text-sm"><?= $_SESSION['user_name'] ?? 'You' ?></h5>
+                                                <span class="text-[10px] text-primary-600 font-bold">Just now</span>
+                                            </div>
+                                            <div class="flex text-yellow-400 text-[10px] mb-2">
+                                                ${'<i class="fas fa-star"></i>'.repeat(rating)}${'<i class="far fa-star"></i>'.repeat(5-rating)}
+                                            </div>
+                                            <p class="text-slate-600 text-sm leading-relaxed">${comment.replace(/\n/g, '<br>')}</p>
+                                        </div>
+                                    </div>
+                                `;
+                                reviewsList.insertAdjacentHTML('afterbegin', newReviewHtml);
+
+                                // Reset form and close
+                                this.reset();
+                                toggleReviewForm();
+                                
+                                // Restore button
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = 'Submit Review';
                             } else {
                                 Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = 'Submit Review';
                             }
                         } catch (error) {
-                            Swal.fire('Error', 'ไม่สามารถส่งข้อมูลได้', 'error');
+                            console.error('Submission Error:', error);
+                            Swal.fire('Error', 'เกิดข้อผิดพลาดในการส่งข้อมูล', 'error');
+                            const submitBtn = this.querySelector('button[type="submit"]');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = 'Submit Review';
                         }
                     });
                 </script>

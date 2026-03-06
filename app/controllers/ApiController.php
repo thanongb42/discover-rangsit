@@ -303,16 +303,25 @@ class ApiController extends Controller {
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $place_id = $_POST['place_id'];
-            $rating = $_POST['rating'];
-            $comment = trim($_POST['comment']);
-            $user_id = $_SESSION['user_id'];
+            try {
+                $place_id = $_POST['place_id'] ?? null;
+                $rating = $_POST['rating'] ?? null;
+                $comment = trim($_POST['comment'] ?? '');
+                $user_id = $_SESSION['user_id'];
 
-            $placeModel = $this->model('Place');
-            if ($placeModel->addReview($place_id, $user_id, $rating, $comment)) {
-                echo json_encode(['success' => true, 'message' => 'ขอบคุณสำหรับการให้คะแนน!']);
-            } else {
-                echo json_encode(['success' => false, 'message' => 'ไม่สามารถบันทึกข้อมูลได้']);
+                if (!$place_id || !$rating) {
+                    echo json_encode(['success' => false, 'message' => 'กรุณาเลือกคะแนนดาวก่อนส่ง']);
+                    return;
+                }
+
+                $placeModel = $this->model('Place');
+                if ($placeModel->addReview($place_id, $user_id, $rating, $comment)) {
+                    echo json_encode(['success' => true, 'message' => 'ขอบคุณสำหรับการให้คะแนน!']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง']);
+                }
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()]);
             }
         }
     }
