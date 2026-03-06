@@ -272,6 +272,16 @@
                 btn.classList.remove('hidden');
                 btn.classList.add('animate-bounce');
                 setTimeout(() => btn.classList.remove('animate-bounce'), 1000);
+
+                Swal.fire({
+                    icon: 'info',
+                    title: 'เลือกไฟล์ใหม่แล้ว',
+                    text: 'กรุณากดปุ่ม "อัปเดต" เพื่อบันทึกลงระบบ',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
             }
             reader.readAsDataURL(input.files[0]);
         }

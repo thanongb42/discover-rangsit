@@ -108,29 +108,37 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">รูปภาพหน้าปก</label>
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary-400 transition cursor-pointer bg-gray-50/50" onclick="document.getElementById('fileInput').click()">
-                            <div class="space-y-1 text-center">
+                        <div id="coverFrame" class="relative mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary-400 transition cursor-pointer bg-gray-50/50 overflow-hidden min-h-[160px]" onclick="document.getElementById('fileInput').click()">
+                            <div id="coverPlaceholder" class="space-y-1 text-center">
                                 <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
                                 <div class="flex text-sm text-gray-600">
                                     <span class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">อัปโหลดรูปหน้าปก</span>
                                 </div>
                                 <p class="text-xs text-gray-400">PNG, JPG ไม่เกิน 5MB</p>
                             </div>
-                            <input id="fileInput" name="cover_image" type="file" class="hidden" accept="image/*">
+                            <img id="coverPreview" class="hidden absolute inset-0 w-full h-full object-cover">
+                            <div id="coverOverlay" class="hidden absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                                <i class="fas fa-sync text-white text-2xl"></i>
+                            </div>
                         </div>
+                        <input id="fileInput" name="cover_image" type="file" class="hidden" accept="image/*" onchange="handlePreview(this, 'coverPreview', 'coverPlaceholder', 'coverOverlay', 'หน้าปก')">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">LINE QR Code</label>
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-green-400 transition cursor-pointer bg-gray-50/50" onclick="document.getElementById('lineQrInput').click()">
-                            <div class="space-y-1 text-center">
+                        <div id="qrFrame" class="relative mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-green-400 transition cursor-pointer bg-gray-50/50 overflow-hidden min-h-[160px]" onclick="document.getElementById('lineQrInput').click()">
+                            <div id="qrPlaceholder" class="space-y-1 text-center">
                                 <i class="fas fa-qrcode text-gray-400 text-3xl mb-2"></i>
                                 <div class="flex text-sm text-gray-600">
                                     <span class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500">อัปโหลด QR Code</span>
                                 </div>
                                 <p class="text-xs text-gray-400">รูปภาพสำหรับเพิ่มเพื่อน</p>
                             </div>
-                            <input id="lineQrInput" name="line_qr" type="file" class="hidden" accept="image/*">
+                            <img id="qrPreview" class="hidden absolute inset-0 w-full h-full object-contain p-2">
+                            <div id="qrOverlay" class="hidden absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition">
+                                <i class="fas fa-sync text-white text-2xl"></i>
+                            </div>
                         </div>
+                        <input id="lineQrInput" name="line_qr" type="file" class="hidden" accept="image/*" onchange="handlePreview(this, 'qrPreview', 'qrPlaceholder', 'qrOverlay', 'LINE QR')">
                     </div>
                 </div>
 
@@ -233,6 +241,33 @@ function syncMapFromInputs() {
     if(!isNaN(lat) && !isNaN(lng)) {
         updateMarker(lat, lng);
         pickerMap.panTo([lat, lng]);
+    }
+}
+
+function handlePreview(input, previewId, placeholderId, overlayId, label) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById(previewId);
+            const placeholder = document.getElementById(placeholderId);
+            const overlay = document.getElementById(overlayId);
+            
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            overlay.classList.remove('hidden');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'เลือกรูป' + label + 'แล้ว',
+                text: 'รูปภาพพร้อมสำหรับการส่งข้อมูล',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+        reader.readAsDataURL(input.files[0]);
     }
 }
 </script>

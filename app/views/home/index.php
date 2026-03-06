@@ -89,7 +89,12 @@
     let currentView = 'grid';
 
     document.addEventListener('DOMContentLoaded', () => {
-        renderLandingPlaces(allPlaces);
+        // Detect mobile and set default view to list
+        if (window.innerWidth < 768) {
+            switchView('list');
+        } else {
+            renderLandingPlaces(allPlaces);
+        }
         
         // Enter key for search
         document.getElementById('homeSearch').addEventListener('keyup', (e) => {
