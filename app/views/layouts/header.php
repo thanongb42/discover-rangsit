@@ -75,7 +75,7 @@
                 extend: {
                     colors: {
                         navy: {
-                            800: '#2795F5',
+                            800: '#1e3a8a',
                             900: '#1e3a8a',
                         },
                         primary: {
@@ -98,7 +98,7 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-900">
     <!-- Navbar -->
-    <nav class="bg-[#2795F5] text-white shadow-lg sticky top-0 z-[2000]">
+    <nav class="bg-[#1e3a8a] text-white shadow-lg sticky top-0 z-[2000]">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <a href="<?= BASE_URL ?>" class="flex items-center space-x-3 text-xl font-bold tracking-tight">
                 <img src="<?= BASE_URL ?>/images/rangsit-logo.png" alt="Rangsit Logo" class="h-10 w-auto">
