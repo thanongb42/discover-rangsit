@@ -6,6 +6,19 @@
 </div>
 
 <div class="max-w-4xl">
+    <?php if(isset($_SESSION['error'])): ?>
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 shadow-sm rounded-r-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-700"><?= $_SESSION['error']; unset($_SESSION['error']); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Data Entry Guideline Alert -->
     <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-2xl shadow-sm">
         <div class="flex gap-3">
@@ -20,7 +33,10 @@
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-8">
-            <form action="<?= BASE_URL ?>/dashboard/add-place" method="POST" enctype="multipart/form-data">
+            <form action="<?= BASE_URL ?>/dashboard/add-place" method="POST" enctype="multipart/form-data" id="addPlaceForm">
+                <input type="hidden" name="cover_base64" id="coverBase64">
+                <input type="hidden" name="qr_base64" id="qrBase64">
+                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">ชื่อธุรกิจ</label>
@@ -246,30 +262,80 @@ function syncMapFromInputs() {
 
 function handlePreview(input, previewId, placeholderId, overlayId, label) {
     if (input.files && input.files[0]) {
+        const file = input.files[0];
         const reader = new FileReader();
+        
         reader.onload = function(e) {
-            const preview = document.getElementById(previewId);
-            const placeholder = document.getElementById(placeholderId);
-            const overlay = document.getElementById(overlayId);
+            const img = new Image();
+            img.src = e.target.result;
             
-            preview.src = e.target.result;
-            preview.classList.remove('hidden');
-            placeholder.classList.add('hidden');
-            overlay.classList.remove('hidden');
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'เลือกรูป' + label + 'แล้ว',
-                text: 'รูปภาพพร้อมสำหรับการส่งข้อมูล',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
+            img.onload = function() {
+                // Resize logic
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const max_size = label === 'หน้าปก' ? 1200 : 800;
+
+                if (width > height) {
+                    if (width > max_size) {
+                        height *= max_size / width;
+                        width = max_size;
+                    }
+                } else {
+                    if (height > max_size) {
+                        width *= max_size / height;
+                        height = max_size;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Store in hidden field
+                const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+                if (label === 'หน้าปก') {
+                    document.getElementById('coverBase64').value = base64Data;
+                } else {
+                    document.getElementById('qrBase64').value = base64Data;
+                }
+
+                // Update Preview UI
+                const preview = document.getElementById(previewId);
+                const placeholder = document.getElementById(placeholderId);
+                const overlay = document.getElementById(overlayId);
+                
+                preview.src = base64Data;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                overlay.classList.remove('hidden');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'เตรียมรูป' + label + 'แล้ว',
+                    text: 'รูปภาพถูกปรับขนาดเพื่อความรวดเร็วในการส่งข้อมูล',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            };
         }
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
 }
+
+document.getElementById('addPlaceForm').onsubmit = function() {
+    Swal.fire({
+        title: 'กำลังส่งข้อมูล...',
+        text: 'กรุณารอสักครู่ ระบบกำลังประมวลผลข้อมูลและรูปภาพ',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+};
 </script>
 
 <!-- CSS fix for Leaflet d-none -->
