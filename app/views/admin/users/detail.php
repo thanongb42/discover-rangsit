@@ -118,7 +118,7 @@
             </div>
             <div class="p-8">
                 <div class="flex items-center gap-6 p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-navy-800 shadow-sm">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-primary-500 shadow-sm">
                         <i class="fas fa-sign-in-alt text-2xl"></i>
                     </div>
                     <div>

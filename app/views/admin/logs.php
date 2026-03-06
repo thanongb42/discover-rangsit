@@ -45,7 +45,7 @@
             </div>
         </div>
         <div class="flex gap-2">
-            <button type="submit" class="flex-1 text-white font-bold py-2 rounded-xl transition shadow-lg flex items-center justify-center" style="background-color: #277DF5; shadow: 0 10px 15px -3px rgba(39, 125, 245, 0.3);">
+            <button type="submit" class="flex-1 text-white font-bold py-2 rounded-xl transition shadow-lg flex items-center justify-center" style="background-color: #2795F5; box-shadow: 0 10px 15px -3px rgba(39, 149, 245, 0.3);">
                 <i class="fas fa-search mr-2"></i> ค้นหา
             </button>
             <a href="<?= BASE_URL ?>/admin/logs" class="bg-gray-100 hover:bg-gray-200 text-gray-500 font-bold py-2 px-4 rounded-xl transition flex items-center">
@@ -146,7 +146,7 @@
             ?>
                 <a href="?page=<?= $i ?><?= !empty($data['filters']['action']) ? '&action='.$data['filters']['action'] : '' ?><?= !empty($data['filters']['start_date']) ? '&start_date='.$data['filters']['start_date'] : '' ?><?= !empty($data['filters']['end_date']) ? '&end_date='.$data['filters']['end_date'] : '' ?>" 
                    class="w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition <?= $i == $data['currentPage'] ? 'text-white shadow-lg' : 'bg-white border border-gray-200 text-gray-400 hover:bg-gray-50' ?>"
-                   style="<?= $i == $data['currentPage'] ? 'background-color: #277DF5; box-shadow: 0 10px 15px -3px rgba(39, 125, 245, 0.3);' : '' ?>">
+                   style="<?= $i == $data['currentPage'] ? 'background-color: #2795F5; box-shadow: 0 10px 15px -3px rgba(39, 149, 245, 0.3);' : '' ?>">
                     <?= $i ?>
                 </a>
             <?php endfor; ?>

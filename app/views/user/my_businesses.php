@@ -56,7 +56,7 @@
                         <a href="<?= BASE_URL ?>/admin/places/edit/<?= $place->id ?>" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-center py-2.5 rounded-xl text-xs font-bold transition">
                             <i class="fas fa-edit mr-1"></i> แก้ไขข้อมูล
                         </a>
-                        <a href="<?= BASE_URL ?>/place/<?= $place->slug ?>" target="_blank" class="w-10 h-10 bg-navy-800 text-white rounded-xl flex items-center justify-center hover:bg-navy-900 transition">
+                        <a href="<?= BASE_URL ?>/place/<?= $place->slug ?>" target="_blank" class="w-10 h-10 bg-primary-500 text-white rounded-xl flex items-center justify-center hover:bg-primary-600 transition">
                             <i class="fas fa-external-link-alt text-xs"></i>
                         </a>
                     </div>

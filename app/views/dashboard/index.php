@@ -111,7 +111,7 @@
             labels: catData.map(d => d.name),
             datasets: [{
                 data: catData.map(d => d.count),
-                backgroundColor: ['#009933', '#1e3a8a', '#0f766e', '#fbbf24', '#f43f5e', '#8b5cf6']
+                backgroundColor: ['#2795F5', '#1e3a8a', '#0f766e', '#fbbf24', '#f43f5e', '#8b5cf6']
             }]
         },
         options: {

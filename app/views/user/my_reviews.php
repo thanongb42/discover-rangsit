@@ -13,7 +13,7 @@
             </div>
             <h3 class="text-xl font-bold text-gray-800">คุณยังไม่เคยเขียนรีวิว</h3>
             <p class="text-gray-400 mb-6">ออกไปค้นหาและแบ่งปันประสบการณ์ของคุณในเมืองรังสิตกันเถอะ</p>
-            <a href="<?= BASE_URL ?>/" class="bg-navy-800 text-white px-8 py-3 rounded-2xl font-bold shadow-lg transition hover:bg-navy-900">สำรวจเมืองรังสิต</a>
+            <a href="<?= BASE_URL ?>/" class="bg-primary-500 text-white px-8 py-3 rounded-2xl font-bold shadow-lg transition hover:bg-primary-600">สำรวจเมืองรังสิต</a>
         </div>
     <?php else: ?>
         <div class="space-y-6">

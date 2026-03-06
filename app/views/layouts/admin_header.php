@@ -60,16 +60,16 @@ $menu_groups['business'] = [
                 extend: {
                     colors: {
                         primary: {
-                            50: '#e6fff0',
-                            100: '#ccffe0',
-                            200: '#99ffc2',
-                            300: '#66ffa3',
-                            400: '#33cc70',
-                            500: '#009933',
-                            600: '#007a29',
-                            700: '#006622',
-                            800: '#00521b',
-                            900: '#003d14',
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae0fd',
+                            300: '#7cc8fb',
+                            400: '#2795F5', // The target color
+                            500: '#2795F5',
+                            600: '#1d76cc',
+                            700: '#1a5ea3',
+                            800: '#1a4f86',
+                            900: '#1a436f',
                         }
                     }
                 }
@@ -77,20 +77,20 @@ $menu_groups['business'] = [
         }
     </script>
     <style>
-        /* Custom Green Button Styles */
+        /* Custom Blue Button Styles */
         .btn-primary {
-            background-color: #009933 !important;
-            border-color: #009933 !important;
+            background-color: #2795F5 !important;
+            border-color: #2795F5 !important;
             color: white !important;
         }
         .btn-primary:hover {
-            background-color: #007a29 !important;
-            border-color: #007a29 !important;
+            background-color: #1d76cc !important;
+            border-color: #1d76cc !important;
         }
         /* Sidebar Styles */
         #sidebar {
-            background: linear-gradient(180deg, #064e3b 0%, #065f46 45%, #0f766e 100%);
-            box-shadow: 2px 0 12px rgba(6,78,59,.35);
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 45%, #2795F5 100%);
+            box-shadow: 2px 0 12px rgba(30, 58, 138, 0.2);
         }
         .sidebar-menu-item {
             display: flex;
@@ -111,7 +111,7 @@ $menu_groups['business'] = [
         .sidebar-menu-item.active {
             background: rgba(255,255,255,.18);
             color: #ffffff;
-            border-left: 3px solid #2dd4bf;
+            border-left: 3px solid #60a5fa;
             font-weight: 600;
         }
         .sidebar-menu-item i {
