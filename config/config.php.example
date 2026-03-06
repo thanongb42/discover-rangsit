@@ -1,0 +1,9 @@
+<?php
+
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_NAME', 'discover_rangsit');
+
+define('BASE_URL', 'http://localhost/discover_rangsit/public');
+define('APP_ROOT', dirname(dirname(__FILE__)));

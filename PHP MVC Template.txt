@@ -1,0 +1,47 @@
+discover-rangsit/
+│
+├── app/
+│   ├── controllers/
+│   │      AuthController.php
+│   │      PlaceController.php
+│   │      MapController.php
+│   │      UserController.php
+│   │
+│   ├── models/
+│   │      User.php
+│   │      Place.php
+│   │      Category.php
+│   │      Rating.php
+│   │
+│   ├── views/
+│   │      layouts/
+│   │          header.php
+│   │          footer.php
+│   │
+│   │      places/
+│   │          list.php
+│   │          detail.php
+│   │
+│   │      map/
+│   │          index.php
+│   │
+│   ├── middleware/
+│   │      AuthMiddleware.php
+│   │
+│   └── core/
+│          Controller.php
+│          Model.php
+│          Database.php
+│
+├── config/
+│      database.php
+│
+├── public/
+│      index.php
+│      css/
+│      js/
+│      images/
+│
+├── uploads/
+│
+└── routes.php

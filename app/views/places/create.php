@@ -1,0 +1,196 @@
+<?php require_once APP_ROOT . '/app/views/layouts/admin_header.php'; ?>
+
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-800">เพิ่มธุรกิจใหม่</h1>
+    <p class="text-gray-500 text-sm">ระบุข้อมูลธุรกิจของคุณให้ครบถ้วนเพื่อความรวดเร็วในการตรวจสอบและอนุมัติ</p>
+</div>
+
+<div class="max-w-4xl">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-8">
+            <form action="<?= BASE_URL ?>/dashboard/add-place" method="POST" enctype="multipart/form-data">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">ชื่อธุรกิจ</label>
+                        <input type="text" name="name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-primary-500 focus:border-primary-500 transition" required placeholder="เช่น ร้านก๋วยเตี๋ยวเรือโกฮับ">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">หมวดหมู่</label>
+                        <select name="category_id" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-primary-500 focus:border-primary-500 transition" required>
+                            <option value="">เลือกหมวดหมู่</option>
+                            <?php foreach($data['categories'] as $cat): ?>
+                                <option value="<?= $cat->id ?>"><?= htmlspecialchars($cat->name) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">รายละเอียดธุรกิจ</label>
+                    <textarea name="description" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-primary-500 focus:border-primary-500 transition" rows="4" required placeholder="บรรยายเกี่ยวกับธุรกิจ จุดเด่น สินค้า หรือบริการของคุณ..."></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">ที่อยู่ / ตำแหน่ง</label>
+                    <input type="text" name="address" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-primary-500 focus:border-primary-500 transition mb-4" required placeholder="ระบุที่อยู่ เลขที่บ้าน ถนน ซอย...">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">ละติจูด (Latitude)</label>
+                            <input type="number" step="any" name="latitude" id="latInput" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1">ลองจิจูด (Longitude)</label>
+                            <input type="number" step="any" name="longitude" id="lngInput" class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 mb-4">
+                        <button type="button" class="bg-primary-50 text-primary-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-100 transition flex items-center" onclick="getLocation()">
+                            <i class="fas fa-location-crosshairs mr-2"></i> ระบุตำแหน่งปัจจุบัน
+                        </button>
+                        <button type="button" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-100 transition flex items-center" id="btnShowMap">
+                            <i class="fas fa-map-marker-alt mr-2"></i> เลือกบนแผนที่
+                        </button>
+                    </div>
+
+                    <div id="locationPickerMap" class="border border-gray-200 rounded-xl overflow-hidden d-none mb-2" style="height: 350px;"></div>
+                    <p id="mapHelpText" class="text-xs text-blue-500 d-none"><i class="fas fa-info-circle mr-1"></i> คลิกที่แผนที่หรือลากหมุดเพื่อระบุพิกัดที่ถูกต้อง</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">เบอร์โทรศัพท์ติดต่อ</label>
+                        <input type="text" name="phone" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-primary-500 focus:border-primary-500 transition" placeholder="เช่น 02-123-4567">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">เว็บไซต์ / ลิงก์ธุรกิจ</label>
+                        <input type="url" name="website" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-primary-500 focus:border-primary-500 transition" placeholder="https://www.facebook.com/yourpage">
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">รูปภาพหน้าปก</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary-400 transition cursor-pointer bg-gray-50/50" onclick="document.getElementById('fileInput').click()">
+                        <div class="space-y-1 text-center">
+                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                            <div class="flex text-sm text-gray-600">
+                                <span class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">อัปโหลดไฟล์</span>
+                                <p class="pl-1 text-gray-400">หรือลากไฟล์มาวางที่นี่</p>
+                            </div>
+                            <p class="text-xs text-gray-400">PNG, JPG ขนาดไม่เกิน 5MB</p>
+                        </div>
+                        <input id="fileInput" name="cover_image" type="file" class="hidden" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-100">
+                    <a href="<?= BASE_URL ?>/dashboard" class="text-gray-500 hover:text-gray-700 font-bold px-4">ยกเลิก</a>
+                    <button type="submit" class="bg-primary-500 hover:bg-primary-600 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-primary-500/30">
+                        ส่งข้อมูลอนุมัติ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let pickerMap, pickerMarker;
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            document.getElementById('latInput').value = lat.toFixed(6);
+            document.getElementById('lngInput').value = lng.toFixed(6);
+            
+            if(pickerMap) {
+                updateMarker(lat, lng);
+                pickerMap.setView([lat, lng], 16);
+            }
+        });
+    } else {
+        alert("Geolocation is not supported by this browser.");
+    }
+}
+
+document.getElementById('btnShowMap').addEventListener('click', function() {
+    const mapDiv = document.getElementById('locationPickerMap');
+    const helpText = document.getElementById('mapHelpText');
+    mapDiv.classList.remove('d-none');
+    helpText.classList.remove('d-none');
+    this.classList.add('hidden'); // Tailwind use hidden
+
+    initPickerMap();
+    // Force leaflet to resize properly when shown from d-none
+    setTimeout(() => { pickerMap.invalidateSize(); }, 200);
+});
+
+function initPickerMap() {
+    if(pickerMap) return;
+
+    // Default to Rangsit center
+    const defaultLat = 13.9840;
+    const defaultLng = 100.6125;
+    
+    const latVal = parseFloat(document.getElementById('latInput').value) || defaultLat;
+    const lngVal = parseFloat(document.getElementById('lngInput').value) || defaultLng;
+
+    pickerMap = L.map('locationPickerMap').setView([latVal, lngVal], 14);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(pickerMap);
+
+    // Initial Marker
+    pickerMarker = L.marker([latVal, lngVal], {
+        draggable: true
+    }).addTo(pickerMap);
+
+    // Update inputs on drag end
+    pickerMarker.on('dragend', function(event) {
+        const position = pickerMarker.getLatLng();
+        updateInputs(position.lat, position.lng);
+    });
+
+    // Update marker and inputs on map click
+    pickerMap.on('click', function(e) {
+        updateMarker(e.latlng.lat, e.latlng.lng);
+        updateInputs(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Handle manual input changes
+    document.getElementById('latInput').addEventListener('change', () => syncMapFromInputs());
+    document.getElementById('lngInput').addEventListener('change', () => syncMapFromInputs());
+}
+
+function updateMarker(lat, lng) {
+    if(pickerMarker) {
+        pickerMarker.setLatLng([lat, lng]);
+    }
+}
+
+function updateInputs(lat, lng) {
+    document.getElementById('latInput').value = lat.toFixed(6);
+    document.getElementById('lngInput').value = lng.toFixed(6);
+}
+
+function syncMapFromInputs() {
+    const lat = parseFloat(document.getElementById('latInput').value);
+    const lng = parseFloat(document.getElementById('lngInput').value);
+    if(!isNaN(lat) && !isNaN(lng)) {
+        updateMarker(lat, lng);
+        pickerMap.panTo([lat, lng]);
+    }
+}
+</script>
+
+<!-- CSS fix for Leaflet d-none -->
+<style>.d-none { display: none !important; }</style>
+<!-- Leaflet JS needed for picker -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<?php require_once APP_ROOT . '/app/views/layouts/admin_footer.php'; ?>

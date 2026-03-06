@@ -1,0 +1,18 @@
+# Config files
+config/config.php
+
+# Uploads
+uploads/covers/*
+uploads/gallery/*
+uploads/avatars/*
+!uploads/covers/default.jpg
+!uploads/**/.gitkeep
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
