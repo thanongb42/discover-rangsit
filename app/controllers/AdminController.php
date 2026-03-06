@@ -89,4 +89,35 @@ class AdminController extends Controller {
             'current_page' => 'users'
         ]);
     }
+
+    public function logs() {
+        $logModel = $this->model('ActivityLog');
+        
+        // Pagination & Filters
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 50;
+        $offset = ($page - 1) * $limit;
+        
+        $filters = [
+            'action' => $_GET['action'] ?? '',
+            'start_date' => $_GET['start_date'] ?? '',
+            'end_date' => $_GET['end_date'] ?? ''
+        ];
+
+        $logs = $logModel->getFiltered($filters, $limit, $offset);
+        $totalLogs = $logModel->countFiltered($filters);
+        $totalPages = ceil($totalLogs / $limit);
+        $actions = $logModel->getDistinctActions();
+
+        $this->view('admin/logs', [
+            'title' => 'ประวัติการใช้งานระบบ - Admin Dashboard',
+            'logs' => $logs,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
+            'totalLogs' => $totalLogs,
+            'filters' => $filters,
+            'actions' => $actions,
+            'current_page' => 'logs'
+        ]);
+    }
 }

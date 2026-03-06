@@ -74,7 +74,7 @@ class PlaceController extends Controller {
             if(isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] == 0) {
                 $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
                 $filename = time() . '_cover.' . $ext;
-                $target = APP_ROOT . '/uploads/covers/' . $filename;
+                $target = APP_ROOT . '/public/uploads/covers/' . $filename;
                 if(move_uploaded_file($_FILES['cover_image']['tmp_name'], $target)) {
                     $data['cover_image'] = $filename;
                 }
@@ -84,7 +84,7 @@ class PlaceController extends Controller {
             if(isset($_FILES['line_qr']) && $_FILES['line_qr']['error'] == 0) {
                 $ext = pathinfo($_FILES['line_qr']['name'], PATHINFO_EXTENSION);
                 $filename = time() . '_lineqr.' . $ext;
-                $target = APP_ROOT . '/uploads/gallery/' . $filename;
+                $target = APP_ROOT . '/public/uploads/gallery/' . $filename;
                 if(move_uploaded_file($_FILES['line_qr']['tmp_name'], $target)) {
                     $data['line_qr'] = $filename;
                 }

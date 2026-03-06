@@ -3,7 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit' ?></title>
+    <title><?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit - ค้นพบของเด็ด ของดัง และทุกสิ่งในเมืองรังสิต' ?></title>
+    
+    <!-- SEO Metadata -->
+    <meta name="description" content="Discover Rangsit แพลตฟอร์มรวมร้านค้า ร้านอาหาร ของเด็ดรังสิต ของดังรังสิต ก๋วยเตี๋ยวเรือรังสิต สถานที่ท่องเที่ยว และบริการในเทศบาลนครรังสิต ค้นหาง่าย ครบจบในที่เดียว">
+    <meta name="keywords" content="รังสิต, ของเด็ดรังสิต, ของดังรังสิต, ก๋วยเตี๋ยวเรือรังสิต, ที่เที่ยวรังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต">
+    <meta name="author" content="เทศบาลนครรังสิต">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= BASE_URL ?>">
+    <meta property="og:title" content="<?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit - แหล่งรวมของเด็ดเมืองรังสิต' ?>">
+    <meta property="og:description" content="ค้นพบร้านอาหารอร่อย ก๋วยเตี๋ยวเรือชื่อดัง และสถานที่น่าสนใจในเมืองรังสิต พร้อมระบบแผนที่นำทางอัจฉริยะ">
+    <meta property="og:image" content="<?= BASE_URL ?>/images/rangsit-logo.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<?= BASE_URL ?>">
+    <meta property="twitter:title" content="<?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit - แหล่งรวมของเด็ดเมืองรังสิต' ?>">
+    <meta property="twitter:description" content="ค้นพบร้านอาหารอร่อย ก๋วยเตี๋ยวเรือชื่อดัง และสถานที่น่าสนใจในเมืองรังสิต พร้อมระบบแผนที่นำทางอัจฉริยะ">
+    <meta property="twitter:image" content="<?= BASE_URL ?>/images/rangsit-logo.png">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="<?= BASE_URL . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?>">
+
+    <!-- JSON-LD Structured Data for WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "WebSite",
+      "name": "Discover Rangsit",
+      "url": "<?= BASE_URL ?>",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "<?= BASE_URL ?>/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "description": "แพลตฟอร์มรวบรวมข้อมูลธุรกิจ ของเด็ด ของดัง ก๋วยเตี๋ยวเรือ และสถานที่ท่องเที่ยวในเมืองรังสิต",
+      "publisher": {
+        "@type": "GovernmentOrganization",
+        "name": "เทศบาลนครรังสิต"
+      }
+    }
+    </script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -21,6 +64,7 @@
     
     <!-- Scripts Core -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
@@ -54,7 +98,7 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-900">
     <!-- Navbar -->
-    <nav class="bg-[#1e3a8a] text-white shadow-lg sticky top-0 z-[1001]">
+    <nav class="bg-[#1e3a8a] text-white shadow-lg sticky top-0 z-[2000]">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <a href="<?= BASE_URL ?>" class="flex items-center space-x-3 text-xl font-bold tracking-tight">
                 <img src="<?= BASE_URL ?>/images/rangsit-logo.png" alt="Rangsit Logo" class="h-10 w-auto">
@@ -66,10 +110,7 @@
                 <a href="<?= BASE_URL ?>/city-map" class="hover:text-teal-300 transition font-medium">Map Explorer</a>
                 <a href="<?= BASE_URL ?>/trending" class="hover:text-teal-300 transition font-medium">Trending</a>
                 
-                <?php if(isset($_SESSION['user_id'])): ?>
-                    <a href="<?= BASE_URL ?>/dashboard" class="bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-lg transition text-sm">Dashboard</a>
-                    <a href="<?= BASE_URL ?>/logout" class="text-red-300 hover:text-red-400 text-sm"><i class="fas fa-sign-out-alt"></i></a>
-                <?php else: ?>
+                <?php if(!isset($_SESSION['user_id'])): ?>
                     <a href="<?= BASE_URL ?>/login" class="hover:text-teal-300 transition font-medium">Login</a>
                     <a href="<?= BASE_URL ?>/register" class="bg-primary-500 hover:bg-primary-600 px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-green-900/20 transition">
                         <i class="fas fa-plus mr-1"></i> Add Business
@@ -77,10 +118,47 @@
                 <?php endif; ?>
             </div>
 
-            <!-- Mobile Menu Btn -->
-            <button onclick="togglePublicMobileMenu()" class="md:hidden text-2xl p-2 hover:bg-white/10 rounded-xl transition">
-                <i class="fas fa-bars" id="publicMobileMenuIcon"></i>
-            </button>
+            <div class="flex items-center space-x-3">
+                <?php if(isset($_SESSION['user_id'])): ?>
+                    <!-- User Dropdown (Visible on all screens) -->
+                    <div class="relative">
+                        <button onclick="toggleUserDropdown()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white font-bold border border-white/20 hover:bg-white/20 transition overflow-hidden">
+                            <?php 
+                                $profile_img = $_SESSION['profile_image'] ?? null;
+                                if($profile_img): 
+                                    $img_src = (strpos($profile_img, 'http') === 0) ? $profile_img : BASE_URL . '/' . $profile_img;
+                            ?>
+                                <img src="<?= $img_src ?>" class="w-full h-full object-cover header-avatar-img">
+                            <?php else: ?>
+                                <span class="header-avatar-img"><?= strtoupper(substr($_SESSION['username'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) ?></span>
+                            <?php endif; ?>
+                        </button>
+                        
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fade-in text-slate-800">
+                            <div class="px-4 py-2 border-b border-gray-50 mb-1 lg:hidden">
+                                <p class="text-sm font-bold text-gray-800"><?= $_SESSION['user_name'] ?? 'User' ?></p>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-wider"><?= $_SESSION['user_role'] ?? 'member' ?></p>
+                            </div>
+                            <a href="<?= BASE_URL ?>/profile" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
+                                <i class="fas fa-user-circle mr-2"></i> โปรไฟล์ของฉัน
+                            </a>
+                            <a href="<?= BASE_URL ?>/dashboard" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
+                                <i class="fas fa-tachometer-alt mr-2"></i> แดชบอร์ด
+                            </a>
+                            <div class="border-t border-gray-50 mt-1">
+                                <a href="<?= BASE_URL ?>/logout" class="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> ออกจากระบบ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Mobile Menu Btn -->
+                <button onclick="togglePublicMobileMenu()" class="md:hidden text-2xl p-2 hover:bg-white/10 rounded-xl transition">
+                    <i class="fas fa-bars" id="publicMobileMenuIcon"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Mobile Menu Container -->
@@ -90,10 +168,7 @@
                 <a href="<?= BASE_URL ?>/city-map" class="text-white hover:text-teal-300 font-bold py-2 border-b border-white/5 transition">Map Explorer</a>
                 <a href="<?= BASE_URL ?>/trending" class="text-white hover:text-teal-300 font-bold py-2 border-b border-white/5 transition">Trending</a>
                 
-                <?php if(isset($_SESSION['user_id'])): ?>
-                    <a href="<?= BASE_URL ?>/dashboard" class="text-teal-400 font-bold py-2 transition">Dashboard</a>
-                    <a href="<?= BASE_URL ?>/logout" class="text-red-400 font-bold py-2 transition">Logout</a>
-                <?php else: ?>
+                <?php if(!isset($_SESSION['user_id'])): ?>
                     <a href="<?= BASE_URL ?>/login" class="text-white hover:text-teal-300 font-bold py-2 border-b border-white/5 transition">Login</a>
                     <a href="<?= BASE_URL ?>/register" class="bg-primary-500 text-white text-center py-4 rounded-2xl font-bold shadow-lg transition">
                         Add Business
@@ -113,6 +188,19 @@
                 icon.classList.replace('fa-times', 'fa-bars');
             } else {
                 icon.classList.replace('fa-bars', 'fa-times');
+            }
+        }
+
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+            
+            // Close when clicking outside
+            window.onclick = function(event) {
+                if (!event.target.closest('.relative')) {
+                    const d = document.getElementById('userDropdown');
+                    if (d) d.classList.add('hidden');
+                }
             }
         }
     </script>

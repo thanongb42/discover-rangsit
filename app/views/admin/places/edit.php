@@ -13,6 +13,18 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Left: Basic Info -->
     <div class="lg:col-span-2 space-y-8">
+        <!-- Data Entry Guideline Alert -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-2xl shadow-sm">
+            <div class="flex gap-3">
+                <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                <div class="text-sm text-blue-800 leading-relaxed">
+                    <p class="font-bold mb-1">แนวทางความปลอดภัยของข้อมูล:</p>
+                    <p>1. ข้อมูลที่นำเข้าควรเป็นข้อมูลสาธารณะเพื่อการประชาสัมพันธ์เมือง</p>
+                    <p>2. รูปภาพที่มีข้อมูลส่วนบุคคลจะต้องทำการอำพรางหรือได้รับอนุญาตจากผู้ที่อยู่ในเหตุการณ์ก่อนทุกครั้ง</p>
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-8 border-b border-gray-50 bg-gray-50/50">
                 <h3 class="text-lg font-bold text-gray-800">รายละเอียดธุรกิจ</h3>

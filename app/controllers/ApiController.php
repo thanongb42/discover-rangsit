@@ -46,6 +46,7 @@ class ApiController extends Controller {
             ];
             
             if ($categoryModel->add($data)) {
+                $this->logActivity('CATEGORY_ADD', "Created new category: " . $data['name']);
                 echo json_encode(['success' => true, 'message' => 'เพิ่มหมวดหมู่สำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'ไม่สามารถเพิ่มหมวดหมู่ได้']);
@@ -65,6 +66,7 @@ class ApiController extends Controller {
             ];
             
             if ($categoryModel->update($data)) {
+                $this->logActivity('CATEGORY_UPDATE', "Updated category ID: " . $data['id']);
                 echo json_encode(['success' => true, 'message' => 'อัปเดตหมวดหมู่สำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'ไม่สามารถอัปเดตหมวดหมู่ได้']);
@@ -79,6 +81,7 @@ class ApiController extends Controller {
             $categoryModel = $this->model('Category');
             
             if ($categoryModel->delete($id)) {
+                $this->logActivity('CATEGORY_DELETE', "Deleted category ID: " . $id);
                 echo json_encode(['success' => true, 'message' => 'ลบหมวดหมู่สำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'ไม่สามารถลบได้ เนื่องจากมีธุรกิจอยู่ในหมวดหมู่ชุดนี้']);
@@ -98,6 +101,7 @@ class ApiController extends Controller {
             $id = $_POST['id'];
             $placeModel = $this->model('Place');
             if ($placeModel->updateStatus($id, 'approved')) {
+                $this->logActivity('PLACE_APPROVE', "Approved place ID: " . $id);
                 echo json_encode(['success' => true, 'message' => 'อนุมัติธุรกิจเรียบร้อยแล้ว']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการอนุมัติ']);
@@ -116,6 +120,7 @@ class ApiController extends Controller {
             $id = $_POST['id'];
             $placeModel = $this->model('Place');
             if ($placeModel->updateStatus($id, 'rejected')) {
+                $this->logActivity('PLACE_REJECT', "Rejected place ID: " . $id);
                 echo json_encode(['success' => true, 'message' => 'ปฏิเสธธุรกิจเรียบร้อยแล้ว']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการปฏิเสธ']);
@@ -160,7 +165,7 @@ class ApiController extends Controller {
             if(isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] == 0) {
                 $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
                 $filename = time() . '_cover.' . $ext;
-                $target = APP_ROOT . '/uploads/covers/' . $filename;
+                $target = APP_ROOT . '/public/uploads/covers/' . $filename;
                 if(move_uploaded_file($_FILES['cover_image']['tmp_name'], $target)) {
                     $data['cover_image'] = $filename;
                 }
@@ -170,13 +175,14 @@ class ApiController extends Controller {
             if(isset($_FILES['line_qr']) && $_FILES['line_qr']['error'] == 0) {
                 $ext = pathinfo($_FILES['line_qr']['name'], PATHINFO_EXTENSION);
                 $filename = time() . '_lineqr.' . $ext;
-                $target = APP_ROOT . '/uploads/gallery/' . $filename; // Use gallery folder for simplicity or create a separate one
+                $target = APP_ROOT . '/public/uploads/gallery/' . $filename; // Use gallery folder for simplicity or create a separate one
                 if(move_uploaded_file($_FILES['line_qr']['tmp_name'], $target)) {
                     $data['line_qr'] = $filename;
                 }
             }
 
             if ($placeModel->update($data)) {
+                $this->logActivity('PLACE_UPDATE', "Updated place: " . $data['name']);
                 echo json_encode(['success' => true, 'message' => 'อัปเดตข้อมูลสำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'ไม่สามารถอัปเดตข้อมูลได้']);
@@ -195,6 +201,7 @@ class ApiController extends Controller {
             $id = $_POST['id'];
             $placeModel = $this->model('Place');
             if ($placeModel->delete($id)) {
+                $this->logActivity('PLACE_DELETE', "Deleted place ID: " . $id);
                 echo json_encode(['success' => true, 'message' => 'ลบสถานที่เรียบร้อยแล้ว']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'ไม่สามารถลบข้อมูลได้']);
@@ -214,7 +221,7 @@ class ApiController extends Controller {
             if(isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] == 0) {
                 $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
                 $filename = time() . '_cover.' . $ext;
-                $target = APP_ROOT . '/uploads/covers/' . $filename;
+                $target = APP_ROOT . '/public/uploads/covers/' . $filename;
                 
                 if(move_uploaded_file($_FILES['cover_image']['tmp_name'], $target)) {
                     $placeModel = $this->model('Place');
@@ -244,7 +251,7 @@ class ApiController extends Controller {
             if(isset($_FILES['line_qr']) && $_FILES['line_qr']['error'] == 0) {
                 $ext = pathinfo($_FILES['line_qr']['name'], PATHINFO_EXTENSION);
                 $filename = time() . '_lineqr.' . $ext;
-                $target = APP_ROOT . '/uploads/gallery/' . $filename;
+                $target = APP_ROOT . '/public/uploads/gallery/' . $filename;
                 
                 if(move_uploaded_file($_FILES['line_qr']['tmp_name'], $target)) {
                     $placeModel = $this->model('Place');
@@ -272,7 +279,7 @@ class ApiController extends Controller {
             if(isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
                 $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                 $filename = time() . '_' . rand(1000,9999) . '.' . $ext;
-                $target = APP_ROOT . '/uploads/gallery/' . $filename;
+                $target = APP_ROOT . '/public/uploads/gallery/' . $filename;
                 
                 if(move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
                     $placeModel = $this->model('Place');
@@ -373,6 +380,7 @@ class ApiController extends Controller {
             ];
 
             if ($userModel->register($data)) {
+                $this->logActivity('USER_ADD', "Created new user: " . $data['username']);
                 echo json_encode(['success' => true, 'message' => 'เพิ่มผู้ใช้งานสำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาด']);
@@ -400,6 +408,7 @@ class ApiController extends Controller {
             ];
 
             if ($userModel->fullUpdate($data)) {
+                $this->logActivity('USER_UPDATE', "Updated user ID: " . $data['id']);
                 echo json_encode(['success' => true, 'message' => 'อัปเดตข้อมูลสำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาด']);
@@ -418,6 +427,7 @@ class ApiController extends Controller {
             $new_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $userModel = $this->model('User');
             if ($userModel->updatePassword($id, $new_password)) {
+                $this->logActivity('USER_PASSWORD_RESET', "Reset password for user ID: " . $id);
                 echo json_encode(['success' => true, 'message' => 'รีเซ็ตรหัสผ่านสำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาด']);
@@ -439,6 +449,7 @@ class ApiController extends Controller {
             }
             $userModel = $this->model('User');
             if ($userModel->delete($id)) {
+                $this->logActivity('USER_DELETE', "Deleted user ID: " . $id);
                 echo json_encode(['success' => true, 'message' => 'ลบผู้ใช้งานสำเร็จ']);
             } else {
                 echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาด']);

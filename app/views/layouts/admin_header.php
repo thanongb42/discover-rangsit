@@ -31,6 +31,7 @@ if ($is_admin) {
             ['id' => 'admin_places', 'icon' => 'fa-map-location-dot', 'label' => 'จัดการสถานที่', 'url' => BASE_URL . '/admin/places'],
             ['id' => 'usermanager', 'icon' => 'fa-users-cog', 'label' => 'จัดการผู้ใช้งาน', 'url' => BASE_URL . '/admin/users'],
             ['id' => 'categories', 'icon' => 'fa-list', 'label' => 'หมวดหมู่ธุรกิจ', 'url' => BASE_URL . '/admin/categories'],
+            ['id' => 'logs', 'icon' => 'fa-history', 'label' => 'ประวัติการใช้งาน', 'url' => BASE_URL . '/admin/logs'],
         ]
     ];
 }
@@ -39,8 +40,8 @@ $menu_groups['business'] = [
     'label' => 'ธุรกิจของฉัน',
     'items' => [
         ['id' => 'add_business', 'icon' => 'fa-plus-circle', 'label' => 'เพิ่มธุรกิจใหม่', 'url' => BASE_URL . '/dashboard/add-place'],
-        ['id' => 'my_businesses', 'icon' => 'fa-building', 'label' => 'ธุรกิจของฉัน', 'url' => '#'],
-        ['id' => 'my_reviews', 'icon' => 'fa-star', 'label' => 'รีวิวของฉัน', 'url' => '#'],
+        ['id' => 'my_businesses', 'icon' => 'fa-building', 'label' => 'ธุรกิจของฉัน', 'url' => BASE_URL . '/my-businesses'],
+        ['id' => 'my_reviews', 'icon' => 'fa-star', 'label' => 'รีวิวของฉัน', 'url' => BASE_URL . '/my-reviews'],
     ]
 ];
 ?>
@@ -209,10 +210,15 @@ $menu_groups['business'] = [
                     <!-- User Dropdown -->
                     <div class="relative">
                         <button onclick="toggleUserDropdown()" class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold border border-primary-200 hover:bg-primary-200 transition overflow-hidden">
-                            <?php if(isset($_SESSION['profile_image']) && $_SESSION['profile_image']): ?>
-                                <img src="<?= BASE_URL ?>/../<?= $_SESSION['profile_image'] ?>" class="w-full h-full object-cover">
+                            <?php 
+                                $profile_img = $_SESSION['profile_image'] ?? null;
+                                if($profile_img): 
+                                    // Check if it's a full URL (LINE) or a local path
+                                    $img_src = (strpos($profile_img, 'http') === 0) ? $profile_img : BASE_URL . '/' . $profile_img;
+                            ?>
+                                <img src="<?= $img_src ?>" class="w-full h-full object-cover header-avatar-img">
                             <?php else: ?>
-                                <?= strtoupper(substr($_SESSION['username'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) ?>
+                                <span class="header-avatar-img"><?= strtoupper(substr($_SESSION['username'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) ?></span>
                             <?php endif; ?>
                         </button>
                         

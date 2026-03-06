@@ -45,6 +45,33 @@ input:focus, select:focus, textarea:focus, button:focus {
     border: none !important;
 }
 
+/* Custom FontAwesome Markers */
+.custom-div-icon {
+    background: none;
+    border: none;
+}
+.custom-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    border: 2px solid white;
+    transition: all 0.3s ease;
+}
+.custom-marker i {
+    transform: rotate(45deg);
+}
+.custom-marker:hover {
+    transform: rotate(-45deg) scale(1.2);
+    z-index: 1000;
+}
+
 /* Star Rating Styles */
 .star-rating {
     display: flex;

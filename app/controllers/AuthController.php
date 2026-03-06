@@ -21,9 +21,11 @@ class AuthController extends Controller {
                 $_SESSION['profile_image'] = $loggedInUser->profile_image;
                 
                 $userModel->updateLastLogin($loggedInUser->user_id);
+                $this->logActivity('LOGIN', "User logged in via standard form");
                 
                 header('Location: ' . BASE_URL . '/dashboard');
             } else {
+                $this->logActivity('LOGIN_FAILED', "Failed login attempt for: " . $identity);
                 $_SESSION['error'] = 'Invalid username/email or password';
                 $this->view('auth/login', ['title' => 'Login - Discover Rangsit']);
             }
@@ -64,6 +66,7 @@ class AuthController extends Controller {
     }
 
     public function logout() {
+        $this->logActivity('LOGOUT', "User logged out");
         session_destroy();
         header('Location: ' . BASE_URL . '/login');
     }

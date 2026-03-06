@@ -45,6 +45,22 @@ class Router {
                 require_once '../app/controllers/' . $controllerName . '.php';
                 $controller = new $controllerName();
 
+                // Page Access Logging (Safe Mode)
+                try {
+                    $logFile = APP_ROOT . '/app/models/ActivityLog.php';
+                    if (file_exists($logFile)) {
+                        require_once $logFile;
+                        $logModel = new ActivityLog();
+                        $logModel->log([
+                            'user_id' => $_SESSION['user_id'] ?? null,
+                            'action' => 'PAGE_ACCESS',
+                            'description' => "Accessed " . $url
+                        ]);
+                    }
+                } catch (Exception $e) {
+                    // Fail silently to keep site alive
+                }
+
                 $params = [];
                 foreach ($matches as $key => $match) {
                     if (is_string($key)) {

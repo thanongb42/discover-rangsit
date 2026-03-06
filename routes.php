@@ -5,6 +5,8 @@
 $router->get('/', 'HomeController', 'index');
 $router->get('/city-map', 'MapController', 'index');
 $router->get('/line-manual', 'HomeController', 'lineManual');
+$router->get('/privacy', 'HomeController', 'privacy');
+$router->get('/terms', 'HomeController', 'terms');
 $router->get('/api/places', 'ApiController', 'places');
 $router->get('/api/search', 'ApiController', 'search');
 $router->get('/api/categories', 'ApiController', 'categories');
@@ -31,7 +33,11 @@ $router->get('/logout', 'AuthController', 'logout');
 // User Profile
 $router->get('/profile', 'UserController', 'profile');
 $router->post('/profile/update', 'UserController', 'update');
+$router->post('/api/profile/avatar', 'UserController', 'updateAvatar');
 $router->post('/profile/change-password', 'UserController', 'changePassword');
+$router->get('/my-businesses', 'UserController', 'myBusinesses');
+$router->get('/my-reviews', 'UserController', 'myReviews');
+
 
 
 // Dashboard (Protected)
@@ -59,6 +65,7 @@ $router->post('/api/admin/places/lineqr/update', 'ApiController', 'placeLineQrUp
 $router->post('/api/admin/places/delete', 'ApiController', 'placeDelete');
 $router->post('/api/admin/places/gallery/upload', 'ApiController', 'galleryUpload');
 $router->post('/api/admin/places/gallery/delete', 'ApiController', 'galleryDelete');
+$router->get('/admin/logs', 'AdminController', 'logs');
 
 
 

@@ -17,4 +17,16 @@ class HomeController extends Controller {
             'title' => 'คู่มือการใช้งาน LINE Login - Discover Rangsit'
         ]);
     }
+
+    public function privacy() {
+        $this->view('home/privacy', [
+            'title' => 'นโยบายความเป็นส่วนตัว - Discover Rangsit'
+        ]);
+    }
+
+    public function terms() {
+        $this->view('home/terms', [
+            'title' => 'ข้อกำหนดและเงื่อนไขการใช้งาน - Discover Rangsit'
+        ]);
+    }
 }

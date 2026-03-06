@@ -20,6 +20,30 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Left: Profile Info -->
     <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+            <div class="p-8 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">รูปโปรไฟล์</h3>
+            </div>
+            <div class="p-8 flex flex-col md:flex-row items-center gap-8">
+                <div class="relative group">
+                    <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-slate-100">
+                        <img id="avatarPreview" src="<?= $data['user']->profile_image ? BASE_URL . '/' . $data['user']->profile_image : 'https://ui-avatars.com/api/?name=' . $data['user']->username . '&size=128' ?>" class="w-full h-full object-cover">
+                    </div>
+                    <button onclick="document.getElementById('avatarInput').click()" class="absolute bottom-0 right-0 w-10 h-10 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary-600 transition border-4 border-white">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" id="avatarInput" class="hidden" accept="image/*" onchange="previewAvatar(this)">
+                </div>
+                <div class="flex-1 text-center md:text-left">
+                    <h4 class="font-bold text-gray-800 text-lg mb-1">เปลี่ยนรูปโปรไฟล์</h4>
+                    <p class="text-sm text-gray-400 mb-4">แนะนำรูปภาพสี่เหลี่ยมจัตุรัส ขนาดไม่เกิน 2MB</p>
+                    <button id="btnUpdateAvatar" onclick="uploadAvatar()" class="hidden bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-xl font-bold text-sm transition animate-bounce">
+                        <i class="fas fa-upload mr-2"></i> บันทึกรูปภาพใหม่
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-8 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-gray-800">ข้อมูลส่วนตัว</h3>
@@ -130,3 +154,98 @@
 </div>
 
 <?php require_once APP_ROOT . '/app/views/layouts/admin_footer.php'; ?>
+
+<script>
+    let resizedBlob = null;
+
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                
+                img.onload = function() {
+                    // --- Start Resizing Logic ---
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = 800; // บังคับขนาดสูงสุด 800px
+
+                    if (width > height) {
+                        if (width > max_size) {
+                            height *= max_size / width;
+                            width = max_size;
+                        }
+                    } else {
+                        if (height > max_size) {
+                            width *= max_size / height;
+                            height = max_size;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // แปลงเป็น Blob (JPEG quality 0.8) เพื่อลดขนาดไฟล์เหลือหลัก KB
+                    canvas.toBlob(function(blob) {
+                        resizedBlob = blob;
+                        document.getElementById('avatarPreview').src = canvas.toDataURL('image/jpeg', 0.8);
+                        document.getElementById('btnUpdateAvatar').classList.remove('hidden');
+                    }, 'image/jpeg', 0.8);
+                };
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function uploadAvatar() {
+        if (!resizedBlob) return;
+
+        const formData = new FormData();
+        // ส่งไฟล์ที่ย่อแล้วในชื่อ 'avatar'
+        formData.append('avatar', resizedBlob, 'profile_avatar.jpg');
+
+        const btn = document.getElementById('btnUpdateAvatar');
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังอัปโหลด...';
+
+            const response = await fetch('<?= BASE_URL ?>/api/profile/avatar', {
+                method: 'POST',
+                body: formData
+            });
+            const res = await response.json();
+
+            if (res.success) {
+                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 1500, showConfirmButton: false });
+                btn.classList.add('hidden');
+                // Update header avatars
+                const headerAvatars = document.querySelectorAll('.header-avatar-img');
+                headerAvatars.forEach(img => {
+                    if(img.tagName === 'IMG') {
+                        img.src = '<?= BASE_URL ?>/' + res.path + '?v=' + Date.now();
+                    } else {
+                        // If it was a span (initial), replace with img
+                        const newImg = document.createElement('img');
+                        newImg.src = '<?= BASE_URL ?>/' + res.path;
+                        newImg.className = 'w-full h-full object-cover header-avatar-img';
+                        img.parentNode.replaceChild(newImg, img);
+                    }
+                });
+            } else {
+                Swal.fire('ข้อผิดพลาด', res.message, 'error');
+            }
+        } catch (error) {
+            console.error(error);
+            Swal.fire('Error', 'ไม่สามารถอัปโหลดได้', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload mr-2"></i> บันทึกรูปภาพใหม่';
+        }
+    }
+</script>

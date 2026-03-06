@@ -6,6 +6,18 @@
 </div>
 
 <div class="max-w-4xl">
+    <!-- Data Entry Guideline Alert -->
+    <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-2xl shadow-sm">
+        <div class="flex gap-3">
+            <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+            <div class="text-sm text-blue-800 leading-relaxed">
+                <p class="font-bold mb-1">ข้อแนะนำในการนำเข้าข้อมูล:</p>
+                <p>1. ข้อมูลที่นำเข้าควรเป็นข้อมูลสาธารณะที่สามารถเปิดเผยได้ เพื่อการประชาสัมพันธ์เมือง</p>
+                <p>2. รูปภาพที่มีข้อมูลส่วนบุคคล (เช่น ใบหน้าบุคคล, ป้ายทะเบียน) จะต้องทำการอำพรางหรือได้รับอนุญาตจากผู้ที่อยู่ในเหตุการณ์ก่อนทุกครั้ง</p>
+            </div>
+        </div>
+    </div>
+
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-8">
             <form action="<?= BASE_URL ?>/dashboard/add-place" method="POST" enctype="multipart/form-data">

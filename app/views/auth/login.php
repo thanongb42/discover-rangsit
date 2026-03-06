@@ -270,10 +270,15 @@
                 </p>
             </div>
 
-            <div class="mt-8 pt-8 border-t border-gray-100 flex justify-center gap-4 fade-right">
+            <div class="mt-8 pt-8 border-t border-gray-100 flex flex-col items-center gap-4 fade-right">
                 <a href="<?= BASE_URL ?>" class="text-xs font-bold text-gray-400 hover:text-primary-600 transition flex items-center">
                     <i class="fas fa-arrow-left mr-2"></i> กลับหน้าหลัก
                 </a>
+                
+                <p class="text-[9px] text-gray-300 text-center leading-relaxed">
+                    คำเตือน: การเข้าถึงระบบโดยมิชอบมีความผิดตาม พรบ.ว่าด้วยการกระทำความผิดเกี่ยวกับคอมพิวเตอร์<br>
+                    ระบบมีการบันทึกหมายเลข IP และประวัติการใช้งานเพื่อความปลอดภัย
+                </p>
             </div>
         </div>
     </div>

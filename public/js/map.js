@@ -84,6 +84,20 @@ function renderPlaces(data) {
     data.forEach(place => {
         // Map Marker
         if(place.latitude && place.longitude) {
+            const categoryIcon = place.category_icon || 'fa-map-marker-alt';
+            const categoryColor = place.category_color || '#1e3a8a';
+
+            // Create custom FontAwesome marker
+            const customIcon = L.divIcon({
+                html: `<div class="custom-marker" style="background-color: ${categoryColor};">
+                        <i class="fas ${categoryIcon}"></i>
+                       </div>`,
+                className: 'custom-div-icon',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+
             const popupContent = `
                 <div class="marker-popup w-full font-sans overflow-hidden">
                     <div class="h-28 w-full overflow-hidden">
@@ -102,7 +116,7 @@ function renderPlaces(data) {
                     </div>
                 </div>
             `;
-            const marker = L.marker([place.latitude, place.longitude])
+            const marker = L.marker([place.latitude, place.longitude], { icon: customIcon })
                             .bindPopup(popupContent, { padding: [0, 0], maxWidth: 200, minWidth: 200 });
             markers.addLayer(marker);
         }

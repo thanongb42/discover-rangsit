@@ -84,7 +84,11 @@ class Place extends Model {
     }
 
     public function getAllApproved() {
-        $this->db->query("SELECT p.*, c.name as category_name FROM places p LEFT JOIN categories c ON p.category_id = c.id WHERE p.status = 'approved'");
+        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color 
+                          FROM places p 
+                          LEFT JOIN categories c ON p.category_id = c.id 
+                          WHERE p.status = 'approved'
+                          ORDER BY p.rating_avg DESC, p.rating_count DESC");
         return $this->db->resultSet();
     }
 
@@ -103,7 +107,7 @@ class Place extends Model {
     public function getTrending() {
         // Simple trending logic based on views and rating
         $this->db->query("
-            SELECT p.*, c.name as category_name, 
+            SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color,
             (p.views_count * 0.4 + p.rating_avg * 20 * 0.6) as trending_score
             FROM places p 
             LEFT JOIN categories c ON p.category_id = c.id 
@@ -115,7 +119,10 @@ class Place extends Model {
     }
 
     public function getBySlug($slug) {
-        $this->db->query("SELECT p.*, c.name as category_name FROM places p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = :slug");
+        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color 
+                          FROM places p 
+                          LEFT JOIN categories c ON p.category_id = c.id 
+                          WHERE p.slug = :slug");
         $this->db->bind(':slug', $slug);
         return $this->db->single();
     }
@@ -221,6 +228,26 @@ class Place extends Model {
                           FROM categories c 
                           LEFT JOIN places p ON c.id = p.category_id 
                           GROUP BY c.id");
+        return $this->db->resultSet();
+    }
+
+    public function getPlacesByOwner($owner_id) {
+        $this->db->query("SELECT p.*, c.name as category_name 
+                          FROM places p 
+                          LEFT JOIN categories c ON p.category_id = c.id 
+                          WHERE p.owner_user_id = :owner_id 
+                          ORDER BY p.created_at DESC");
+        $this->db->bind(':owner_id', $owner_id);
+        return $this->db->resultSet();
+    }
+
+    public function getReviewsByUser($user_id) {
+        $this->db->query("SELECT r.*, p.name as place_name, p.slug as place_slug, p.cover_image 
+                          FROM ratings r 
+                          JOIN places p ON r.place_id = p.id 
+                          WHERE r.user_id = :user_id 
+                          ORDER BY r.created_at DESC");
+        $this->db->bind(':user_id', $user_id);
         return $this->db->resultSet();
     }
 }

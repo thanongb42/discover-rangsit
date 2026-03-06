@@ -10,6 +10,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 DROP VIEW IF EXISTS `v_users_full`;
 DROP TABLE IF EXISTS `site_visits`;
+DROP TABLE IF EXISTS `activity_logs`;
 DROP TABLE IF EXISTS `ratings`;
 DROP TABLE IF EXISTS `place_views`;
 DROP TABLE IF EXISTS `place_tags`;
@@ -166,6 +167,21 @@ CREATE TABLE `site_visits` (
   PRIMARY KEY (`id`),
   KEY `visited_at` (`visited_at`),
   KEY `ip_address` (`ip_address`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `activity_logs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `page_url` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(50) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `action` (`action`),
+  KEY `created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------

@@ -6,7 +6,7 @@
         "@context" => "https://schema.org",
         "@type" => "LocalBusiness",
         "name" => $place->name,
-        "image" => BASE_URL . '/../uploads/covers/' . ($place->cover_image ?: 'default.jpg'),
+        "image" => BASE_URL . '/uploads/covers/' . ($place->cover_image ?: 'default.jpg'),
         "address" => [
             "@type" => "PostalAddress",
             "streetAddress" => $place->address,
@@ -75,31 +75,40 @@
                         <?php endif; ?>
                     </div>
 
-                    <!-- Review Form (Hidden by default) -->
+                    <!-- Review Form -->
                     <div id="reviewForm" class="hidden mb-10 p-6 bg-slate-50 rounded-3xl border border-slate-100 animate-fade-in">
                         <h4 class="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wider">Your Experience</h4>
                         <form id="ratingForm" class="space-y-4">
                             <input type="hidden" name="place_id" value="<?= $place->id ?>">
                             <div class="mb-4">
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Rating</label>
-                                <div class="star-rating">
-                                    <input type="radio" name="rating" id="star5" value="5"><label for="star5" title="5 stars"><i class="fas fa-star"></i></label>
-                                    <input type="radio" name="rating" id="star4" value="4"><label for="star4" title="4 stars"><i class="fas fa-star"></i></label>
-                                    <input type="radio" name="rating" id="star3" value="3"><label for="star3" title="3 stars"><i class="fas fa-star"></i></label>
-                                    <input type="radio" name="rating" id="star2" value="2"><label for="star2" title="2 stars"><i class="fas fa-star"></i></label>
-                                    <input type="radio" name="rating" id="star1" value="1"><label for="star1" title="1 star"><i class="fas fa-star"></i></label>
+                                <div class="star-rating-v2 flex gap-2">
+                                    <input type="radio" name="rating" id="star1" value="1" class="hidden peer/s1" required><label for="star1" class="cursor-pointer text-2xl text-slate-300 peer-checked/s1:text-yellow-400 hover:text-yellow-300"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star2" value="2" class="hidden peer/s2"><label for="star2" class="cursor-pointer text-2xl text-slate-300 peer-checked/s2:text-yellow-400 hover:text-yellow-300"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star3" value="3" class="hidden peer/s3"><label for="star3" class="cursor-pointer text-2xl text-slate-300 peer-checked/s3:text-yellow-400 hover:text-yellow-300"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star4" value="4" class="hidden peer/s4"><label for="star4" class="cursor-pointer text-2xl text-slate-300 peer-checked/s4:text-yellow-400 hover:text-yellow-300"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star5" value="5" class="hidden peer/s5"><label for="star5" class="cursor-pointer text-2xl text-slate-300 peer-checked/s5:text-yellow-400 hover:text-yellow-300"><i class="fas fa-star"></i></label>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Comment</label>
-                                <textarea name="comment" rows="3" class="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-navy-800" placeholder="Tell others about this place..."></textarea>
+                                <textarea name="comment" rows="3" class="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-navy-800" placeholder="Tell others about this place (optional)..."></textarea>
                             </div>
                             <div class="flex gap-2">
-                                <button type="submit" class="bg-primary-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-600 transition">Submit Review</button>
+                                <button type="submit" id="btnSubmitReview" class="bg-primary-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-600 transition">Submit Review</button>
                                 <button type="button" onclick="toggleReviewForm()" class="text-slate-400 font-bold px-4 py-2.5 text-sm">Cancel</button>
                             </div>
                         </form>
                     </div>
+
+                    <style>
+                        .star-rating-v2:has(.peer\/s2:checked) label[for="star1"],
+                        .star-rating-v2:has(.peer\/s3:checked) label[for="star1"], .star-rating-v2:has(.peer\/s3:checked) label[for="star2"],
+                        .star-rating-v2:has(.peer\/s4:checked) label[for="star1"], .star-rating-v2:has(.peer\/s4:checked) label[for="star2"], .star-rating-v2:has(.peer\/s4:checked) label[for="star3"],
+                        .star-rating-v2:has(.peer\/s5:checked) label[for="star1"], .star-rating-v2:has(.peer\/s5:checked) label[for="star2"], .star-rating-v2:has(.peer\/s5:checked) label[for="star3"], .star-rating-v2:has(.peer\/s5:checked) label[for="star4"] {
+                            color: #fbbf24;
+                        }
+                    </style>
 
                     <?php if(empty($data['reviews'])): ?>
                         <div id="noReviewsState" class="bg-slate-50 rounded-2xl p-10 text-center border border-dashed border-slate-200">
@@ -111,7 +120,6 @@
                                 <a href="<?= BASE_URL ?>/login" class="text-navy-800 font-bold text-sm mt-4 inline-block hover:underline">Login to review</a>
                             <?php endif; ?>
                         </div>
-                        <div id="reviewsList" class="space-y-6"></div>
                     <?php else: ?>
                         <div id="reviewsList" class="space-y-6">
                             <?php foreach($data['reviews'] as $review): ?>
@@ -146,13 +154,11 @@
                     document.getElementById('ratingForm')?.addEventListener('submit', async function(e) {
                         e.preventDefault();
                         const formData = new FormData(this);
-                        const rating = formData.get('rating');
-                        const comment = formData.get('comment');
+                        const submitBtn = document.getElementById('btnSubmitReview');
                         
                         try {
-                            const submitBtn = this.querySelector('button[type="submit"]');
                             submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
+                            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> กำลังบันทึก...';
 
                             const response = await fetch('<?= BASE_URL ?>/api/place/review', {
                                 method: 'POST',
@@ -164,53 +170,21 @@
                             if(res.success) {
                                 Swal.fire({ 
                                     icon: 'success', 
-                                    title: 'สำเร็จ', 
+                                    title: 'สำเร็จ!', 
                                     text: res.message, 
-                                    timer: 2000, 
-                                    showConfirmButton: false 
+                                    confirmButtonText: 'ตกลง',
+                                    confirmButtonColor: '#1e3a8a'
+                                }).then(() => {
+                                    location.reload();
                                 });
-
-                                // Dynamic DOM Update
-                                const reviewsList = document.getElementById('reviewsList');
-                                const noReviewsState = document.getElementById('noReviewsState');
-                                if(noReviewsState) noReviewsState.remove();
-
-                                // Prepend new review
-                                const newReviewHtml = `
-                                    <div class="flex gap-4 p-4 bg-primary-50 rounded-2xl border border-primary-100 animate-fade-in">
-                                        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 border border-slate-200">
-                                            <img src="<?= isset($_SESSION['profile_image']) ? BASE_URL . '/../' . $_SESSION['profile_image'] : 'https://ui-avatars.com/api/?name=' . ($_SESSION['user_name'] ?? 'User') ?>" class="w-full h-full object-cover">
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex justify-between items-start mb-1">
-                                                <h5 class="font-bold text-slate-800 text-sm"><?= $_SESSION['user_name'] ?? 'You' ?></h5>
-                                                <span class="text-[10px] text-primary-600 font-bold">Just now</span>
-                                            </div>
-                                            <div class="flex text-yellow-400 text-[10px] mb-2">
-                                                ${'<i class="fas fa-star"></i>'.repeat(rating)}${'<i class="far fa-star"></i>'.repeat(5-rating)}
-                                            </div>
-                                            <p class="text-slate-600 text-sm leading-relaxed">${comment.replace(/\n/g, '<br>')}</p>
-                                        </div>
-                                    </div>
-                                `;
-                                reviewsList.insertAdjacentHTML('afterbegin', newReviewHtml);
-
-                                // Reset form and close
-                                this.reset();
-                                toggleReviewForm();
-                                
-                                // Restore button
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = 'Submit Review';
                             } else {
                                 Swal.fire('ข้อผิดพลาด', res.message, 'error');
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = 'Submit Review';
                             }
                         } catch (error) {
-                            console.error('Submission Error:', error);
-                            Swal.fire('Error', 'เกิดข้อผิดพลาดในการส่งข้อมูล', 'error');
-                            const submitBtn = this.querySelector('button[type="submit"]');
+                            console.error('Review Error:', error);
+                            Swal.fire('Error', 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = 'Submit Review';
                         }
@@ -299,7 +273,7 @@
                     <!-- LINE QR Section -->
                     <div class="mt-6 p-4 bg-green-50 rounded-[2rem] border border-green-100 text-center">
                         <p class="text-[10px] font-black text-green-700 uppercase tracking-widest mb-3">Scan to Add LINE</p>
-                        <img src="<?= BASE_URL ?>/../uploads/gallery/<?= $place->line_qr ?>" class="w-32 h-32 mx-auto rounded-xl shadow-sm bg-white p-1 border border-green-200" alt="LINE QR Code">
+                        <img src="<?= BASE_URL ?>/uploads/gallery/<?= $place->line_qr ?>" class="w-32 h-32 mx-auto rounded-xl shadow-sm bg-white p-1 border border-green-200" alt="LINE QR Code">
                         <?php if($place->line): ?>
                             <p class="mt-2 text-xs font-bold text-green-800">ID: <?= htmlspecialchars($place->line) ?></p>
                         <?php endif; ?>

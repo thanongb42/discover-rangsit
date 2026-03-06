@@ -64,6 +64,13 @@ class User extends Model {
         return $this->db->execute();
     }
 
+    public function updateAvatar($id, $filename) {
+        $this->db->query("UPDATE users SET profile_image = :image WHERE user_id = :id");
+        $this->db->bind(':image', $filename);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
+
     public function register($data) {
         $this->db->query("INSERT INTO users (username, first_name, last_name, email, password, phone, role, status) VALUES (:username, :first_name, :last_name, :email, :password, :phone, :role, :status)");
         $this->db->bind(':username', $data['username'] ?? $data['email']);
