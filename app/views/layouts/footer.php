@@ -11,13 +11,7 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js (Keep at bottom) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>

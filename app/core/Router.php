@@ -23,11 +23,17 @@ class Router {
 
     public function dispatch($url) {
         $url = parse_url($url, PHP_URL_PATH);
-        $basePath = '/discover_rangsit/public';
-        if (strpos($url, $basePath) === 0) {
+        
+        // ดึงเอาเฉพาะส่วนที่เป็น Path จาก BASE_URL ใน config
+        // เช่น ถ้า BASE_URL คือ https://domain.com/public ค่า $basePath จะเป็น /public
+        $basePath = parse_url(BASE_URL, PHP_URL_PATH) ?: '';
+        
+        // ตัดส่วนที่เป็น basePath ออกจาก URL ที่รับเข้ามา
+        if ($basePath !== '' && $basePath !== '/' && strpos($url, $basePath) === 0) {
             $url = substr($url, strlen($basePath));
         }
-        if ($url == '') $url = '/';
+        
+        if ($url == '' || $url == '/') $url = '/';
 
         $method = $_SERVER['REQUEST_METHOD'];
 

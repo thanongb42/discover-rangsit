@@ -69,18 +69,56 @@
                     </div>
                 </div>
 
-                <div class="mb-8">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">รูปภาพหน้าปก</label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary-400 transition cursor-pointer bg-gray-50/50" onclick="document.getElementById('fileInput').click()">
-                        <div class="space-y-1 text-center">
-                            <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
-                            <div class="flex text-sm text-gray-600">
-                                <span class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">อัปโหลดไฟล์</span>
-                                <p class="pl-1 text-gray-400">หรือลากไฟล์มาวางที่นี่</p>
-                            </div>
-                            <p class="text-xs text-gray-400">PNG, JPG ขนาดไม่เกิน 5MB</p>
+                <div class="mb-8 pt-6 border-t border-gray-100">
+                    <h4 class="font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-share-nodes text-primary-500 mr-2"></i> ช่องทางการติดต่อโซเชียลมีเดีย
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 mb-1">LINE ID</label>
+                            <input type="text" name="line" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm" placeholder="@lineid">
                         </div>
-                        <input id="fileInput" name="cover_image" type="file" class="hidden" accept="image/*">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 mb-1">Facebook URL</label>
+                            <input type="url" name="facebook" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm" placeholder="https://facebook.com/page">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 mb-1">Instagram URL</label>
+                            <input type="url" name="instagram" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm" placeholder="https://instagram.com/user">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 mb-1">TikTok URL</label>
+                            <input type="url" name="tiktok" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm" placeholder="https://tiktok.com/@user">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">รูปภาพหน้าปก</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-primary-400 transition cursor-pointer bg-gray-50/50" onclick="document.getElementById('fileInput').click()">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-2"></i>
+                                <div class="flex text-sm text-gray-600">
+                                    <span class="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">อัปโหลดรูปหน้าปก</span>
+                                </div>
+                                <p class="text-xs text-gray-400">PNG, JPG ไม่เกิน 5MB</p>
+                            </div>
+                            <input id="fileInput" name="cover_image" type="file" class="hidden" accept="image/*">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">LINE QR Code</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-green-400 transition cursor-pointer bg-gray-50/50" onclick="document.getElementById('lineQrInput').click()">
+                            <div class="space-y-1 text-center">
+                                <i class="fas fa-qrcode text-gray-400 text-3xl mb-2"></i>
+                                <div class="flex text-sm text-gray-600">
+                                    <span class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500">อัปโหลด QR Code</span>
+                                </div>
+                                <p class="text-xs text-gray-400">รูปภาพสำหรับเพิ่มเพื่อน</p>
+                            </div>
+                            <input id="lineQrInput" name="line_qr" type="file" class="hidden" accept="image/*">
+                        </div>
                     </div>
                 </div>
 

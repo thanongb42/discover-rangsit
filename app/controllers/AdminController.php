@@ -19,55 +19,74 @@ class AdminController extends Controller {
         ]);
     }
 
-    public function approve() {
-        // ... previous code
-    }
-
-    public function reject() {
-        // ... previous code
-    }
-
     public function users() {
         $userModel = $this->model('User');
         $users = $userModel->getAllUsers();
-        $roles = $userModel->getRoles();
+        $prefixes = $userModel->getPrefixes();
+        $departments = $userModel->getDepartments();
+        $stats = $userModel->getStats();
 
-        $this->view('admin/users', [
-            'title' => 'Manage Users - Admin Dashboard',
+        $this->view('admin/users/index', [
+            'title' => 'จัดการผู้ใช้งาน - Admin Dashboard',
             'users' => $users,
-            'roles' => $roles,
+            'prefixes' => $prefixes,
+            'departments' => $departments,
+            'stats' => $stats,
             'current_page' => 'users'
         ]);
     }
 
-    public function updateUserRole() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $userId = $_POST['user_id'];
-            $roleId = $_POST['role_id'];
-            $userModel = $this->model('User');
-            if ($userModel->updateRole($userId, $roleId)) {
-                $_SESSION['success'] = 'User role updated successfully.';
-                header('Location: ' . BASE_URL . '/admin/users');
-            }
-        }
+    public function categories() {
+        $this->view('admin/categories', [
+            'title' => 'จัดการหมวดหมู่ธุรกิจ - Admin Dashboard',
+            'current_page' => 'categories'
+        ]);
     }
 
-    public function deleteUser() {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id = $_POST['user_id'];
-            
-            // Prevent self-deletion
-            if ($id == $_SESSION['user_id']) {
-                $_SESSION['error'] = 'You cannot delete your own account.';
-                header('Location: ' . BASE_URL . '/admin/users');
-                return;
-            }
+    public function places() {
+        $placeModel = $this->model('Place');
+        $places = $placeModel->getAll();
 
-            $userModel = $this->model('User');
-            if ($userModel->delete($id)) {
-                $_SESSION['success'] = 'User deleted successfully.';
-                header('Location: ' . BASE_URL . '/admin/users');
-            }
+        $this->view('admin/places/index', [
+            'title' => 'จัดการสถานที่และธุรกิจ - Admin Dashboard',
+            'places' => $places,
+            'current_page' => 'admin_places'
+        ]);
+    }
+
+    public function placeEdit($id) {
+        $placeModel = $this->model('Place');
+        $place = $placeModel->getById($id);
+        $categories = $placeModel->getCategories();
+        $gallery = $placeModel->getGallery($id);
+
+        if (!$place) {
+            header('Location: ' . BASE_URL . '/admin/places');
+            exit;
         }
+
+        $this->view('admin/places/edit', [
+            'title' => 'แก้ไขข้อมูลสถานที่ - Admin Dashboard',
+            'place' => $place,
+            'categories' => $categories,
+            'gallery' => $gallery,
+            'current_page' => 'admin_places'
+        ]);
+    }
+
+    public function userDetail($id) {
+        $userModel = $this->model('User');
+        $user = $userModel->findById($id);
+
+        if (!$user) {
+            header('Location: ' . BASE_URL . '/admin/users');
+            exit;
+        }
+
+        $this->view('admin/users/detail', [
+            'title' => 'รายละเอียดผู้ใช้งาน - Admin Dashboard',
+            'user' => $user,
+            'current_page' => 'users'
+        ]);
     }
 }

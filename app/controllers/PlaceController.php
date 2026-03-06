@@ -22,10 +22,14 @@ class PlaceController extends Controller {
 
         // Add view count
         $placeModel->addView($place->id, $_SERVER['REMOTE_ADDR']);
+        
+        // Fetch reviews
+        $reviews = $placeModel->getReviews($place->id);
 
         $this->view('places/detail', [
             'title' => $place->name . ' - Discover Rangsit',
-            'place' => $place
+            'place' => $place,
+            'reviews' => $reviews
         ]);
     }
 
@@ -55,17 +59,34 @@ class PlaceController extends Controller {
                 'longitude' => $_POST['longitude'],
                 'phone' => trim($_POST['phone']),
                 'website' => trim($_POST['website']),
+                'facebook' => trim($_POST['facebook']),
+                'line' => trim($_POST['line']),
+                'instagram' => trim($_POST['instagram']),
+                'tiktok' => trim($_POST['tiktok']),
+                'x' => '', // Default empty for public form unless added
+                'youtube' => '', 
                 'owner_user_id' => $_SESSION['user_id'],
-                'cover_image' => 'default.jpg'
+                'cover_image' => 'default.jpg',
+                'line_qr' => NULL
             ];
 
-            // Handle Image Upload
+            // Handle Cover Image Upload
             if(isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] == 0) {
                 $ext = pathinfo($_FILES['cover_image']['name'], PATHINFO_EXTENSION);
-                $filename = time() . '.' . $ext;
+                $filename = time() . '_cover.' . $ext;
                 $target = APP_ROOT . '/uploads/covers/' . $filename;
                 if(move_uploaded_file($_FILES['cover_image']['tmp_name'], $target)) {
                     $data['cover_image'] = $filename;
+                }
+            }
+
+            // Handle LINE QR Upload
+            if(isset($_FILES['line_qr']) && $_FILES['line_qr']['error'] == 0) {
+                $ext = pathinfo($_FILES['line_qr']['name'], PATHINFO_EXTENSION);
+                $filename = time() . '_lineqr.' . $ext;
+                $target = APP_ROOT . '/uploads/gallery/' . $filename;
+                if(move_uploaded_file($_FILES['line_qr']['tmp_name'], $target)) {
+                    $data['line_qr'] = $filename;
                 }
             }
 

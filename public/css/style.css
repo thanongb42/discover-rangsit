@@ -1,19 +1,67 @@
+/* Fix Leaflet tiles disappearing due to Tailwind CSS */
+.leaflet-container img {
+    max-width: none !important;
+    max-height: none !important;
+}
+#map {
+    background-color: #e5e7eb; /* slate-200 */
+    outline: none;
+}
 /* Custom styles for Discover Rangsit */
 .leaflet-popup-content-wrapper {
-    padding: 0;
-    overflow: hidden;
-    border-radius: 12px;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 1.5rem !important; /* matches rounded-3xl */
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
 }
 .leaflet-popup-content {
-    margin: 0;
+    margin: 0 !important;
     width: 200px !important;
 }
 .leaflet-popup-tip-container {
     display: none;
 }
+/* Scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+/* Marker Clusters */
 .marker-cluster-small { background-color: rgba(0, 153, 51, 0.6); }
 .marker-cluster-small div { background-color: rgba(0, 153, 51, 0.6); color: white; }
 .marker-cluster-medium { background-color: rgba(30, 58, 138, 0.6); }
 .marker-cluster-medium div { background-color: rgba(30, 58, 138, 0.6); color: white; }
 .marker-cluster-large { background-color: rgba(15, 118, 110, 0.6); }
-.marker-cluster-large div { background-color: rgba(15, 118, 110, 0.6); color: white; }
+/* Global Input Focus Styles */
+input:focus, select:focus, textarea:focus, button:focus {
+    outline: none !important;
+}
+
+#homeSearch:focus, #searchInput:focus {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Star Rating Styles */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+.star-rating input { display: none; }
+.star-rating label {
+    font-size: 2rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+    color: #fbbf24; /* yellow-400 */
+}
+.star-rating label:active { transform: scale(0.9); }
+

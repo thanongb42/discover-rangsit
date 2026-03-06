@@ -16,8 +16,9 @@ $menu_groups = [
     'main' => [
         'label' => '',
         'items' => [
+            ['id' => 'landing', 'icon' => 'fa-door-open', 'label' => 'หน้าแรก', 'url' => BASE_URL . '/'],
             ['id' => 'dashboard', 'icon' => 'fa-home', 'label' => 'แดชบอร์ด', 'url' => BASE_URL . '/dashboard'],
-            ['id' => 'map', 'icon' => 'fa-map-marked-alt', 'label' => 'แผนที่เมือง', 'url' => BASE_URL . '/'],
+            ['id' => 'map', 'icon' => 'fa-map-marked-alt', 'label' => 'แผนที่เมือง', 'url' => BASE_URL . '/city-map'],
         ]
     ]
 ];
@@ -27,8 +28,9 @@ if ($is_admin) {
         'label' => 'จัดการระบบ',
         'items' => [
             ['id' => 'pending', 'icon' => 'fa-clock', 'label' => 'รอการอนุมัติ', 'url' => BASE_URL . '/admin/pending'],
-            ['id' => 'users', 'icon' => 'fa-users', 'label' => 'จัดการผู้ใช้งาน', 'url' => BASE_URL . '/admin/users'],
-            ['id' => 'categories', 'icon' => 'fa-list', 'label' => 'หมวดหมู่ธุรกิจ', 'url' => '#'],
+            ['id' => 'admin_places', 'icon' => 'fa-map-location-dot', 'label' => 'จัดการสถานที่', 'url' => BASE_URL . '/admin/places'],
+            ['id' => 'usermanager', 'icon' => 'fa-users-cog', 'label' => 'จัดการผู้ใช้งาน', 'url' => BASE_URL . '/admin/users'],
+            ['id' => 'categories', 'icon' => 'fa-list', 'label' => 'หมวดหมู่ธุรกิจ', 'url' => BASE_URL . '/admin/categories'],
         ]
     ];
 }
@@ -149,8 +151,8 @@ $menu_groups['business'] = [
         <div class="flex flex-col h-full">
             <div class="p-5 flex items-center justify-between border-b border-white/10">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 bg-white rounded-lg flex items-center justify-center">
-                        <i class="fas fa-city text-primary-600"></i>
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+                        <img src="<?= BASE_URL ?>/images/rangsit-logo.png" alt="Rangsit Logo" class="w-full h-full object-contain p-1">
                     </div>
                     <div class="menu-text">
                         <h1 class="text-white font-bold text-lg leading-tight">Discover</h1>
@@ -206,8 +208,12 @@ $menu_groups['business'] = [
                     
                     <!-- User Dropdown -->
                     <div class="relative">
-                        <button onclick="toggleUserDropdown()" class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold border border-primary-200 hover:bg-primary-200 transition">
-                            <?= strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)) ?>
+                        <button onclick="toggleUserDropdown()" class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold border border-primary-200 hover:bg-primary-200 transition overflow-hidden">
+                            <?php if(isset($_SESSION['profile_image']) && $_SESSION['profile_image']): ?>
+                                <img src="<?= BASE_URL ?>/../<?= $_SESSION['profile_image'] ?>" class="w-full h-full object-cover">
+                            <?php else: ?>
+                                <?= strtoupper(substr($_SESSION['username'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) ?>
+                            <?php endif; ?>
                         </button>
                         
                         <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fade-in">

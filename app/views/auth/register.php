@@ -93,8 +93,8 @@
 
         <div class="relative z-10">
             <div class="flex items-center gap-4 mb-12">
-                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg">
-                    <i class="fa-solid fa-city text-3xl text-primary-600"></i>
+                <div class="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg overflow-hidden p-2">
+                    <img src="<?= BASE_URL ?>/images/rangsit-logo.png" alt="Rangsit Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold leading-tight uppercase tracking-wider">Discover Rangsit</h1>
@@ -200,6 +200,24 @@
                     <i class="fas fa-arrow-right text-xs"></i>
                 </button>
             </form>
+
+            <!-- Social Login Divider -->
+            <div class="relative my-8 text-center">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                <span class="relative px-4 bg-slate-50 text-gray-400 text-xs font-bold uppercase tracking-widest">หรือสมัครสมาชิกด้วย</span>
+            </div>
+
+            <!-- LINE Register Button -->
+            <a href="<?= BASE_URL ?>/login/line" class="w-full bg-[#00b900] hover:bg-[#009900] text-white font-bold py-3.5 rounded-2xl shadow-md transition flex items-center justify-center gap-3 mb-4">
+                <i class="fab fa-line text-2xl"></i>
+                สมัครสมาชิกด้วย LINE
+            </a>
+            
+            <div class="text-center">
+                <a href="<?= BASE_URL ?>/line-manual" class="text-[10px] text-gray-400 hover:text-primary-600 transition flex items-center justify-center gap-1">
+                    <i class="fas fa-info-circle"></i> คู่มือการลงทะเบียนด้วย LINE
+                </a>
+            </div>
 
             <div class="mt-10 text-center fade-right">
                 <p class="text-gray-500 text-sm font-medium">

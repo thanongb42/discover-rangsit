@@ -48,7 +48,7 @@
             <div class="lg:col-span-2 space-y-8">
                 <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 overflow-hidden border border-white">
                     <div class="relative h-[400px]">
-                        <img src="<?= BASE_URL ?>/../uploads/covers/<?= htmlspecialchars($place->cover_image ?: 'default.jpg') ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($place->name) ?>">
+                        <img src="<?= BASE_URL ?>/uploads/covers/<?= htmlspecialchars($place->cover_image ?: 'default.jpg') ?>" class="w-full h-full object-cover" alt="<?= htmlspecialchars($place->name) ?>">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end">
                             <div class="p-8 text-white">
                                 <span class="bg-teal-500 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-3 inline-block"><?= htmlspecialchars($place->category_name) ?></span>
@@ -66,19 +66,104 @@
                     </div>
                 </div>
 
-                <!-- Reviews Placeholder -->
+                <!-- Reviews Section -->
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                     <div class="flex items-center justify-between mb-8">
                         <h3 class="text-xl font-bold text-slate-800">Recent Reviews</h3>
-                        <button class="bg-navy-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-navy-900 transition">Write a Review</button>
+                        <?php if(isset($_SESSION['user_id'])): ?>
+                            <button onclick="toggleReviewForm()" class="bg-navy-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-navy-900 transition">Write a Review</button>
+                        <?php endif; ?>
                     </div>
-                    <div class="bg-slate-50 rounded-2xl p-10 text-center border border-dashed border-slate-200">
-                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm">
-                            <i class="fas fa-comment-alt text-2xl"></i>
+
+                    <!-- Review Form (Hidden by default) -->
+                    <div id="reviewForm" class="hidden mb-10 p-6 bg-slate-50 rounded-3xl border border-slate-100 animate-fade-in">
+                        <h4 class="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wider">Your Experience</h4>
+                        <form id="ratingForm" class="space-y-4">
+                            <input type="hidden" name="place_id" value="<?= $place->id ?>">
+                            <div class="mb-4">
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Rating</label>
+                                <div class="star-rating">
+                                    <input type="radio" name="rating" id="star5" value="5"><label for="star5" title="5 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star4" value="4"><label for="star4" title="4 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star3" value="3"><label for="star3" title="3 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star2" value="2"><label for="star2" title="2 stars"><i class="fas fa-star"></i></label>
+                                    <input type="radio" name="rating" id="star1" value="1"><label for="star1" title="1 star"><i class="fas fa-star"></i></label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Comment</label>
+                                <textarea name="comment" rows="3" class="w-full bg-white border border-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-navy-800" placeholder="Tell others about this place..."></textarea>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" class="bg-primary-500 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-600 transition">Submit Review</button>
+                                <button type="button" onclick="toggleReviewForm()" class="text-slate-400 font-bold px-4 py-2.5 text-sm">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <?php if(empty($data['reviews'])): ?>
+                        <div class="bg-slate-50 rounded-2xl p-10 text-center border border-dashed border-slate-200">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm">
+                                <i class="fas fa-comment-alt text-2xl"></i>
+                            </div>
+                            <p class="text-slate-400 font-medium">Be the first to share your experience!</p>
+                            <?php if(!isset($_SESSION['user_id'])): ?>
+                                <a href="<?= BASE_URL ?>/login" class="text-navy-800 font-bold text-sm mt-4 inline-block hover:underline">Login to review</a>
+                            <?php endif; ?>
                         </div>
-                        <p class="text-slate-400 font-medium">Be the first to share your experience!</p>
-                    </div>
+                    <?php else: ?>
+                        <div class="space-y-6">
+                            <?php foreach($data['reviews'] as $review): ?>
+                                <div class="flex gap-4 p-4 hover:bg-slate-50 rounded-2xl transition duration-200">
+                                    <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-slate-100 border border-slate-200">
+                                        <img src="<?= $review->profile_image ? BASE_URL . '/../' . $review->profile_image : 'https://ui-avatars.com/api/?name=' . $review->first_name ?>" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h5 class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($review->first_name . ' ' . $review->last_name) ?></h5>
+                                            <span class="text-[10px] text-slate-400 font-bold"><?= date('d M Y', strtotime($review->created_at)) ?></span>
+                                        </div>
+                                        <div class="flex text-yellow-400 text-[10px] mb-2">
+                                            <?php for($i=1; $i<=5; $i++): ?>
+                                                <i class="<?= $i <= $review->rating ? 'fas' : 'far' ?> fa-star"></i>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <p class="text-slate-600 text-sm leading-relaxed"><?= nl2br(htmlspecialchars($review->comment)) ?></p>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
+                <script>
+                    function toggleReviewForm() {
+                        const form = document.getElementById('reviewForm');
+                        form.classList.toggle('hidden');
+                    }
+
+                    document.getElementById('ratingForm')?.addEventListener('submit', async function(e) {
+                        e.preventDefault();
+                        const formData = new FormData(this);
+                        
+                        try {
+                            const response = await fetch('<?= BASE_URL ?>/api/place/review', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const res = await response.json();
+                            
+                            if(res.success) {
+                                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 1500, showConfirmButton: false });
+                                setTimeout(() => location.reload(), 1500);
+                            } else {
+                                Swal.fire('ข้อผิดพลาด', res.message, 'error');
+                            }
+                        } catch (error) {
+                            Swal.fire('Error', 'ไม่สามารถส่งข้อมูลได้', 'error');
+                        }
+                    });
+                </script>
             </div>
 
             <!-- Sidebar Info -->
@@ -120,6 +205,54 @@
                         </li>
                         <?php endif; ?>
                     </ul>
+
+                    <!-- Social Media Grid -->
+                    <div class="mt-8 pt-8 border-t border-slate-100">
+                        <span class="block text-[10px] uppercase font-bold text-slate-400 mb-4 px-1">Social Connect</span>
+                        <div class="grid grid-cols-4 gap-3">
+                            <?php if($place->facebook): ?>
+                                <a href="<?= htmlspecialchars($place->facebook) ?>" target="_blank" class="w-full aspect-square bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 hover:bg-blue-600 hover:text-white transition shadow-sm border border-blue-100" title="Facebook">
+                                    <i class="fab fa-facebook-f text-lg"></i>
+                                </a>
+                            <?php endif; ?>
+                            <?php if($place->instagram): ?>
+                                <a href="<?= htmlspecialchars($place->instagram) ?>" target="_blank" class="w-full aspect-square bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 hover:bg-pink-600 hover:text-white transition shadow-sm border border-pink-100" title="Instagram">
+                                    <i class="fab fa-instagram text-lg"></i>
+                                </a>
+                            <?php endif; ?>
+                            <?php if($place->tiktok): ?>
+                                <a href="<?= htmlspecialchars($place->tiktok) ?>" target="_blank" class="w-full aspect-square bg-slate-50 rounded-2xl flex items-center justify-center text-slate-900 hover:bg-black hover:text-white transition shadow-sm border border-slate-200" title="TikTok">
+                                    <i class="fab fa-tiktok text-lg"></i>
+                                </a>
+                            <?php endif; ?>
+                            <?php if($place->line): ?>
+                                <a href="https://line.me/ti/p/~<?= htmlspecialchars($place->line) ?>" target="_blank" class="w-full aspect-square bg-green-50 rounded-2xl flex items-center justify-center text-green-600 hover:bg-green-600 hover:text-white transition shadow-sm border border-green-100" title="LINE ID: <?= htmlspecialchars($place->line) ?>">
+                                    <i class="fab fa-line text-xl"></i>
+                                </a>
+                            <?php endif; ?>
+                            <?php if($place->youtube): ?>
+                                <a href="<?= htmlspecialchars($place->youtube) ?>" target="_blank" class="w-full aspect-square bg-red-50 rounded-2xl flex items-center justify-center text-red-600 hover:bg-red-600 hover:text-white transition shadow-sm border border-red-100" title="YouTube">
+                                    <i class="fab fa-youtube text-lg"></i>
+                                </a>
+                            <?php endif; ?>
+                            <?php if($place->x): ?>
+                                <a href="<?= htmlspecialchars($place->x) ?>" target="_blank" class="w-full aspect-square bg-slate-900 rounded-2xl flex items-center justify-center text-white hover:bg-black transition shadow-sm" title="X (Twitter)">
+                                    <i class="fa-brands fa-x-twitter text-lg"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <?php if($place->line_qr): ?>
+                    <!-- LINE QR Section -->
+                    <div class="mt-6 p-4 bg-green-50 rounded-[2rem] border border-green-100 text-center">
+                        <p class="text-[10px] font-black text-green-700 uppercase tracking-widest mb-3">Scan to Add LINE</p>
+                        <img src="<?= BASE_URL ?>/../uploads/gallery/<?= $place->line_qr ?>" class="w-32 h-32 mx-auto rounded-xl shadow-sm bg-white p-1 border border-green-200" alt="LINE QR Code">
+                        <?php if($place->line): ?>
+                            <p class="mt-2 text-xs font-bold text-green-800">ID: <?= htmlspecialchars($place->line) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Navigation Button -->

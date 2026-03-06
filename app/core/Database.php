@@ -21,11 +21,14 @@ class Database {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
         } catch(PDOException $e) {
             $this->error = $e->getMessage();
-            echo $this->error;
+            die("Database Connection Error: " . $this->error . " (Check config/config.php)");
         }
     }
 
     public function query($sql) {
+        if (!$this->dbh) {
+            die("Database connection not established.");
+        }
         $this->stmt = $this->dbh->prepare($sql);
     }
 

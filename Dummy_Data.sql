@@ -11,8 +11,8 @@ ON DUPLICATE KEY UPDATE name=name;
 
 -- Note: In a real scenario, users should be created first, but for dummy places we might just use NULL for owner_user_id if allowed, or insert a dummy user.
 -- Default admin password is 'admin123'
-INSERT INTO users (name, email, password, role_id) VALUES 
-('Admin User', 'admin@rangsit.go.th', '$2y$10$8.Z.vQ.DPtm.vEqXLoYUp.syZsqXidIdZghEpIsfSpAnmxIDclZye', 1) ON DUPLICATE KEY UPDATE email=email;
+INSERT INTO users (username, first_name, last_name, email, password, role, status) VALUES 
+('admin', 'ผู้ดูแลระบบ', 'กลาง', 'admin@rangsit.go.th', '$2y$10$8.Z.vQ.DPtm.vEqXLoYUp.syZsqXidIdZghEpIsfSpAnmxIDclZye', 'admin', 'active') ON DUPLICATE KEY UPDATE email=email;
 
 INSERT INTO places (name, slug, description, category_id, address, latitude, longitude, status, views_count, rating_avg, rating_count) VALUES 
 ('Rangsit Boat Noodle', 'rangsit-boat-noodle', 'Famous authentic boat noodle near the canal.', 1, 'Rangsit Canal, Pathum Thani', 13.9850, 100.6130, 'approved', 1500, 4.8, 120),

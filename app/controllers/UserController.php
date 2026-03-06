@@ -10,12 +10,13 @@ class UserController extends Controller {
 
     public function profile() {
         $userModel = $this->model('User');
-        // Find user by ID
         $user = $userModel->findById($_SESSION['user_id']);
+        $prefixes = $userModel->getPrefixes();
 
         $this->view('user/profile', [
             'title' => 'My Profile - Discover Rangsit',
             'user' => $user,
+            'prefixes' => $prefixes,
             'current_page' => 'profile'
         ]);
     }
@@ -24,13 +25,15 @@ class UserController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $data = [
                 'id' => $_SESSION['user_id'],
-                'name' => trim($_POST['name']),
+                'first_name' => trim($_POST['first_name']),
+                'last_name' => trim($_POST['last_name']),
+                'prefix_id' => $_POST['prefix_id'],
                 'phone' => trim($_POST['phone'])
             ];
 
             $userModel = $this->model('User');
             if ($userModel->updateProfile($data)) {
-                $_SESSION['user_name'] = $data['name'];
+                $_SESSION['user_name'] = $data['first_name'] . ' ' . $data['last_name'];
                 $_SESSION['success'] = 'Profile updated successfully.';
                 header('Location: ' . BASE_URL . '/profile');
             } else {

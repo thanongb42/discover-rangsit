@@ -1,4 +1,28 @@
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [QSA,L]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # บังคับให้ใช้ HTTPS (แนะนำสำหรับ Production)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # ป้องกันการเข้าถึงโฟลเดอร์ที่ไม่มีไฟล์ index
+    Options -Indexes
+
+    # ตรวจสอบว่าถ้ามีไฟล์หรือโฟลเดอร์อยู่จริง ให้เปิดไฟล์นั้นเลย (สำหรับ CSS, JS, Images)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # ถ้าไม่มีไฟล์อยู่จริง ให้ส่งค่าทั้งหมดไปที่ index.php
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# กำหนดสิทธิ์การเข้าถึงไฟล์ Static
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|svgz|php)$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>

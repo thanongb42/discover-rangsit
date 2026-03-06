@@ -37,7 +37,10 @@ function initMap() {
 
 function loadCategories() {
     fetch(BASE_URL + '/api/categories')
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('API Error');
+            return res.json();
+        })
         .then(data => {
             categoriesData = data;
             const select = document.getElementById('categoryFilter');
@@ -47,15 +50,23 @@ function loadCategories() {
                 option.textContent = cat.name;
                 select.appendChild(option);
             });
-        });
+        })
+        .catch(err => console.error('Failed to load categories:', err));
 }
 
 function loadPlaces() {
     fetch(BASE_URL + '/api/places')
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('API Error');
+            return res.json();
+        })
         .then(data => {
             placesData = data;
             renderPlaces(data);
+        })
+        .catch(err => {
+            console.error('Failed to load places:', err);
+            document.getElementById('placesList').innerHTML = '<div class="text-center text-red-400 py-10 text-xs">Error loading data. Check console.</div>';
         });
 }
 
@@ -74,47 +85,57 @@ function renderPlaces(data) {
         // Map Marker
         if(place.latitude && place.longitude) {
             const popupContent = `
-                <div class="marker-popup w-48 font-sans">
-                    <img src="${BASE_URL}/../uploads/covers/${place.cover_image || 'default.jpg'}" class="popup-img" alt="${place.name}">
+                <div class="marker-popup w-full font-sans overflow-hidden">
+                    <div class="h-28 w-full overflow-hidden">
+                        <img src="${BASE_URL}/uploads/covers/${place.cover_image || 'default.jpg'}" class="w-full h-full object-cover" alt="${place.name}">
+                    </div>
                     <div class="p-3">
-                        <h6 class="font-bold text-slate-800 leading-tight mb-1 text-sm">${place.name}</h6>
-                        <p class="text-[10px] text-slate-500 mb-2">${place.category_name}</p>
-                        <div class="flex items-center text-yellow-500 text-xs mb-3">
-                            <i class="fas fa-star mr-1"></i> ${place.rating_avg} <span class="text-slate-400 ml-1">(${place.rating_count})</span>
+                        <h6 class="font-bold text-slate-800 leading-tight mb-1 text-sm line-clamp-2">${place.name}</h6>
+                        <p class="text-[10px] text-primary-600 font-bold uppercase tracking-wider mb-2">${place.category_name}</p>
+                        <div class="flex items-center text-yellow-500 text-xs mb-3 font-bold">
+                            <i class="fas fa-star mr-1"></i> ${place.rating_avg} <span class="text-slate-400 ml-1 font-normal">(${place.rating_count})</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <a href="${BASE_URL}/place/${place.slug}" class="bg-navy-800 text-white text-center py-1.5 rounded-lg text-[10px] font-bold hover:bg-navy-900 transition">View</a>
-                            <a href="https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}" target="_blank" class="bg-slate-100 text-slate-600 text-center py-1.5 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition">Navigate</a>
+                            <a href="${BASE_URL}/place/${place.slug}" class="bg-navy-800 text-white text-center py-2 rounded-xl text-[10px] font-bold hover:bg-navy-900 transition shadow-sm">View</a>
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}" target="_blank" class="bg-slate-100 text-slate-600 text-center py-2 rounded-xl text-[10px] font-bold hover:bg-slate-200 transition">Navigate</a>
                         </div>
                     </div>
                 </div>
             `;
             const marker = L.marker([place.latitude, place.longitude])
-                            .bindPopup(popupContent, { padding: [0, 0] });
+                            .bindPopup(popupContent, { padding: [0, 0], maxWidth: 200, minWidth: 200 });
             markers.addLayer(marker);
         }
 
         // Sidebar List Card
         const card = document.createElement('div');
-        card.className = 'group flex bg-white border border-slate-100 rounded-2xl p-2 cursor-pointer hover:shadow-md hover:border-navy-100 transition duration-200';
+        card.className = 'group flex bg-white border border-slate-100 rounded-3xl p-3 cursor-pointer hover:shadow-lg hover:border-navy-100 transition duration-300 transform hover:-translate-y-1';
         card.innerHTML = `
-            <div class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden bg-slate-100 mr-3 border border-slate-50">
-                <img src="${BASE_URL}/../uploads/covers/${place.cover_image || 'default.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="${place.name}">
+            <div class="w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden bg-slate-100 mr-4 border border-slate-50 shadow-inner">
+                <img src="${BASE_URL}/uploads/covers/${place.cover_image || 'default.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="${place.name}">
             </div>
-            <div class="flex-1 min-w-0 py-1">
+            <div class="flex-1 min-w-0 flex flex-col justify-center">
                 <h6 class="font-bold text-slate-800 text-sm truncate mb-0.5">${place.name}</h6>
-                <p class="text-[10px] font-semibold text-primary-500 mb-1 uppercase tracking-wider">${place.category_name}</p>
-                <div class="flex items-center justify-between mt-auto">
-                    <div class="flex items-center text-yellow-500 text-[10px] font-bold">
-                        <i class="fas fa-star mr-1"></i> ${place.rating_avg}
+                <p class="text-[10px] font-bold text-primary-500 mb-1 uppercase tracking-widest">${place.category_name}</p>
+                <div class="flex items-center justify-between mt-1">
+                    <div class="flex items-center text-yellow-500 text-[10px] font-black">
+                        <i class="fas fa-star mr-1 text-[8px]"></i> ${place.rating_avg}
                     </div>
-                    <span class="text-[10px] text-slate-400 font-medium">${place.views_count} views</span>
+                    <span class="text-[9px] text-slate-400 font-bold bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">${place.views_count} views</span>
                 </div>
             </div>
         `;
         card.addEventListener('click', () => {
             if(place.latitude && place.longitude) {
                 map.setView([place.latitude, place.longitude], 16);
+                
+                // Close mobile sidebar automatically if open
+                if (window.innerWidth < 768 && typeof toggleMobileSidebar === 'function') {
+                    if (isSidebarOpen) {
+                        toggleMobileSidebar();
+                    }
+                }
+
                 // Find marker and open popup
                 markers.eachLayer(function(marker) {
                     if(marker.getLatLng().lat == place.latitude && marker.getLatLng().lng == place.longitude) {
@@ -130,12 +151,22 @@ function renderPlaces(data) {
 function filterPlaces() {
     const keyword = document.getElementById('searchInput').value.toLowerCase();
     const category = document.getElementById('categoryFilter').value;
+    const minRating = parseFloat(document.getElementById('ratingFilter').value);
+    const sortBy = document.getElementById('sortFilter').value;
 
-    const filtered = placesData.filter(place => {
+    let filtered = placesData.filter(place => {
         const matchKeyword = place.name.toLowerCase().includes(keyword) || (place.description && place.description.toLowerCase().includes(keyword));
         const matchCat = category === "" || place.category_id == category;
-        return matchKeyword && matchCat;
+        const matchRating = place.rating_avg >= minRating;
+        return matchKeyword && matchCat && matchRating;
     });
+
+    // Sorting
+    if (sortBy === 'rating') {
+        filtered.sort((a, b) => b.rating_avg - a.rating_avg);
+    } else if (sortBy === 'views') {
+        filtered.sort((a, b) => b.views_count - a.views_count);
+    }
 
     renderPlaces(filtered);
 
