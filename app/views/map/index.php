@@ -156,6 +156,8 @@
 
 <script>
     const BASE_URL = '<?= BASE_URL ?>';
+    const CURRENT_USER_ID   = <?= isset($_SESSION['user_id'])   ? (int)$_SESSION['user_id']   : 'null' ?>;
+    const CURRENT_USER_ROLE = <?= isset($_SESSION['user_role'])  ? json_encode($_SESSION['user_role']) : 'null' ?>;
     <?php
         $mapSettingsFile = APP_ROOT . '/config/map_settings.json';
         $mapSettings = file_exists($mapSettingsFile) ? json_decode(file_get_contents($mapSettingsFile), true) : [];

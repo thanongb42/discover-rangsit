@@ -357,6 +357,33 @@ class Place extends Model {
         return (int)$row->cnt > 0;
     }
 
+    // ─── Trash / Restore ───────────────────────────────────────────────────
+
+    public function trash($id) {
+        return $this->updateStatus($id, 'trash');
+    }
+
+    public function restore($id) {
+        return $this->updateStatus($id, 'approved');
+    }
+
+    public function getTrashed() {
+        $this->db->query("SELECT p.*, c.name as category_name, CONCAT(u.first_name, ' ', u.last_name) as owner_name
+                          FROM places p
+                          LEFT JOIN categories c ON p.category_id = c.id
+                          LEFT JOIN users u ON p.owner_user_id = u.user_id
+                          WHERE p.status = 'trash'
+                          ORDER BY p.updated_at DESC");
+        return $this->db->resultSet();
+    }
+
+    public function getOwnerUserId($id) {
+        $this->db->query("SELECT owner_user_id FROM places WHERE id = :id");
+        $this->db->bind(':id', $id);
+        $row = $this->db->single();
+        return $row ? (int)$row->owner_user_id : null;
+    }
+
     public function getRecommendations($user_id, $limit = 6) {
         $this->ensureInterestsTable();
         // Use derived table instead of LIMIT inside IN() — MySQL doesn't support LIMIT in subqueries with IN

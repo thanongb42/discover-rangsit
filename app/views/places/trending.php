@@ -2,8 +2,10 @@
 
 <section class="bg-navy-900 text-white py-16 px-4">
     <div class="container mx-auto text-center">
-        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight"><i class="fas fa-fire text-orange-500 mr-3"></i>Trending Places</h1>
-        <p class="text-teal-100 text-lg opacity-80">Discover the most popular spots in Rangsit City right now.</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">
+            <i class="fas fa-fire text-orange-500 mr-3"></i><?= t('trending.title') ?>
+        </h1>
+        <p class="text-teal-100 text-lg opacity-80"><?= t('trending.subtitle') ?></p>
     </div>
 </section>
 
@@ -12,7 +14,7 @@
         <?php if(empty($data['places'])): ?>
             <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
                 <i class="fas fa-info-circle text-slate-200 text-5xl mb-4"></i>
-                <p class="text-slate-400 font-medium">No trending places found at the moment.</p>
+                <p class="text-slate-400 font-medium"><?= t('trending.empty') ?></p>
             </div>
         <?php else: ?>
             <?php foreach($data['places'] as $index => $place): ?>
@@ -33,14 +35,14 @@
                                 <i class="fas fa-star mr-1"></i> <?= number_format($place->rating_avg, 1) ?>
                             </div>
                             <div class="text-slate-400 text-sm">
-                                <i class="fas fa-eye mr-1"></i> <?= number_format($place->views_count) ?> views
+                                <i class="fas fa-eye mr-1"></i> <?= number_format($place->views_count) ?> <?= t('trending.views') ?>
                             </div>
                         </div>
                         <p class="text-slate-500 text-sm mb-6 line-clamp-2 leading-relaxed">
                             <?= htmlspecialchars($place->description) ?>
                         </p>
                         <a href="<?= BASE_URL ?>/place/<?= htmlspecialchars($place->slug) ?>" class="block w-full bg-slate-900 text-white text-center py-3 rounded-2xl font-bold hover:bg-navy-800 transition">
-                            View Detail
+                            <?= t('trending.btn') ?>
                         </a>
                     </div>
                 </div>

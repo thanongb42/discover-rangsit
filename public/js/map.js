@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnNearby').addEventListener('click', toggleNearby);
     document.getElementById('radiusSelect').addEventListener('change', filterNearby);
     document.getElementById('heatmapToggle').addEventListener('change', toggleHeatmap);
+
+    // Close kebab menus when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.kebab-menu').forEach(m => m.classList.add('hidden'));
+    });
 });
 
 // ─── Cluster options from MAP_SETTINGS ───────────────────────────────────────
@@ -156,13 +161,18 @@ function renderPlaces(data) {
         }
 
         // Sidebar Card
+        const isAdmin = typeof CURRENT_USER_ROLE !== 'undefined' && CURRENT_USER_ROLE === 'admin';
+        const isOwner = typeof CURRENT_USER_ID   !== 'undefined' && CURRENT_USER_ID !== null
+                        && parseInt(place.owner_user_id) === CURRENT_USER_ID;
+        const canManage = isAdmin || isOwner;
+
         const card = document.createElement('div');
-        card.className = 'group flex bg-white border border-slate-100 rounded-3xl p-3 cursor-pointer hover:shadow-lg hover:border-navy-100 transition duration-300 transform hover:-translate-y-1';
+        card.className = 'group relative flex bg-white border border-slate-100 rounded-3xl p-3 cursor-pointer hover:shadow-lg hover:border-navy-100 transition duration-300 transform hover:-translate-y-1';
         card.innerHTML = `
             <div class="w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden bg-slate-100 mr-4 border border-slate-50 shadow-inner">
                 <img src="${BASE_URL}/uploads/covers/${place.cover_image || 'default.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" alt="${place.name}">
             </div>
-            <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="flex-1 min-w-0 flex flex-col justify-center pr-${canManage ? '6' : '0'}">
                 <h6 class="font-bold text-slate-800 text-sm truncate mb-0.5">${place.name}</h6>
                 <p class="text-[10px] font-bold text-primary-500 mb-1 uppercase tracking-widest">${place.category_name}</p>
                 <div class="flex items-center justify-between mt-1">
@@ -172,8 +182,75 @@ function renderPlaces(data) {
                     <span class="text-[9px] text-slate-400 font-bold bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">${place.views_count} views</span>
                 </div>
             </div>
+            ${canManage ? `
+            <div class="absolute top-2 right-2">
+                <button class="kebab-btn w-7 h-7 flex flex-col items-center justify-center gap-[3px] rounded-full hover:bg-slate-100 transition z-10" title="จัดการ">
+                    <span class="w-1 h-1 bg-slate-400 rounded-full"></span>
+                    <span class="w-1 h-1 bg-slate-400 rounded-full"></span>
+                    <span class="w-1 h-1 bg-slate-400 rounded-full"></span>
+                </button>
+                <div class="kebab-menu hidden absolute right-0 top-8 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 min-w-[130px] z-50">
+                    <a href="${BASE_URL}/place/${place.slug}" class="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition" onclick="event.stopPropagation()">
+                        <i class="fas fa-eye text-slate-400 w-3"></i> ดูรายละเอียด
+                    </a>
+                    <a href="${BASE_URL}/admin/places/edit/${place.id}" class="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition" onclick="event.stopPropagation()">
+                        <i class="fas fa-edit text-blue-400 w-3"></i> แก้ไข
+                    </a>
+                    <div class="border-t border-slate-100 my-1"></div>
+                    <button class="kebab-delete w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition">
+                        <i class="fas fa-trash-alt text-red-400 w-3"></i> ย้ายไปถังขยะ
+                    </button>
+                </div>
+            </div>` : ''}
         `;
+
+        // Kebab menu toggle
+        if (canManage) {
+            const kebabBtn  = card.querySelector('.kebab-btn');
+            const kebabMenu = card.querySelector('.kebab-menu');
+            const deleteBtn = card.querySelector('.kebab-delete');
+
+            kebabBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all other open menus
+                document.querySelectorAll('.kebab-menu').forEach(m => {
+                    if (m !== kebabMenu) m.classList.add('hidden');
+                });
+                kebabMenu.classList.toggle('hidden');
+            });
+
+            deleteBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                kebabMenu.classList.add('hidden');
+                const result = await Swal.fire({
+                    title: 'ย้ายไปถังขยะ?',
+                    text: `"${place.name}" จะถูกซ่อนจากแผนที่ และสามารถกู้คืนได้ในภายหลัง`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'ย้ายไปถังขยะ',
+                    cancelButtonText: 'ยกเลิก'
+                });
+                if (!result.isConfirmed) return;
+
+                const fd = new FormData();
+                fd.append('id', place.id);
+                const res = await fetch(`${BASE_URL}/api/admin/places/trash`, { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    Swal.fire({ icon: 'success', title: 'ย้ายแล้ว', text: data.message, timer: 1500, showConfirmButton: false });
+                    card.classList.add('opacity-0', 'transition-all', 'duration-300');
+                    setTimeout(() => card.remove(), 300);
+                } else {
+                    Swal.fire('ข้อผิดพลาด', data.message, 'error');
+                }
+            });
+        }
+
         card.addEventListener('click', () => {
+            // Close any open kebab menus
+            document.querySelectorAll('.kebab-menu').forEach(m => m.classList.add('hidden'));
+
             if (place.latitude && place.longitude) {
                 map.setView([place.latitude, place.longitude], 16);
 
