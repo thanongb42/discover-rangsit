@@ -34,6 +34,11 @@
     <meta name="twitter:description" content="<?= htmlspecialchars($seo_desc) ?>">
     <meta name="twitter:image" content="<?= htmlspecialchars($seo_image) ?>">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/images/rangsit-logo.png">
+    <link rel="shortcut icon" type="image/png" href="<?= BASE_URL ?>/images/rangsit-logo.png">
+    <link rel="apple-touch-icon" href="<?= BASE_URL ?>/images/rangsit-logo.png">
+
     <!-- Canonical URL -->
     <link rel="canonical" href="<?= htmlspecialchars($seo_url) ?>">
 

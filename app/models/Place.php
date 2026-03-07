@@ -224,10 +224,14 @@ class Place extends Model {
     }
 
     public function getCategoryStats() {
-        $this->db->query("SELECT c.name, COUNT(p.id) as count 
-                          FROM categories c 
-                          LEFT JOIN places p ON c.id = p.category_id 
-                          GROUP BY c.id");
+        $this->db->query("SELECT c.id, c.name, c.icon, c.color,
+                          COUNT(CASE WHEN p.status = 'approved' THEN 1 END) as approved_count,
+                          COUNT(p.id) as total_count
+                          FROM categories c
+                          LEFT JOIN places p ON c.id = p.category_id
+                          GROUP BY c.id, c.name, c.icon, c.color
+                          HAVING approved_count > 0
+                          ORDER BY approved_count DESC");
         return $this->db->resultSet();
     }
 

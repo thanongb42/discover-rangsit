@@ -121,6 +121,76 @@
     });
 </script>
 
+<!-- Category Ranking Report -->
+<?php if (!empty($data['catStats'])): ?>
+<?php
+    $catStats = $data['catStats'];
+    $totalPlaces = array_sum(array_column($catStats, 'approved_count'));
+?>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <h5 class="font-bold text-gray-800 flex items-center">
+            <i class="fas fa-trophy text-yellow-500 mr-2"></i> รายงานสรุป: จำนวนสถานที่แยกตาม Category (Ranking)
+        </h5>
+        <span class="text-xs text-gray-400 font-medium">รวมทั้งหมด <?= number_format($totalPlaces) ?> สถานที่ (approved)</span>
+    </div>
+    <div class="p-6">
+        <div class="space-y-3">
+        <?php foreach ($catStats as $i => $cat): ?>
+        <?php
+            $rank = $i + 1;
+            $pct  = $totalPlaces > 0 ? round($cat->approved_count / $totalPlaces * 100, 1) : 0;
+            $rankColor = match($rank) {
+                1 => 'text-yellow-500',
+                2 => 'text-gray-400',
+                3 => 'text-amber-600',
+                default => 'text-gray-300'
+            };
+            $badgeBg = match($rank) {
+                1 => 'bg-yellow-50 border-yellow-200',
+                2 => 'bg-gray-50 border-gray-200',
+                3 => 'bg-amber-50 border-amber-200',
+                default => 'bg-white border-gray-100'
+            };
+        ?>
+        <div class="flex items-center gap-4 p-3 rounded-xl border <?= $badgeBg ?> hover:bg-gray-50 transition">
+            <!-- Rank -->
+            <div class="w-8 text-center">
+                <?php if ($rank <= 3): ?>
+                    <i class="fas fa-trophy <?= $rankColor ?> text-lg"></i>
+                <?php else: ?>
+                    <span class="text-sm font-bold text-gray-400">#<?= $rank ?></span>
+                <?php endif; ?>
+            </div>
+
+            <!-- Icon -->
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                 style="background-color: <?= htmlspecialchars($cat->color ?? '#9E9E9E') ?>22;">
+                <i class="<?= htmlspecialchars($cat->icon ?? 'fas fa-map-marker-alt') ?> text-base"
+                   style="color: <?= htmlspecialchars($cat->color ?? '#9E9E9E') ?>;"></i>
+            </div>
+
+            <!-- Name + Bar -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm font-semibold text-gray-700 truncate"><?= htmlspecialchars($cat->name) ?></span>
+                    <div class="flex items-center gap-2 ml-3 flex-shrink-0">
+                        <span class="text-sm font-black text-gray-800"><?= number_format($cat->approved_count) ?></span>
+                        <span class="text-xs text-gray-400 font-medium">(<?= $pct ?>%)</span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2">
+                    <div class="h-2 rounded-full transition-all"
+                         style="width: <?= $pct ?>%; background-color: <?= htmlspecialchars($cat->color ?? '#9E9E9E') ?>;"></div>
+                </div>
+            </div>
+        </div>
+        <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-12 mb-6">
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
