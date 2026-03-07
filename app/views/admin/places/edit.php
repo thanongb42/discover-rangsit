@@ -152,6 +152,9 @@
 
     <!-- Right: Images & Gallery -->
     <div class="space-y-8">
+        <input type="hidden" id="coverBase64">
+        <input type="hidden" id="qrBase64">
+
         <!-- Cover Image -->
         <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
             <div class="p-6 border-b border-gray-50 bg-gray-50/50">
@@ -262,95 +265,145 @@
         });
     }
 
+    // Store resized blobs instead of base64 strings to avoid exceeding server body size limits
+    let coverBlob = null;
+    let qrBlob    = null;
+
     function previewImage(input, previewId, btnId = 'btnUpdateCover') {
         if (input.files && input.files[0]) {
+            const file = input.files[0];
             const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById(previewId).src = e.target.result;
-                // Show specific update button
-                const btn = document.getElementById(btnId);
-                btn.classList.remove('hidden');
-                btn.classList.add('animate-bounce');
-                setTimeout(() => btn.classList.remove('animate-bounce'), 1000);
 
-                Swal.fire({
-                    icon: 'info',
-                    title: 'เลือกไฟล์ใหม่แล้ว',
-                    text: 'กรุณากดปุ่ม "อัปเดต" เพื่อบันทึกลงระบบ',
-                    timer: 3000,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
-                });
-            }
-            reader.readAsDataURL(input.files[0]);
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = previewId === 'coverPreview' ? 1200 : 800;
+
+                    if (width > height) {
+                        if (width > max_size) { height *= max_size / width; width = max_size; }
+                    } else {
+                        if (height > max_size) { width *= max_size / height; height = max_size; }
+                    }
+
+                    canvas.width  = Math.round(width);
+                    canvas.height = Math.round(height);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // Auto-compress: ลด quality อัตโนมัติจนกว่า blob < 800KB
+                    const MAX_BYTES = 800 * 1024;
+                    let quality = 0.82;
+
+                    function tryBlob() {
+                        canvas.toBlob(function(blob) {
+                            if (blob.size > MAX_BYTES && quality > 0.3) {
+                                quality = Math.max(quality - 0.1, 0.3);
+                                tryBlob();
+                                return;
+                            }
+
+                            // Update preview
+                            document.getElementById(previewId).src = URL.createObjectURL(blob);
+
+                            if (previewId === 'coverPreview') { coverBlob = blob; }
+                            else                              { qrBlob    = blob; }
+
+                            const btn = document.getElementById(btnId);
+                            btn.classList.remove('hidden');
+                            btn.classList.add('animate-bounce');
+                            setTimeout(() => btn.classList.remove('animate-bounce'), 1000);
+
+                            const kb = Math.round(blob.size / 1024);
+                            Swal.fire({
+                                icon: 'info', title: 'เตรียมรูปภาพสำเร็จ',
+                                text: `ขนาดไฟล์: ${kb} KB · กรุณากดปุ่ม "อัปเดต" เพื่อบันทึกลงระบบ`,
+                                timer: 3000, showConfirmButton: false, toast: true, position: 'top-end'
+                            });
+                        }, 'image/jpeg', quality);
+                    }
+                    tryBlob();
+                };
+            };
+            reader.readAsDataURL(file);
         }
     }
 
     async function uploadLineQr() {
-        const qrInput = document.getElementById('lineQrInput');
-        if(!qrInput.files[0]) return;
+        if (!qrBlob) {
+            Swal.fire('แจ้งเตือน', 'กรุณาเลือกรูปภาพ QR Code ใหม่ก่อน', 'warning');
+            return;
+        }
 
         const formData = new FormData();
         formData.append('id', <?= $data['place']->id ?>);
-        formData.append('line_qr', qrInput.files[0]);
-        
+        formData.append('line_qr', qrBlob, 'lineqr.jpg');
+
         try {
             Swal.fire({ title: 'กำลังอัปโหลด QR...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-            
+
             const response = await fetch('<?= BASE_URL ?>/api/admin/places/lineqr/update', {
                 method: 'POST',
                 body: formData
             });
-            const res = await response.json();
 
+            if (!response.ok) {
+                throw new Error('เซิร์ฟเวอร์ตอบกลับ HTTP ' + response.status + ' — ไฟล์อาจมีขนาดใหญ่เกินไป');
+            }
+
+            const res = await response.json();
             if (res.success) {
                 Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'อัปเดต LINE QR เรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
                 document.getElementById('btnUpdateLineQr').classList.add('hidden');
+                qrBlob = null;
             } else {
                 Swal.fire('ข้อผิดพลาด', res.message, 'error');
             }
         } catch (error) {
-            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
+            Swal.fire('ข้อผิดพลาด', error.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
         }
     }
 
     async function uploadCover() {
-        const coverInput = document.getElementById('coverInput');
-        if(!coverInput.files[0]) return;
+        if (!coverBlob) {
+            Swal.fire('แจ้งเตือน', 'กรุณาเลือกรูปภาพหน้าปกใหม่ก่อน', 'warning');
+            return;
+        }
 
         const formData = new FormData();
         formData.append('id', <?= $data['place']->id ?>);
-        formData.append('cover_image', coverInput.files[0]);
-        
+        formData.append('cover_image', coverBlob, 'cover.jpg');
+
         try {
-            Swal.fire({ 
-                title: 'กำลังอัปโหลด...', 
-                html: 'กรุณารอสักครู่',
-                allowOutsideClick: false, 
-                didOpen: () => { Swal.showLoading(); } 
+            Swal.fire({
+                title: 'กำลังอัปโหลด...',
+                html: 'กรุณารอสักครู่ ระบบกำลังปรับจูนรูปภาพให้เหมาะสม',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
             });
-            
+
             const response = await fetch('<?= BASE_URL ?>/api/admin/places/cover/update', {
                 method: 'POST',
                 body: formData
             });
-            const res = await response.json();
 
+            if (!response.ok) {
+                throw new Error('เซิร์ฟเวอร์ตอบกลับ HTTP ' + response.status + ' — ไฟล์อาจมีขนาดใหญ่เกินไป');
+            }
+
+            const res = await response.json();
             if (res.success) {
-                Swal.fire({ 
-                    icon: 'success', 
-                    title: 'สำเร็จ', 
-                    text: 'อัปเดตรูปหน้าปกเรียบร้อยแล้ว', 
-                    timer: 1500, 
-                    showConfirmButton: false 
-                });
+                Swal.fire({ icon: 'success', title: 'สำเร็จ', text: 'อัปเดตรูปหน้าปกเรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
                 document.getElementById('btnUpdateCover').classList.add('hidden');
+                coverBlob = null;
             } else {
                 Swal.fire('ข้อผิดพลาด', res.message, 'error');
             }
         } catch (error) {
-            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
+            Swal.fire('ข้อผิดพลาด', error.message || 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้', 'error');
         }
     }
 

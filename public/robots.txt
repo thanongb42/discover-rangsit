@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /admin/
+Disallow: /api/
+
+Sitemap: https://discover.rangsitcity.go.th/sitemap.xml

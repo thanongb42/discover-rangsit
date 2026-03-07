@@ -250,4 +250,127 @@ class Place extends Model {
         $this->db->bind(':user_id', $user_id);
         return $this->db->resultSet();
     }
+
+    // ─── Like System ─────────────────────────────────────────────────────────
+
+    private function ensureLikesTable() {
+        $this->db->query("CREATE TABLE IF NOT EXISTS place_likes (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            place_id INT NOT NULL,
+            user_id INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_like (place_id, user_id),
+            KEY idx_place_id (place_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $this->db->execute();
+    }
+
+    public function toggleLike($place_id, $user_id) {
+        $this->ensureLikesTable();
+
+        $this->db->query("SELECT id FROM place_likes WHERE place_id = :place_id AND user_id = :user_id");
+        $this->db->bind(':place_id', $place_id);
+        $this->db->bind(':user_id', $user_id);
+        $existing = $this->db->single();
+
+        if ($existing) {
+            $this->db->query("DELETE FROM place_likes WHERE place_id = :place_id AND user_id = :user_id");
+            $this->db->bind(':place_id', $place_id);
+            $this->db->bind(':user_id', $user_id);
+            $this->db->execute();
+            $liked = false;
+        } else {
+            $this->db->query("INSERT INTO place_likes (place_id, user_id) VALUES (:place_id, :user_id)");
+            $this->db->bind(':place_id', $place_id);
+            $this->db->bind(':user_id', $user_id);
+            $this->db->execute();
+            $liked = true;
+        }
+
+        $this->db->query("SELECT COUNT(*) as cnt FROM place_likes WHERE place_id = :place_id");
+        $this->db->bind(':place_id', $place_id);
+        $row = $this->db->single();
+
+        return ['liked' => $liked, 'count' => (int)$row->cnt];
+    }
+
+    public function getLikeCount($place_id) {
+        $this->ensureLikesTable();
+        $this->db->query("SELECT COUNT(*) as cnt FROM place_likes WHERE place_id = :place_id");
+        $this->db->bind(':place_id', $place_id);
+        $row = $this->db->single();
+        return (int)$row->cnt;
+    }
+
+    public function hasLiked($place_id, $user_id) {
+        $this->ensureLikesTable();
+        $this->db->query("SELECT id FROM place_likes WHERE place_id = :place_id AND user_id = :user_id");
+        $this->db->bind(':place_id', $place_id);
+        $this->db->bind(':user_id', $user_id);
+        return (bool)$this->db->single();
+    }
+
+    public function getLikers($place_id) {
+        $this->ensureLikesTable();
+        $this->db->query("SELECT u.user_id, u.first_name, u.last_name, u.profile_image, u.username, pl.created_at as liked_at
+                          FROM place_likes pl
+                          JOIN users u ON pl.user_id = u.user_id
+                          WHERE pl.place_id = :place_id
+                          ORDER BY pl.created_at DESC");
+        $this->db->bind(':place_id', $place_id);
+        return $this->db->resultSet();
+    }
+
+    // ─── Personalization ───────────────────────────────────────────────────
+
+    private function ensureInterestsTable() {
+        $this->db->query("CREATE TABLE IF NOT EXISTS user_interests (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            category_id INT NOT NULL,
+            score INT DEFAULT 1,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_user_cat (user_id, category_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $this->db->execute();
+    }
+
+    public function trackInterest($user_id, $category_id) {
+        $this->ensureInterestsTable();
+        $this->db->query("INSERT INTO user_interests (user_id, category_id, score)
+                          VALUES (:uid, :cid, 1)
+                          ON DUPLICATE KEY UPDATE score = score + 1, updated_at = NOW()");
+        $this->db->bind(':uid', $user_id);
+        $this->db->bind(':cid', $category_id);
+        $this->db->execute();
+    }
+
+    public function hasInterests($user_id) {
+        $this->ensureInterestsTable();
+        $this->db->query("SELECT COUNT(*) as cnt FROM user_interests WHERE user_id = :uid");
+        $this->db->bind(':uid', $user_id);
+        $row = $this->db->single();
+        return (int)$row->cnt > 0;
+    }
+
+    public function getRecommendations($user_id, $limit = 6) {
+        $this->ensureInterestsTable();
+        // Use derived table instead of LIMIT inside IN() — MySQL doesn't support LIMIT in subqueries with IN
+        $this->db->query("
+            SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color
+            FROM places p
+            LEFT JOIN categories c ON p.category_id = c.id
+            INNER JOIN (
+                SELECT category_id FROM user_interests
+                WHERE user_id = :uid
+                ORDER BY score DESC LIMIT 3
+            ) top_cats ON p.category_id = top_cats.category_id
+            WHERE p.status = 'approved'
+            ORDER BY p.rating_avg DESC, p.views_count DESC
+            LIMIT :lim
+        ");
+        $this->db->bind(':uid', $user_id);
+        $this->db->bind(':lim', (int)$limit);
+        return $this->db->resultSet();
+    }
 }

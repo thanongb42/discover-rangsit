@@ -1,8 +1,12 @@
 <?php
 /** @var Router $router */
 
+// Language Switch
+$router->get('/lang/{code}', 'LangController', 'switchLang');
+
 // Public Pages
 $router->get('/', 'HomeController', 'index');
+$router->get('/sitemap.xml', 'SitemapController', 'index');
 $router->get('/city-map', 'MapController', 'index');
 $router->get('/line-manual', 'HomeController', 'lineManual');
 $router->get('/privacy', 'HomeController', 'privacy');
@@ -15,6 +19,8 @@ $router->post('/api/categories/update', 'ApiController', 'categoriesUpdate');
 $router->post('/api/categories/delete', 'ApiController', 'categoriesDelete');
 $router->get('/api/top-places', 'ApiController', 'topPlaces');
 $router->post('/api/place/review', 'ApiController', 'placeReview');
+$router->post('/api/place/like', 'ApiController', 'placeLike');
+$router->get('/api/place/likers', 'ApiController', 'placeLikers');
 
 // Businesses
 $router->get('/place/{slug}', 'PlaceController', 'detail');
@@ -26,6 +32,8 @@ $router->get('/login', 'AuthController', 'login');
 $router->post('/login', 'AuthController', 'authenticate');
 $router->get('/login/line', 'AuthController', 'lineLogin');
 $router->get('/login/line/callback', 'AuthController', 'lineCallback');
+$router->get('/login/google', 'AuthController', 'googleLogin');
+$router->get('/login/google/callback', 'AuthController', 'googleCallback');
 $router->get('/register', 'AuthController', 'register');
 $router->post('/register', 'AuthController', 'store');
 $router->get('/logout', 'AuthController', 'logout');
@@ -66,6 +74,11 @@ $router->post('/api/admin/places/delete', 'ApiController', 'placeDelete');
 $router->post('/api/admin/places/gallery/upload', 'ApiController', 'galleryUpload');
 $router->post('/api/admin/places/gallery/delete', 'ApiController', 'galleryDelete');
 $router->get('/admin/logs', 'AdminController', 'logs');
+$router->get('/admin/map-settings', 'AdminController', 'mapSettings');
+$router->get('/api/map-settings', 'ApiController', 'getMapSettings');
+$router->get('/api/air-quality', 'ApiController', 'getAirQuality');
+$router->get('/api/weather', 'ApiController', 'getWeather');
+$router->post('/api/admin/map-settings/save', 'ApiController', 'saveMapSettings');
 
 
 

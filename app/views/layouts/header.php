@@ -1,32 +1,41 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="<?= currentLang() ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit - ค้นพบของเด็ด ของดัง และทุกสิ่งในเมืองรังสิต' ?></title>
     
+    <?php
+        $seo_desc     = $data['description'] ?? 'Discover Rangsit แพลตฟอร์มรวมร้านค้า ร้านอาหาร ของเด็ดรังสิต ของดังรังสิต ก๋วยเตี๋ยวเรือรังสิต สถานที่ท่องเที่ยว และบริการในเทศบาลนครรังสิต ค้นหาง่าย ครบจบในที่เดียว';
+        $seo_title    = $data['title'] ?? 'Discover Rangsit - ค้นพบทุกสิ่งในเมืองรังสิต';
+        $seo_image    = $data['og_image'] ?? BASE_URL . '/images/og-cover.jpg';
+        $seo_url      = $data['og_url']   ?? BASE_URL . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $seo_keywords = $data['keywords'] ?? 'รังสิต, ของเด็ดรังสิต, ของดังรังสิต, ก๋วยเตี๋ยวเรือรังสิต, ที่เที่ยวรังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต';
+    ?>
     <!-- SEO Metadata -->
-    <meta name="description" content="Discover Rangsit แพลตฟอร์มรวมร้านค้า ร้านอาหาร ของเด็ดรังสิต ของดังรังสิต ก๋วยเตี๋ยวเรือรังสิต สถานที่ท่องเที่ยว และบริการในเทศบาลนครรังสิต ค้นหาง่าย ครบจบในที่เดียว">
-    <meta name="keywords" content="รังสิต, ของเด็ดรังสิต, ของดังรังสิต, ก๋วยเตี๋ยวเรือรังสิต, ที่เที่ยวรังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต">
+    <meta name="description" content="<?= htmlspecialchars($seo_desc) ?>">
+    <meta name="keywords" content="<?= htmlspecialchars($seo_keywords) ?>">
     <meta name="author" content="เทศบาลนครรังสิต">
     <meta name="robots" content="index, follow">
-    
+
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="<?= BASE_URL ?>">
-    <meta property="og:title" content="<?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit - แหล่งรวมของเด็ดเมืองรังสิต' ?>">
-    <meta property="og:description" content="ค้นพบร้านอาหารอร่อย ก๋วยเตี๋ยวเรือชื่อดัง และสถานที่น่าสนใจในเมืองรังสิต พร้อมระบบแผนที่นำทางอัจฉริยะ">
-    <meta property="og:image" content="<?= BASE_URL ?>/images/rangsit-logo.png">
-    
+    <meta property="og:type" content="<?= isset($data['og_type']) ? $data['og_type'] : 'website' ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($seo_url) ?>">
+    <meta property="og:title" content="<?= htmlspecialchars($seo_title) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars($seo_desc) ?>">
+    <meta property="og:image" content="<?= htmlspecialchars($seo_image) ?>">
+    <meta property="og:locale" content="th_TH">
+    <meta property="og:site_name" content="Discover Rangsit">
+
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="<?= BASE_URL ?>">
-    <meta property="twitter:title" content="<?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit - แหล่งรวมของเด็ดเมืองรังสิต' ?>">
-    <meta property="twitter:description" content="ค้นพบร้านอาหารอร่อย ก๋วยเตี๋ยวเรือชื่อดัง และสถานที่น่าสนใจในเมืองรังสิต พร้อมระบบแผนที่นำทางอัจฉริยะ">
-    <meta property="twitter:image" content="<?= BASE_URL ?>/images/rangsit-logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?= htmlspecialchars($seo_url) ?>">
+    <meta name="twitter:title" content="<?= htmlspecialchars($seo_title) ?>">
+    <meta name="twitter:description" content="<?= htmlspecialchars($seo_desc) ?>">
+    <meta name="twitter:image" content="<?= htmlspecialchars($seo_image) ?>">
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="<?= BASE_URL . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?>">
+    <link rel="canonical" href="<?= htmlspecialchars($seo_url) ?>">
 
     <!-- JSON-LD Structured Data for WebSite -->
     <script type="application/ld+json">
@@ -75,12 +84,12 @@
                 extend: {
                     colors: {
                         navy: {
-                            800: '#1e3a8a',
-                            900: '#1e3a8a',
+                            800: '#0088CC',
+                            900: '#006BA8',
                         },
                         primary: {
-                            500: '#2795F5',
-                            600: '#1d76cc',
+                            500: '#0088CC',
+                            600: '#006BA8',
                         }
                     }
                 }
@@ -98,7 +107,7 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-900">
     <!-- Navbar -->
-    <nav class="bg-[#1e3a8a] text-white shadow-lg sticky top-0 z-[2000]">
+    <nav class="bg-[#0088CC] text-white shadow-lg sticky top-0 z-[2000]">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <a href="<?= BASE_URL ?>" class="flex items-center space-x-3 text-xl font-bold tracking-tight">
                 <img src="<?= BASE_URL ?>/images/rangsit-logo.png" alt="Rangsit Logo" class="h-10 w-auto">
@@ -106,19 +115,24 @@
             </a>
             
             <div class="hidden md:flex items-center space-x-6">
-                <a href="<?= BASE_URL ?>" class="hover:text-teal-300 transition font-medium">Home</a>
-                <a href="<?= BASE_URL ?>/city-map" class="hover:text-teal-300 transition font-medium">Map Explorer</a>
-                <a href="<?= BASE_URL ?>/trending" class="hover:text-teal-300 transition font-medium">Trending</a>
-                
+                <a href="<?= BASE_URL ?>" class="hover:text-blue-100 transition font-medium"><?= t('nav.home') ?></a>
+                <a href="<?= BASE_URL ?>/city-map" class="hover:text-blue-100 transition font-medium"><?= t('nav.map') ?></a>
+                <a href="<?= BASE_URL ?>/trending" class="hover:text-blue-100 transition font-medium"><?= t('nav.trending') ?></a>
+
                 <?php if(!isset($_SESSION['user_id'])): ?>
-                    <a href="<?= BASE_URL ?>/login" class="hover:text-teal-300 transition font-medium">Login</a>
-                    <a href="<?= BASE_URL ?>/register" class="bg-primary-500 hover:bg-primary-600 px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-green-900/20 transition">
-                        <i class="fas fa-plus mr-1"></i> Add Business
+                    <a href="<?= BASE_URL ?>/login" class="hover:text-blue-100 transition font-medium"><?= t('nav.login') ?></a>
+                    <a href="<?= BASE_URL ?>/register" class="bg-white/15 hover:bg-white/25 border border-white/30 px-5 py-2 rounded-xl text-sm font-bold transition">
+                        <i class="fas fa-plus mr-1"></i> <?= t('nav.add_business') ?>
                     </a>
                 <?php endif; ?>
             </div>
 
             <div class="flex items-center space-x-3">
+                <!-- Language Toggle -->
+                <div class="hidden md:flex items-center bg-white/10 rounded-xl overflow-hidden border border-white/20 text-xs font-black">
+                    <a href="<?= BASE_URL ?>/lang/th" class="px-3 py-1.5 transition <?= isLang('th') ? 'bg-white text-[#0088CC]' : 'text-white hover:bg-white/10' ?>">TH</a>
+                    <a href="<?= BASE_URL ?>/lang/en" class="px-3 py-1.5 transition <?= isLang('en') ? 'bg-white text-[#0088CC]' : 'text-white hover:bg-white/10' ?>">EN</a>
+                </div>
                 <?php if(isset($_SESSION['user_id'])): ?>
                     <!-- User Dropdown (Visible on all screens) -->
                     <div class="relative">
@@ -140,14 +154,14 @@
                                 <p class="text-[10px] text-gray-400 uppercase tracking-wider"><?= $_SESSION['user_role'] ?? 'member' ?></p>
                             </div>
                             <a href="<?= BASE_URL ?>/profile" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
-                                <i class="fas fa-user-circle mr-2"></i> โปรไฟล์ของฉัน
+                                <i class="fas fa-user-circle mr-2"></i> <?= t('nav.profile') ?>
                             </a>
                             <a href="<?= BASE_URL ?>/dashboard" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
-                                <i class="fas fa-tachometer-alt mr-2"></i> แดชบอร์ด
+                                <i class="fas fa-tachometer-alt mr-2"></i> <?= t('nav.dashboard') ?>
                             </a>
                             <div class="border-t border-gray-50 mt-1">
                                 <a href="<?= BASE_URL ?>/logout" class="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> ออกจากระบบ
+                                    <i class="fas fa-sign-out-alt mr-2"></i> <?= t('nav.logout') ?>
                                 </a>
                             </div>
                         </div>
@@ -162,18 +176,27 @@
         </div>
 
         <!-- Mobile Menu Container -->
-        <div id="publicMobileMenu" class="hidden md:hidden bg-navy-900 border-t border-white/10 animate-fade-in">
+        <div id="publicMobileMenu" class="hidden md:hidden bg-[#006BA8] border-t border-white/10 animate-fade-in">
             <div class="container mx-auto px-4 py-6 flex flex-col space-y-4">
-                <a href="<?= BASE_URL ?>" class="text-white hover:text-teal-300 font-bold py-2 border-b border-white/5 transition">Home</a>
-                <a href="<?= BASE_URL ?>/city-map" class="text-white hover:text-teal-300 font-bold py-2 border-b border-white/5 transition">Map Explorer</a>
-                <a href="<?= BASE_URL ?>/trending" class="text-white hover:text-teal-300 font-bold py-2 border-b border-white/5 transition">Trending</a>
-                
+                <a href="<?= BASE_URL ?>" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition"><?= t('nav.home') ?></a>
+                <a href="<?= BASE_URL ?>/city-map" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition"><?= t('nav.map') ?></a>
+                <a href="<?= BASE_URL ?>/trending" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition"><?= t('nav.trending') ?></a>
+
                 <?php if(!isset($_SESSION['user_id'])): ?>
-                    <a href="<?= BASE_URL ?>/login" class="text-white hover:text-teal-300 font-bold py-2 border-b border-white/5 transition">Login</a>
-                    <a href="<?= BASE_URL ?>/register" class="bg-primary-500 text-white text-center py-4 rounded-2xl font-bold shadow-lg transition">
-                        Add Business
+                    <a href="<?= BASE_URL ?>/login" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition"><?= t('nav.login') ?></a>
+                    <a href="<?= BASE_URL ?>/register" class="bg-white/15 border border-white/30 text-white text-center py-4 rounded-2xl font-bold transition">
+                        <?= t('nav.add_business') ?>
                     </a>
                 <?php endif; ?>
+
+                <!-- Language Toggle (Mobile) -->
+                <div class="flex items-center gap-3 pt-2">
+                    <span class="text-white/50 text-xs font-bold uppercase tracking-wider">Language</span>
+                    <div class="flex items-center bg-white/10 rounded-xl overflow-hidden border border-white/20 text-xs font-black">
+                        <a href="<?= BASE_URL ?>/lang/th" class="px-4 py-2 transition <?= isLang('th') ? 'bg-white text-[#0088CC]' : 'text-white' ?>">TH</a>
+                        <a href="<?= BASE_URL ?>/lang/en" class="px-4 py-2 transition <?= isLang('en') ? 'bg-white text-[#0088CC]' : 'text-white' ?>">EN</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>

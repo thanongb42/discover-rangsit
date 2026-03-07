@@ -1,46 +1,56 @@
-let map, markers, userMarker, userCircle;
+let map, userMarker, userCircle;
 let placesData = [];
 let categoriesData = [];
+let categoryLayerGroups = {}; // { catId: L.markerClusterGroup }
+let visibleCategories = new Set(); // catIds currently shown on map
+let heatLayer = null;
+let isNearbyActive = false;
 
 document.addEventListener('DOMContentLoaded', () => {
     initMap();
     loadCategories();
     loadPlaces();
 
-    // Event Listeners
     document.getElementById('searchBtn').addEventListener('click', filterPlaces);
     document.getElementById('searchInput').addEventListener('keyup', (e) => {
-        if(e.key === 'Enter') filterPlaces();
+        if (e.key === 'Enter') filterPlaces();
     });
     document.getElementById('categoryFilter').addEventListener('change', filterPlaces);
-    
-    // Geolocation
     document.getElementById('btnNearby').addEventListener('click', toggleNearby);
     document.getElementById('radiusSelect').addEventListener('change', filterNearby);
+    document.getElementById('heatmapToggle').addEventListener('change', toggleHeatmap);
 });
 
+// ─── Cluster options from MAP_SETTINGS ───────────────────────────────────────
+function buildClusterOptions() {
+    const s = (typeof MAP_SETTINGS !== 'undefined') ? MAP_SETTINGS : {};
+    const opts = {
+        chunkedLoading: true,
+        maxClusterRadius: s.max_cluster_radius || 50,
+        spiderfyOnMaxZoom: s.spiderfy_on_max_zoom !== false,
+        spiderfyDistanceMultiplier: 2,
+        showCoverageOnHover: false
+    };
+    if (s.clustering_enabled === false) {
+        opts.disableClusteringAtZoom = 1;
+    } else {
+        opts.disableClusteringAtZoom = s.disable_clustering_at_zoom || 14;
+    }
+    return opts;
+}
+
+// ─── Map Init ─────────────────────────────────────────────────────────────────
 function initMap() {
-    // Center of Rangsit, Thailand approximately
     map = L.map('map').setView([13.9840, 100.6125], 13);
-    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-
-    markers = L.markerClusterGroup({
-        chunkedLoading: true,
-        maxClusterRadius: 50
-    });
-    
-    map.addLayer(markers);
 }
 
+// ─── Load Data ────────────────────────────────────────────────────────────────
 function loadCategories() {
     fetch(BASE_URL + '/api/categories')
-        .then(res => {
-            if (!res.ok) throw new Error('API Error');
-            return res.json();
-        })
+        .then(res => { if (!res.ok) throw new Error('API Error'); return res.json(); })
         .then(data => {
             categoriesData = data;
             const select = document.getElementById('categoryFilter');
@@ -56,12 +66,10 @@ function loadCategories() {
 
 function loadPlaces() {
     fetch(BASE_URL + '/api/places')
-        .then(res => {
-            if (!res.ok) throw new Error('API Error');
-            return res.json();
-        })
+        .then(res => { if (!res.ok) throw new Error('API Error'); return res.json(); })
         .then(data => {
             placesData = data;
+            initCategoryLayers(data);
             renderPlaces(data);
         })
         .catch(err => {
@@ -70,24 +78,40 @@ function loadPlaces() {
         });
 }
 
+// ─── Init persistent per-category layer groups (called once on load) ─────────
+function initCategoryLayers(data) {
+    const catIds = [...new Set(data.map(p => String(p.category_id || 'default')))];
+    catIds.forEach(catId => {
+        if (!categoryLayerGroups[catId]) {
+            categoryLayerGroups[catId] = L.markerClusterGroup(buildClusterOptions());
+            map.addLayer(categoryLayerGroups[catId]);
+            visibleCategories.add(catId);
+        }
+    });
+}
+
+// ─── Render markers + sidebar cards ──────────────────────────────────────────
 function renderPlaces(data) {
-    markers.clearLayers();
+    // Clear markers in all category layers (keep the layer groups themselves)
+    Object.values(categoryLayerGroups).forEach(lg => lg.clearLayers());
+
     const listContainer = document.getElementById('placesList');
     listContainer.innerHTML = '';
     document.getElementById('resultCount').textContent = data.length;
 
-    if(data.length === 0) {
+    if (data.length === 0) {
         listContainer.innerHTML = '<div class="text-center text-slate-400 py-10 italic">No places found.</div>';
         return;
     }
 
     data.forEach(place => {
-        // Map Marker
-        if(place.latitude && place.longitude) {
-            const categoryIcon = place.category_icon || 'fa-map-marker-alt';
-            const categoryColor = place.category_color || '#1e3a8a';
+        const catId = String(place.category_id || 'default');
 
-            // Create custom FontAwesome marker
+        // Map Marker
+        if (place.latitude && place.longitude) {
+            const categoryIcon = place.category_icon || 'fa-map-marker-alt';
+            const categoryColor = place.category_color || '#0088CC';
+
             const customIcon = L.divIcon({
                 html: `<div class="custom-marker" style="background-color: ${categoryColor};">
                         <i class="fas ${categoryIcon}"></i>
@@ -110,18 +134,28 @@ function renderPlaces(data) {
                             <i class="fas fa-star mr-1"></i> ${place.rating_avg} <span class="text-slate-400 ml-1 font-normal">(${place.rating_count})</span>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <a href="${BASE_URL}/place/${place.slug}" class="bg-navy-800 text-white text-center py-2 rounded-xl text-[10px] font-bold hover:bg-navy-900 transition shadow-sm">View</a>
+                            <a href="${BASE_URL}/place/${place.slug}" class="bg-[#0088CC] text-white text-center py-2 rounded-xl text-[10px] font-bold hover:bg-[#006BA8] transition shadow-sm" style="color:white">View</a>
                             <a href="https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}" target="_blank" class="bg-slate-100 text-slate-600 text-center py-2 rounded-xl text-[10px] font-bold hover:bg-slate-200 transition">Navigate</a>
                         </div>
                     </div>
                 </div>
             `;
+
             const marker = L.marker([place.latitude, place.longitude], { icon: customIcon })
                             .bindPopup(popupContent, { padding: [0, 0], maxWidth: 200, minWidth: 200 });
-            markers.addLayer(marker);
+
+            marker.on('mouseover', function () { this.setZIndexOffset(1000); });
+            marker.on('mouseout', function () { this.setZIndexOffset(0); });
+
+            // Create category layer group if it doesn't exist yet
+            if (!categoryLayerGroups[catId]) {
+                categoryLayerGroups[catId] = L.markerClusterGroup(buildClusterOptions());
+                visibleCategories.add(catId);
+            }
+            categoryLayerGroups[catId].addLayer(marker);
         }
 
-        // Sidebar List Card
+        // Sidebar Card
         const card = document.createElement('div');
         card.className = 'group flex bg-white border border-slate-100 rounded-3xl p-3 cursor-pointer hover:shadow-lg hover:border-navy-100 transition duration-300 transform hover:-translate-y-1';
         card.innerHTML = `
@@ -140,28 +174,109 @@ function renderPlaces(data) {
             </div>
         `;
         card.addEventListener('click', () => {
-            if(place.latitude && place.longitude) {
+            if (place.latitude && place.longitude) {
                 map.setView([place.latitude, place.longitude], 16);
-                
-                // Close mobile sidebar automatically if open
+
                 if (window.innerWidth < 768 && typeof toggleMobileSidebar === 'function') {
-                    if (isSidebarOpen) {
-                        toggleMobileSidebar();
-                    }
+                    if (isSidebarOpen) toggleMobileSidebar();
                 }
 
-                // Find marker and open popup
-                markers.eachLayer(function(marker) {
-                    if(marker.getLatLng().lat == place.latitude && marker.getLatLng().lng == place.longitude) {
-                        marker.openPopup();
-                    }
-                });
+                const lg = categoryLayerGroups[catId];
+                if (lg) {
+                    lg.eachLayer(function (m) {
+                        if (m.getLatLng().lat == place.latitude && m.getLatLng().lng == place.longitude) {
+                            m.openPopup();
+                        }
+                    });
+                }
             }
         });
         listContainer.appendChild(card);
     });
+
+    // Re-apply visibility state (respect layer panel toggles)
+    Object.entries(categoryLayerGroups).forEach(([catId, lg]) => {
+        if (visibleCategories.has(catId)) {
+            if (!map.hasLayer(lg)) map.addLayer(lg);
+        } else {
+            if (map.hasLayer(lg)) map.removeLayer(lg);
+        }
+    });
+
+    buildLayerPanel();
 }
 
+// ─── Layer Panel ──────────────────────────────────────────────────────────────
+function buildLayerPanel() {
+    const container = document.getElementById('layerPanelList');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const catIds = Object.keys(categoryLayerGroups);
+    if (catIds.length === 0) {
+        document.getElementById('layerPanelWrapper').classList.add('hidden');
+        return;
+    }
+    document.getElementById('layerPanelWrapper').classList.remove('hidden');
+
+    catIds.forEach(catId => {
+        const cat = categoriesData.find(c => String(c.id) === catId);
+        const catName = cat ? cat.name : 'อื่นๆ';
+        const catColor = cat ? (cat.color || '#0088CC') : '#0088CC';
+        const catIcon = cat ? (cat.icon || 'fa-map-marker-alt') : 'fa-map-marker-alt';
+        const isVisible = visibleCategories.has(catId);
+
+        const label = document.createElement('label');
+        label.className = 'flex items-center gap-2.5 cursor-pointer py-1 hover:opacity-80 transition';
+
+        const dot = document.createElement('div');
+        dot.className = 'w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border-2 transition-all';
+        dot.style.borderColor = catColor;
+        dot.style.backgroundColor = isVisible ? catColor : 'transparent';
+
+        const ico = document.createElement('i');
+        ico.className = `fas ${catIcon} text-[9px]`;
+        ico.style.color = isVisible ? 'white' : catColor;
+        dot.appendChild(ico);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'text-xs font-medium text-slate-700 leading-tight';
+        nameSpan.textContent = catName;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'sr-only';
+        checkbox.checked = isVisible;
+        checkbox.addEventListener('change', function () {
+            const visible = this.checked;
+            if (visible) {
+                visibleCategories.add(catId);
+                map.addLayer(categoryLayerGroups[catId]);
+                dot.style.backgroundColor = catColor;
+                ico.style.color = 'white';
+            } else {
+                visibleCategories.delete(catId);
+                map.removeLayer(categoryLayerGroups[catId]);
+                dot.style.backgroundColor = 'transparent';
+                ico.style.color = catColor;
+            }
+        });
+
+        label.appendChild(checkbox);
+        label.appendChild(dot);
+        label.appendChild(nameSpan);
+        container.appendChild(label);
+    });
+}
+
+function toggleLayerPanel() {
+    const panel = document.getElementById('layerPanel');
+    const chevron = document.getElementById('layerPanelChevron');
+    panel.classList.toggle('hidden');
+    chevron.classList.toggle('rotate-180');
+}
+
+// ─── Filter ───────────────────────────────────────────────────────────────────
 function filterPlaces() {
     const keyword = document.getElementById('searchInput').value.toLowerCase();
     const category = document.getElementById('categoryFilter').value;
@@ -170,161 +285,117 @@ function filterPlaces() {
 
     let filtered = placesData.filter(place => {
         const matchKeyword = place.name.toLowerCase().includes(keyword) || (place.description && place.description.toLowerCase().includes(keyword));
-        const matchCat = category === "" || place.category_id == category;
+        const matchCat = category === '' || place.category_id == category;
         const matchRating = place.rating_avg >= minRating;
         return matchKeyword && matchCat && matchRating;
     });
 
-    // Sorting
-    if (sortBy === 'rating') {
-        filtered.sort((a, b) => b.rating_avg - a.rating_avg);
-    } else if (sortBy === 'views') {
-        filtered.sort((a, b) => b.views_count - a.views_count);
-    }
+    if (sortBy === 'rating') filtered.sort((a, b) => b.rating_avg - a.rating_avg);
+    else if (sortBy === 'views') filtered.sort((a, b) => b.views_count - a.views_count);
 
     renderPlaces(filtered);
 
-    // If searching keyword, send analytics log
     if (keyword.length > 2) {
         fetch(BASE_URL + '/api/search?q=' + encodeURIComponent(keyword));
     }
 }
 
-// Nearby Geolocation Feature
-let isNearbyActive = false;
-let heatLayer = null;
-
-document.addEventListener('DOMContentLoaded', () => {
-    // ... previous listeners
-    document.getElementById('heatmapToggle').addEventListener('change', toggleHeatmap);
-});
-
+// ─── Heatmap ──────────────────────────────────────────────────────────────────
 function toggleHeatmap(e) {
-    if(e.target.checked) {
-        // Create heat points: lat, lng, intensity
+    if (e.target.checked) {
         const heatPoints = placesData.map(p => {
-            if(p.latitude && p.longitude) {
-                // calculate intensity based on views
-                let intensity = p.views_count ? Math.min(1.0, p.views_count / 1000) : 0.2;
-                return [p.latitude, p.longitude, intensity];
+            if (p.latitude && p.longitude) {
+                return [p.latitude, p.longitude, Math.min(1.0, (p.views_count || 200) / 1000)];
             }
             return null;
-        }).filter(p => p !== null);
+        }).filter(Boolean);
 
         heatLayer = L.heatLayer(heatPoints, {
-            radius: 25,
-            blur: 15,
-            maxZoom: 15,
-            gradient: {0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1.0: 'red'}
+            radius: 25, blur: 15, maxZoom: 15,
+            gradient: { 0.4: 'blue', 0.6: 'cyan', 0.7: 'lime', 0.8: 'yellow', 1.0: 'red' }
         }).addTo(map);
-        
-        map.removeLayer(markers);
+
+        Object.entries(categoryLayerGroups).forEach(([catId, lg]) => {
+            if (visibleCategories.has(catId)) map.removeLayer(lg);
+        });
     } else {
-        if(heatLayer) {
-            map.removeLayer(heatLayer);
-            heatLayer = null;
-        }
-        map.addLayer(markers);
+        if (heatLayer) { map.removeLayer(heatLayer); heatLayer = null; }
+        Object.entries(categoryLayerGroups).forEach(([catId, lg]) => {
+            if (visibleCategories.has(catId)) map.addLayer(lg);
+        });
     }
 }
 
+// ─── Nearby ───────────────────────────────────────────────────────────────────
 function toggleNearby() {
     isNearbyActive = !isNearbyActive;
-    const btn = document.getElementById('btnNearby');
     const wrapper = document.getElementById('radiusSelectWrapper');
 
-    if(isNearbyActive) {
-        btn.classList.replace('btn-outline-success', 'btn-success');
-        wrapper.classList.remove('d-none');
+    if (isNearbyActive) {
+        wrapper.classList.remove('hidden');
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 position => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    showUserLocation(lat, lng);
+                    showUserLocation(position.coords.latitude, position.coords.longitude);
                     filterNearby();
                 },
-                error => {
-                    alert('Error getting location. Please enable location services.');
-                    toggleNearby();
-                }
+                () => { alert('Error getting location. Please enable location services.'); toggleNearby(); }
             );
         } else {
             alert('Geolocation is not supported by this browser.');
             toggleNearby();
         }
     } else {
-        btn.classList.replace('btn-success', 'btn-outline-success');
-        wrapper.classList.add('d-none');
-        if(userMarker) map.removeLayer(userMarker);
-        if(userCircle) map.removeLayer(userCircle);
+        wrapper.classList.add('hidden');
+        if (userMarker) map.removeLayer(userMarker);
+        if (userCircle) map.removeLayer(userCircle);
         renderPlaces(placesData);
         map.setView([13.9840, 100.6125], 13);
     }
 }
 
 function showUserLocation(lat, lng) {
-    if(userMarker) map.removeLayer(userMarker);
-    if(userCircle) map.removeLayer(userCircle);
-
+    if (userMarker) map.removeLayer(userMarker);
+    if (userCircle) map.removeLayer(userCircle);
     userMarker = L.marker([lat, lng], {
         icon: L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         })
     }).bindPopup('<b>You are here!</b>').addTo(map);
     map.setView([lat, lng], 14);
 }
 
 function filterNearby() {
-    if(!userMarker) return;
+    if (!userMarker) return;
     const radiusKm = parseFloat(document.getElementById('radiusSelect').value);
     const userLat = userMarker.getLatLng().lat;
     const userLng = userMarker.getLatLng().lng;
 
-    if(userCircle) map.removeLayer(userCircle);
+    if (userCircle) map.removeLayer(userCircle);
     userCircle = L.circle([userLat, userLng], {
-        color: 'red',
-        fillColor: '#f03',
-        fillOpacity: 0.1,
-        radius: radiusKm * 1000
+        color: 'red', fillColor: '#f03', fillOpacity: 0.1, radius: radiusKm * 1000
     }).addTo(map);
 
-    const filtered = placesData.filter(place => {
-        if(!place.latitude || !place.longitude) return false;
-        const dist = getDistanceFromLatLonInKm(userLat, userLng, place.latitude, place.longitude);
-        return dist <= radiusKm;
-    });
-
-    // Sort by distance
-    filtered.sort((a, b) => {
-        const distA = getDistanceFromLatLonInKm(userLat, userLng, a.latitude, a.longitude);
-        const distB = getDistanceFromLatLonInKm(userLat, userLng, b.latitude, b.longitude);
-        return distA - distB;
-    });
+    const filtered = placesData
+        .filter(p => p.latitude && p.longitude && getDistanceFromLatLonInKm(userLat, userLng, p.latitude, p.longitude) <= radiusKm)
+        .sort((a, b) => getDistanceFromLatLonInKm(userLat, userLng, a.latitude, a.longitude)
+                      - getDistanceFromLatLonInKm(userLat, userLng, b.latitude, b.longitude));
 
     renderPlaces(filtered);
     map.fitBounds(userCircle.getBounds());
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(lat2-lat1);  // deg2rad below
-    const dLon = deg2rad(lon2-lon1); 
-    const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2)
-        ; 
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-    const d = R * c; // Distance in km
-    return d;
+    const R = 6371;
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function deg2rad(deg) {
-    return deg * (Math.PI/180)
-}
+function deg2rad(deg) { return deg * (Math.PI / 180); }

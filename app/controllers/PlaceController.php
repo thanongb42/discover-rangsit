@@ -22,14 +22,37 @@ class PlaceController extends Controller {
 
         // Add view count
         $placeModel->addView($place->id, $_SERVER['REMOTE_ADDR']);
-        
+
+        // Track category interest for logged-in users
+        if (isset($_SESSION['user_id']) && !empty($place->category_id)) {
+            $placeModel->trackInterest($_SESSION['user_id'], $place->category_id);
+        }
+
         // Fetch reviews
         $reviews = $placeModel->getReviews($place->id);
 
+        // Like data
+        $likeCount = $placeModel->getLikeCount($place->id);
+        $hasLiked  = isset($_SESSION['user_id']) ? $placeModel->hasLiked($place->id, $_SESSION['user_id']) : false;
+
+        // Build SEO description from place data
+        $seoDesc = trim(strip_tags($place->description ?? ''));
+        if (empty($seoDesc)) {
+            $seoDesc = $place->name . ' - ' . ($place->category_name ?? '') . ' ใน' . ($place->address ?? 'เมืองรังสิต');
+        }
+        $seoDesc = mb_substr($seoDesc, 0, 160);
+
         $this->view('places/detail', [
-            'title' => $place->name . ' - Discover Rangsit',
-            'place' => $place,
-            'reviews' => $reviews
+            'title'       => $place->name . ' - Discover Rangsit',
+            'description' => $seoDesc,
+            'keywords'    => $place->name . ', ' . ($place->category_name ?? '') . ', รังสิต, Discover Rangsit, ' . ($place->address ?? ''),
+            'og_type'     => 'business.business',
+            'og_image'    => BASE_URL . '/uploads/covers/' . ($place->cover_image ?: 'default.jpg'),
+            'og_url'      => BASE_URL . '/place/' . $place->slug,
+            'place'       => $place,
+            'reviews'     => $reviews,
+            'like_count'  => $likeCount,
+            'has_liked'   => $hasLiked,
         ]);
     }
 

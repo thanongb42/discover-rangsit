@@ -5,10 +5,24 @@ class HomeController extends Controller {
         $places = $placeModel->getAllApproved();
         $categories = $placeModel->getCategories();
 
+        $recommendations = [];
+        $hasInterests    = false;
+        if (isset($_SESSION['user_id'])) {
+            try {
+                $hasInterests    = $placeModel->hasInterests($_SESSION['user_id']);
+                $recommendations = $hasInterests ? $placeModel->getRecommendations($_SESSION['user_id']) : [];
+            } catch (Exception $e) {
+                $hasInterests    = false;
+                $recommendations = [];
+            }
+        }
+
         $this->view('home/index', [
-            'title' => 'Discover Rangsit - ค้นพบทุกสิ่งในเมืองรังสิต',
-            'places' => $places,
-            'categories' => $categories
+            'title'           => 'Discover Rangsit - ค้นพบทุกสิ่งในเมืองรังสิต',
+            'places'          => $places,
+            'categories'      => $categories,
+            'recommendations' => $recommendations,
+            'has_interests'   => $hasInterests,
         ]);
     }
 

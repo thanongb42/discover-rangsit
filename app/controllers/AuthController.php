@@ -71,6 +71,123 @@ class AuthController extends Controller {
         header('Location: ' . BASE_URL . '/login');
     }
 
+    // ─── Google OAuth ──────────────────────────────────────────────────────────
+    public function googleLogin() {
+        $state = bin2hex(random_bytes(16));
+        $_SESSION['google_state'] = $state;
+
+        $url = "https://accounts.google.com/o/oauth2/v2/auth?" . http_build_query([
+            'client_id'     => GOOGLE_CLIENT_ID,
+            'redirect_uri'  => GOOGLE_REDIRECT_URI,
+            'response_type' => 'code',
+            'scope'         => 'openid email profile',
+            'state'         => $state,
+            'access_type'   => 'online',
+        ]);
+        header('Location: ' . $url);
+    }
+
+    public function googleCallback() {
+        if (!isset($_GET['code']) || !isset($_GET['state']) || $_GET['state'] !== ($_SESSION['google_state'] ?? '')) {
+            $_SESSION['error'] = 'การยืนยันตัวตนล้มเหลว กรุณาลองใหม่';
+            header('Location: ' . BASE_URL . '/login');
+            return;
+        }
+
+        // Exchange code for access token
+        $ch = curl_init("https://oauth2.googleapis.com/token");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'code'          => $_GET['code'],
+            'client_id'     => GOOGLE_CLIENT_ID,
+            'client_secret' => GOOGLE_CLIENT_SECRET,
+            'redirect_uri'  => GOOGLE_REDIRECT_URI,
+            'grant_type'    => 'authorization_code',
+        ]));
+        $tokenData = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+
+        if (!isset($tokenData['access_token'])) {
+            $_SESSION['error'] = 'ไม่สามารถเชื่อมต่อกับ Google ได้';
+            header('Location: ' . BASE_URL . '/login');
+            return;
+        }
+
+        // Get user profile
+        $ch = curl_init("https://www.googleapis.com/oauth2/v2/userinfo");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer " . $tokenData['access_token']]);
+        $profile = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+
+        $userModel = $this->model('User');
+
+        // Case A: Already logged in — link account
+        if (isset($_SESSION['user_id'])) {
+            if ($userModel->linkGoogleAccount($_SESSION['user_id'], $profile)) {
+                $_SESSION['success'] = 'เชื่อมต่อบัญชี Google เรียบร้อยแล้ว';
+            } else {
+                $_SESSION['error'] = 'บัญชี Google นี้ถูกใช้งานโดยสมาชิกท่านอื่นแล้ว';
+            }
+            header('Location: ' . BASE_URL . '/profile');
+            return;
+        }
+
+        // Case B: Login or Register
+        $existingUser = $userModel->findByGoogleId($profile['id']);
+
+        if ($existingUser) {
+            $this->_setGoogleSession($existingUser, $profile);
+            $userModel->updateLastLogin($existingUser->user_id);
+            $this->logActivity('LOGIN', "User logged in via Google");
+            header('Location: ' . BASE_URL . '/dashboard');
+            return;
+        }
+
+        // Check if email already registered — auto-link
+        if (!empty($profile['email'])) {
+            $emailUser = $userModel->findUserByEmail($profile['email']);
+            if ($emailUser) {
+                $userModel->linkGoogleAccount($emailUser->user_id, $profile);
+                $this->_setGoogleSession($emailUser, $profile);
+                $userModel->updateLastLogin($emailUser->user_id);
+                $this->logActivity('LOGIN', "User logged in via Google (email match)");
+                header('Location: ' . BASE_URL . '/dashboard');
+                return;
+            }
+        }
+
+        // New user — create account
+        $nameParts  = explode(' ', $profile['name'] ?? 'Google User', 2);
+        $data = [
+            'username'   => 'google_' . substr($profile['id'], 0, 8),
+            'first_name' => $nameParts[0],
+            'last_name'  => $nameParts[1] ?? '',
+            'email'      => $profile['email'] ?? $profile['id'] . '@google.placeholder',
+            'password'   => password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT),
+            'phone'      => '',
+            'role'       => 'user',
+            'status'     => 'active',
+        ];
+        if ($userModel->register($data)) {
+            $newUser = $userModel->findByUsername($data['username']);
+            $userModel->linkGoogleAccount($newUser->user_id, $profile);
+            $this->_setGoogleSession($newUser, $profile);
+            $this->logActivity('REGISTER', "New user registered via Google");
+            header('Location: ' . BASE_URL . '/dashboard');
+        }
+    }
+
+    private function _setGoogleSession($user, $profile) {
+        $_SESSION['user_id']      = $user->user_id;
+        $_SESSION['user_email']   = $user->email;
+        $_SESSION['username']     = $user->username;
+        $_SESSION['user_name']    = $user->first_name . ' ' . $user->last_name;
+        $_SESSION['user_role']    = $user->role;
+        $_SESSION['profile_image'] = $profile['picture'] ?? $user->profile_image;
+    }
+
     public function lineLogin() {
         $state = bin2hex(random_bytes(16));
         $_SESSION['line_state'] = $state;

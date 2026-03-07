@@ -1,6 +1,9 @@
 # Config files
 config/config.php
 
+# API cache (auto-generated, do not commit)
+config/cache/
+
 # Uploads
 uploads/covers/*
 uploads/gallery/*

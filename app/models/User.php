@@ -25,6 +25,20 @@ class User extends Model {
         return $this->db->single();
     }
 
+    public function findByGoogleId($google_id) {
+        $this->db->query("SELECT * FROM users WHERE google_id = :google_id");
+        $this->db->bind(':google_id', $google_id);
+        return $this->db->single();
+    }
+
+    public function linkGoogleAccount($user_id, $profile) {
+        $this->db->query("UPDATE users SET google_id = :google_id, google_picture_url = :picture_url WHERE user_id = :id");
+        $this->db->bind(':google_id', $profile['id']);
+        $this->db->bind(':picture_url', $profile['picture'] ?? null);
+        $this->db->bind(':id', $user_id);
+        return $this->db->execute();
+    }
+
     public function linkLineAccount($user_id, $line_data) {
         $this->db->query("UPDATE users SET line_user_id = :line_id, line_display_name = :display_name, line_picture_url = :picture_url, line_linked_at = NOW() WHERE user_id = :id");
         $this->db->bind(':line_id', $line_data['userId']);
