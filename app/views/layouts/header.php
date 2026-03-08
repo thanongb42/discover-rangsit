@@ -12,6 +12,19 @@
         $seo_url      = $data['og_url']   ?? BASE_URL . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $seo_keywords = $data['keywords'] ?? 'รังสิต, ของเด็ดรังสิต, ของดังรังสิต, ก๋วยเตี๋ยวเรือรังสิต, ที่เที่ยวรังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต';
     ?>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-99N779E4B7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-99N779E4B7');
+    </script>
+
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="o-7xL1Np4Q3qQU_5JJLugZKRpj15gTxtJ1z6qEkWfdk" />
+
     <!-- SEO Metadata -->
     <meta name="description" content="<?= htmlspecialchars($seo_desc) ?>">
     <meta name="keywords" content="<?= htmlspecialchars($seo_keywords) ?>">
