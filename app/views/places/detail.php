@@ -101,10 +101,59 @@
                             </button>
                         </div>
 
+                        <!-- Posted By -->
+                        <?php if (!empty($place->owner_name)): ?>
+                        <div class="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
+                            <?php
+                                $avatarSrc = !empty($place->owner_avatar)
+                                    ? BASE_URL . '/../' . $place->owner_avatar
+                                    : 'https://ui-avatars.com/api/?name=' . urlencode($place->owner_name) . '&background=1e3a8a&color=fff';
+                            ?>
+                            <img src="<?= $avatarSrc ?>" alt="<?= htmlspecialchars($place->owner_name) ?>" class="w-10 h-10 rounded-full object-cover border-2 border-slate-200">
+                            <div>
+                                <p class="text-xs text-slate-400"><?= t('place.posted_by') ?></p>
+                                <p class="text-sm font-bold text-slate-700"><?= htmlspecialchars($place->owner_name) ?></p>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
                         <h3 class="text-xl font-bold text-slate-800 mb-4"><?= t('place.about') ?></h3>
                         <p class="text-slate-600 leading-relaxed text-lg"><?= nl2br(htmlspecialchars($place->description)) ?></p>
                     </div>
                 </div>
+
+                <!-- Photo Gallery Section -->
+                <?php if (!empty($data['gallery'])): ?>
+                <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="px-8 pt-7 pb-4 flex items-center justify-between border-b border-slate-50">
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fas fa-images text-navy-800"></i>
+                            <?= isLang('en') ? 'Photo Gallery' : 'คลังภาพ' ?>
+                            <span class="text-sm font-normal text-slate-400">(<?= count($data['gallery']) ?>)</span>
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <?php foreach($data['gallery'] as $idx => $img): ?>
+                                <?php
+                                    // Skip line_qr images if they match the place's line_qr filename
+                                    if ($place->line_qr && $img->image_path === $place->line_qr) continue;
+                                ?>
+                                <div class="aspect-square rounded-2xl overflow-hidden cursor-pointer group relative"
+                                     onclick="openGalleryLightbox(<?= $idx ?>, this)">
+                                    <img src="<?= BASE_URL ?>/uploads/gallery/<?= htmlspecialchars($img->image_path) ?>"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                         alt="<?= htmlspecialchars($place->name) ?> photo <?= $idx + 1 ?>"
+                                         loading="lazy">
+                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition duration-300 flex items-center justify-center">
+                                        <i class="fas fa-expand text-white opacity-0 group-hover:opacity-100 transition text-xl drop-shadow-lg"></i>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- Reviews Section -->
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
@@ -330,6 +379,65 @@
         </div>
     </div>
 </main>
+
+<!-- Gallery Lightbox -->
+<?php if (!empty($data['gallery'])): ?>
+<div id="galleryLightbox" class="hidden fixed inset-0 bg-black/90 z-[3000] flex items-center justify-center p-4"
+     onclick="if(event.target===this||event.target.id==='galleryLightbox')closeLightbox()">
+    <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white/70 hover:text-white w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition z-10">
+        <i class="fas fa-times text-xl"></i>
+    </button>
+    <button onclick="prevPhoto()" class="absolute left-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition z-10">
+        <i class="fas fa-chevron-left text-xl"></i>
+    </button>
+    <button onclick="nextPhoto()" class="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition z-10">
+        <i class="fas fa-chevron-right text-xl"></i>
+    </button>
+    <img id="lightboxImg" src="" alt="" class="max-w-full max-h-[88vh] rounded-2xl shadow-2xl object-contain select-none">
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/50 text-sm font-bold" id="lightboxCounter"></div>
+</div>
+<script>
+const GALLERY_IMGS = <?= json_encode(array_values(array_filter(
+    array_map(fn($img) => $img->image_path, $data['gallery']),
+    fn($path) => $path !== ($place->line_qr ?? '')
+)), JSON_UNESCAPED_UNICODE) ?>;
+let lightboxIdx = 0;
+
+function openGalleryLightbox(idx) {
+    // idx from PHP may include filtered items; find by clicked img src
+    const clickedEl = event.currentTarget || event.target.closest('[onclick]');
+    const imgSrc = clickedEl ? clickedEl.querySelector('img')?.src : null;
+    if (imgSrc) {
+        const filename = imgSrc.split('/').pop();
+        const found = GALLERY_IMGS.findIndex(p => p === filename);
+        if (found !== -1) idx = found;
+    }
+    lightboxIdx = Math.min(idx, GALLERY_IMGS.length - 1);
+    showLightboxImg();
+    document.getElementById('galleryLightbox').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+    document.getElementById('galleryLightbox').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+function showLightboxImg() {
+    const lb = document.getElementById('lightboxImg');
+    lb.style.opacity = '0';
+    lb.src = '<?= BASE_URL ?>/uploads/gallery/' + GALLERY_IMGS[lightboxIdx];
+    lb.onload = () => { lb.style.transition = 'opacity .2s'; lb.style.opacity = '1'; };
+    document.getElementById('lightboxCounter').textContent = (lightboxIdx + 1) + ' / ' + GALLERY_IMGS.length;
+}
+function prevPhoto() { lightboxIdx = (lightboxIdx - 1 + GALLERY_IMGS.length) % GALLERY_IMGS.length; showLightboxImg(); }
+function nextPhoto() { lightboxIdx = (lightboxIdx + 1) % GALLERY_IMGS.length; showLightboxImg(); }
+document.addEventListener('keydown', e => {
+    if (document.getElementById('galleryLightbox').classList.contains('hidden')) return;
+    if (e.key === 'ArrowLeft') prevPhoto();
+    else if (e.key === 'ArrowRight') nextPhoto();
+    else if (e.key === 'Escape') closeLightbox();
+});
+</script>
+<?php endif; ?>
 
 <!-- Likers Modal -->
 <div id="likersModal" class="hidden fixed inset-0 bg-black/50 z-[2000] flex items-center justify-center p-4 backdrop-blur-sm" onclick="if(event.target===this)closeLikersModal()">

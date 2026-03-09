@@ -17,8 +17,8 @@
                 extend: {
                     colors: {
                         primary: {
-                            500: '#009933',
-                            600: '#007a29',
+                            500: '#0088CC',
+                            600: '#006BA8',
                         }
                     }
                 }
@@ -29,7 +29,7 @@
     <style>
         * { font-family: 'Sarabun', sans-serif; }
         .hero-panel {
-            background: linear-gradient(145deg, #064e3b 0%, #065f46 30%, #0f766e 70%, #0d9488 100%);
+            background: linear-gradient(145deg, #003A5C 0%, #005A8E 30%, #0088CC 70%, #33AADC 100%);
             position: relative;
             overflow: hidden;
         }
@@ -38,8 +38,8 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse at 20% 20%, rgba(20,184,166,.25) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 80%, rgba(6,78,59,.4) 0%, transparent 60%);
+                radial-gradient(ellipse at 20% 20%, rgba(51,170,220,.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,58,92,.4) 0%, transparent 60%);
         }
         .blob {
             position: absolute;
@@ -48,7 +48,7 @@
             opacity: .18;
             animation: blobFloat 8s ease-in-out infinite;
         }
-        .blob-1 { width:380px;height:380px;background:#2dd4bf;top:-80px;left:-80px; }
+        .blob-1 { width:380px;height:380px;background:#33AADC;top:-80px;left:-80px; }
         @keyframes blobFloat {
             0%,100% { transform: translate(0,0) scale(1); }
             50%      { transform: translate(15px,-20px) scale(1.05); }
@@ -59,7 +59,7 @@
             left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #0f766e;
+            color: #0088CC;
             z-index: 2;
         }
         .input-wrap input {
@@ -68,17 +68,17 @@
         }
         .input-wrap input:focus {
             outline: none;
-            border-color: #0f766e;
-            box-shadow: 0 0 0 3px rgba(15,118,110,.12);
+            border-color: #0088CC;
+            box-shadow: 0 0 0 3px rgba(0,136,204,.12);
         }
         .btn-primary {
-            background: linear-gradient(135deg, #065f46, #0f766e);
+            background: linear-gradient(135deg, #005A8E, #0088CC);
             transition: all .3s;
         }
         .btn-primary:hover {
-            background: linear-gradient(135deg, #064e3b, #0d9488);
+            background: linear-gradient(135deg, #003A5C, #006BA8);
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(15,118,110,.35);
+            box-shadow: 0 8px 20px rgba(0,136,204,.35);
         }
         .fade-right { animation: fadeRight .7s ease both; }
         @keyframes fadeRight { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:none} }
@@ -98,16 +98,16 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold leading-tight uppercase tracking-wider">Discover Rangsit</h1>
-                    <p class="text-teal-200 text-sm">Smart City Platform</p>
+                    <p class="text-blue-100 text-sm">Smart City Platform</p>
                 </div>
             </div>
 
             <div class="mb-12">
                 <h2 class="text-4xl font-extrabold leading-tight mb-4">
                     ขยายโอกาสทางธุรกิจ<br>
-                    <span class="text-teal-300">สู่โลกดิจิทัล</span>
+                    <span class="text-blue-200">สู่โลกดิจิทัล</span>
                 </h2>
-                <p class="text-teal-100 text-base leading-relaxed max-w-sm">
+                <p class="text-blue-50 text-base leading-relaxed max-w-sm">
                     ร่วมเป็นส่วนหนึ่งของเครือข่ายธุรกิจในเมืองรังสิต 
                     เพิ่มการมองเห็น และเข้าถึงลูกค้ากลุ่มใหม่ได้ทันที
                 </p>
@@ -115,20 +115,20 @@
 
             <div class="space-y-4">
                 <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
-                        <i class="fas fa-check text-teal-300 text-xs"></i>
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                        <i class="fas fa-check text-blue-200 text-xs"></i>
                     </div>
                     <p class="text-sm font-medium">สมัครสมาชิกฟรี ไม่มีค่าใช้จ่าย</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
-                        <i class="fas fa-check text-teal-300 text-xs"></i>
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                        <i class="fas fa-check text-blue-200 text-xs"></i>
                     </div>
                     <p class="text-sm font-medium">จัดการข้อมูลธุรกิจได้ด้วยตัวเอง</p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <div class="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
-                        <i class="fas fa-check text-teal-300 text-xs"></i>
+                    <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                        <i class="fas fa-check text-blue-200 text-xs"></i>
                     </div>
                     <p class="text-sm font-medium">รายงานสถิติการเข้าชมแบบ Real-time</p>
                 </div>
@@ -136,7 +136,7 @@
         </div>
 
         <div class="relative z-10">
-            <p class="text-teal-300/60 text-xs uppercase tracking-widest font-bold">
+            <p class="text-blue-200/60 text-xs uppercase tracking-widest font-bold">
                 Discover Rangsit &copy; 2026
             </p>
         </div>
@@ -195,7 +195,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary w-full text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-900/20 transition flex items-center justify-center gap-2 mt-4">
+                <button type="submit" class="btn-primary w-full text-white font-black py-4 rounded-2xl shadow-lg shadow-blue-900/20 transition flex items-center justify-center gap-2 mt-4">
                     สร้างบัญชีผู้ใช้งาน
                     <i class="fas fa-arrow-right text-xs"></i>
                 </button>

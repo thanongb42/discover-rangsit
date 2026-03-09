@@ -34,6 +34,10 @@
                 <i class="fas fa-map-marked-alt mr-2"></i> <?= t('home.map.link') ?>
             </a>
 
+            <a href="<?= BASE_URL ?>/pr" class="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-extrabold text-sm px-5 py-2.5 rounded-full shadow-lg shadow-yellow-400/30 transition-all hover:-translate-y-0.5">
+                🏪 ฝากร้านของคุณ — ฟรี!
+            </a>
+
             <!-- Weather Widget -->
             <div id="weatherWidget" class="hidden items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-2xl px-4 py-2.5">
                 <i id="weatherIcon" class="fas fa-sun text-yellow-300 text-lg"></i>
@@ -91,6 +95,22 @@
                 </button>
             <?php endforeach; ?>
         </div>
+    </div>
+
+    <!-- PR Banner -->
+    <div class="container mx-auto px-4 mt-8 relative z-10">
+        <a href="<?= BASE_URL ?>/pr" class="group flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 hover:from-yellow-300 hover:to-yellow-300 text-blue-900 rounded-2xl px-6 py-4 shadow-xl shadow-yellow-400/30 transition-all hover:-translate-y-0.5">
+            <div class="flex items-center gap-4">
+                <span class="text-3xl">🏪</span>
+                <div class="text-left">
+                    <div class="font-extrabold text-lg leading-tight">มีร้านในรังสิต? มาฝากร้านกับเรา — ฟรี!</div>
+                    <div class="text-blue-800/70 text-sm font-medium">แสดงบนแผนที่ · รับรีวิว · เชื่อมต่อ LINE · ไม่มีค่าใช้จ่าย</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-blue-900 text-white text-sm font-extrabold px-5 py-2.5 rounded-xl group-hover:bg-blue-800 transition-colors whitespace-nowrap shrink-0">
+                โพสต์เลย <i class="fas fa-arrow-right text-xs ml-1"></i>
+            </div>
+        </a>
     </div>
 </section>
 

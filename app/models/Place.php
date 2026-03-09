@@ -74,7 +74,10 @@ class Place extends Model {
         $this->db->query("INSERT INTO place_images (place_id, image_path) VALUES (:place_id, :image_path)");
         $this->db->bind(':place_id', $place_id);
         $this->db->bind(':image_path', $path);
-        return $this->db->execute();
+        if ($this->db->execute()) {
+            return $this->db->lastInsertId();
+        }
+        return false;
     }
 
     public function deleteGalleryImage($image_id) {
@@ -119,9 +122,11 @@ class Place extends Model {
     }
 
     public function getBySlug($slug) {
-        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color 
-                          FROM places p 
-                          LEFT JOIN categories c ON p.category_id = c.id 
+        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color,
+                          CONCAT(u.first_name, ' ', u.last_name) as owner_name, u.profile_image as owner_avatar
+                          FROM places p
+                          LEFT JOIN categories c ON p.category_id = c.id
+                          LEFT JOIN users u ON p.owner_user_id = u.user_id
                           WHERE p.slug = :slug");
         $this->db->bind(':slug', $slug);
         return $this->db->single();

@@ -417,19 +417,35 @@ class ApiController extends Controller {
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $place_id = $_POST['place_id'];
-            if(isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-                $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-                $filename = time() . '_' . rand(1000,9999) . '.' . $ext;
-                $target = APP_ROOT . '/public/uploads/gallery/' . $filename;
-                
-                if(move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
-                    $placeModel = $this->model('Place');
-                    if($placeModel->addGalleryImage($place_id, $filename)) {
-                        echo json_encode(['success' => true, 'message' => 'อัปโหลดรูปภาพสำเร็จ', 'filename' => $filename]);
-                    }
-                }
+            $place_id = intval($_POST['place_id'] ?? 0);
+            if (!$place_id) {
+                echo json_encode(['success' => false, 'message' => 'Invalid place_id']);
+                return;
             }
+            if (!isset($_FILES['image']) || $_FILES['image']['error'] != 0) {
+                $errCode = $_FILES['image']['error'] ?? -1;
+                echo json_encode(['success' => false, 'message' => 'File upload error code: ' . $errCode]);
+                return;
+            }
+            // Always save as .jpg (client sends canvas JPEG blob)
+            $filename = time() . '_' . rand(1000,9999) . '.jpg';
+            $target = APP_ROOT . '/public/uploads/gallery/' . $filename;
+
+            if (!move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
+                $err = error_get_last();
+                echo json_encode(['success' => false, 'message' => 'move_uploaded_file failed: ' . ($err['message'] ?? 'unknown')]);
+                return;
+            }
+
+            $placeModel = $this->model('Place');
+            $newId = $placeModel->addGalleryImage($place_id, $filename);
+            if ($newId) {
+                echo json_encode(['success' => true, 'id' => $newId, 'filename' => $filename, 'message' => 'อัปโหลดรูปภาพสำเร็จ']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Database insert failed']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Method not allowed']);
         }
     }
 

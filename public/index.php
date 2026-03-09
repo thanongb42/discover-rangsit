@@ -8,6 +8,9 @@ require_once '../app/core/Router.php';
 
 session_start();
 
+// Load language helper
+require_once '../app/helpers/lang_helper.php';
+
 $router = new Router();
 require_once '../routes.php';
 

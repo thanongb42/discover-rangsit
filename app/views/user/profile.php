@@ -26,13 +26,24 @@
             </div>
             <div class="p-8 flex flex-col md:flex-row items-center gap-8">
                 <div class="relative group">
+                    <?php
+                        $u = $data['user'];
+                        if (!empty($u->profile_image)) {
+                            $avatarSrc = BASE_URL . '/' . $u->profile_image;
+                        } elseif (!empty($u->line_picture_url)) {
+                            $avatarSrc = $u->line_picture_url;
+                        } else {
+                            $displayName = trim(($u->first_name ?? '') . ' ' . ($u->last_name ?? '')) ?: $u->username;
+                            $avatarSrc = 'https://ui-avatars.com/api/?name=' . urlencode($displayName) . '&size=128&background=1e3a8a&color=fff';
+                        }
+                    ?>
                     <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-slate-100">
-                        <img id="avatarPreview" src="<?= $data['user']->profile_image ? BASE_URL . '/' . $data['user']->profile_image : 'https://ui-avatars.com/api/?name=' . $data['user']->username . '&size=128' ?>" class="w-full h-full object-cover">
+                        <img id="avatarPreview" src="<?= htmlspecialchars($avatarSrc) ?>" class="w-full h-full object-cover">
                     </div>
                     <button onclick="document.getElementById('avatarInput').click()" class="absolute bottom-0 right-0 w-10 h-10 bg-primary-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary-600 transition border-4 border-white">
                         <i class="fas fa-camera"></i>
                     </button>
-                    <input type="file" id="avatarInput" class="hidden" accept="image/*" onchange="previewAvatar(this)">
+                    <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(this)" style="position:absolute;opacity:0;width:0.1px;height:0.1px;overflow:hidden;pointer-events:none;">
                 </div>
                 <div class="flex-1 text-center md:text-left">
                     <h4 class="font-bold text-gray-800 text-lg mb-1">เปลี่ยนรูปโปรไฟล์</h4>
@@ -159,47 +170,79 @@
     let resizedBlob = null;
 
     function previewAvatar(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const img = new Image();
-                img.src = e.target.result;
-                
-                img.onload = function() {
-                    // --- Start Resizing Logic ---
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    const max_size = 800; // บังคับขนาดสูงสุด 800px
+        if (!input.files || !input.files[0]) return;
 
-                    if (width > height) {
-                        if (width > max_size) {
-                            height *= max_size / width;
-                            width = max_size;
-                        }
-                    } else {
-                        if (height > max_size) {
-                            width *= max_size / height;
-                            height = max_size;
-                        }
-                    }
+        const file = input.files[0];
+        const ext  = file.name.split('.').pop().toLowerCase();
 
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
+        if (ext === 'eps') {
+            Swal.fire('ไม่รองรับ', 'ไฟล์ .eps ไม่สามารถประมวลผลได้บนเบราว์เซอร์ กรุณาใช้ .jpg, .png หรือ .heic', 'error');
+            input.value = '';
+            return;
+        }
 
-                    // แปลงเป็น Blob (JPEG quality 0.8) เพื่อลดขนาดไฟล์เหลือหลัก KB
-                    canvas.toBlob(function(blob) {
-                        resizedBlob = blob;
-                        document.getElementById('avatarPreview').src = canvas.toDataURL('image/jpeg', 0.8);
-                        document.getElementById('btnUpdateAvatar').classList.remove('hidden');
-                    }, 'image/jpeg', 0.8);
-                };
-            }
-            reader.readAsDataURL(file);
+        const fileMB    = file.size / (1024 * 1024);
+        const objectUrl = URL.createObjectURL(file); // สร้างใน user-gesture context ทันที
+
+        function doProcess() {
+            Swal.fire({ title: 'กำลังประมวลผลรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+            const img = new Image();
+
+            img.onerror = function() {
+                URL.revokeObjectURL(objectUrl);
+                Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดรูปภาพได้ อาจเป็นรูปแบบที่เบราว์เซอร์ไม่รองรับในอุปกรณ์นี้', 'error');
+                input.value = '';
+            };
+
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width  = img.width;
+                let height = img.height;
+                const max_size = 800;
+
+                if (width > height) {
+                    if (width > max_size) { height *= max_size / width; width = max_size; }
+                } else {
+                    if (height > max_size) { width *= max_size / height; height = max_size; }
+                }
+
+                canvas.width  = Math.round(width);
+                canvas.height = Math.round(height);
+                canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                URL.revokeObjectURL(objectUrl);
+
+                canvas.toBlob(function(blob) {
+                    resizedBlob = blob;
+                    document.getElementById('avatarPreview').src = URL.createObjectURL(blob);
+                    const btn = document.getElementById('btnUpdateAvatar');
+                    btn.classList.remove('hidden');
+                    Swal.fire({
+                        icon: 'success', title: 'เตรียมรูปภาพสำเร็จ',
+                        text: `ขนาด ${Math.round(blob.size/1024)} KB · กดบันทึกเพื่ออัปโหลด`,
+                        timer: 2000, showConfirmButton: false, toast: true, position: 'top-end'
+                    });
+                }, 'image/jpeg', 0.8);
+            };
+
+            img.src = objectUrl;
+        }
+
+        if (fileMB > 2) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ขนาดไฟล์ใหญ่เกินไป',
+                text: `ไฟล์มีขนาด ${fileMB.toFixed(1)} MB ระบบจะทำการลดขนาดเพื่อให้สามารถอัปโหลดได้`,
+                showCancelButton: true,
+                confirmButtonText: 'OK ดำเนินการต่อ',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#2795F5',
+            }).then(result => {
+                if (result.isConfirmed) doProcess();
+                else { URL.revokeObjectURL(objectUrl); input.value = ''; }
+            });
+        } else {
+            doProcess();
         }
     }
 

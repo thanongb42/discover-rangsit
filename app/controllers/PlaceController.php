@@ -28,8 +28,9 @@ class PlaceController extends Controller {
             $placeModel->trackInterest($_SESSION['user_id'], $place->category_id);
         }
 
-        // Fetch reviews
+        // Fetch reviews & gallery
         $reviews = $placeModel->getReviews($place->id);
+        $gallery = $placeModel->getGallery($place->id);
 
         // Like data
         $likeCount = $placeModel->getLikeCount($place->id);
@@ -50,6 +51,7 @@ class PlaceController extends Controller {
             'og_image'    => BASE_URL . '/uploads/covers/' . ($place->cover_image ?: 'default.jpg'),
             'og_url'      => BASE_URL . '/place/' . $place->slug,
             'place'       => $place,
+            'gallery'     => $gallery,
             'reviews'     => $reviews,
             'like_count'  => $likeCount,
             'has_liked'   => $hasLiked,

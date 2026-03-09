@@ -90,6 +90,17 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function mapSettings() {
+        $settingsFile = APP_ROOT . '/config/map_settings.json';
+        $settings = json_decode(file_get_contents($settingsFile), true);
+
+        $this->view('admin/map_settings', [
+            'title' => 'ตั้งค่าแผนที่ - Admin Dashboard',
+            'settings' => $settings,
+            'current_page' => 'map_settings'
+        ]);
+    }
+
     public function logs() {
         $logModel = $this->model('ActivityLog');
         

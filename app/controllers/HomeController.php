@@ -32,6 +32,16 @@ class HomeController extends Controller {
         ]);
     }
 
+    public function pr() {
+        $this->view('home/pr', [
+            'title'       => 'ฝากร้านกับ Discover Rangsit — โปรโมทร้านดังรังสิตของคุณ ฟรี!',
+            'description' => 'ร้านค้า ร้านอาหาร คาเฟ่ในรังสิต มาฝากร้านกับ Discover Rangsit ฟรี! โพสต์ข้อมูลร้าน แสดงบนแผนที่ รับรีวิว และเชื่อมต่อลูกค้าได้ง่ายขึ้น',
+            'keywords'    => 'ฝากร้านรังสิต, โปรโมทร้านรังสิต, ลงร้านฟรี, Discover Rangsit, ร้านค้ารังสิต, ร้านอาหารรังสิต, เพิ่มร้านค้า',
+            'og_image'    => BASE_URL . '/images/rangsit-logo.png',
+            'og_url'      => BASE_URL . '/pr',
+        ]);
+    }
+
     public function privacy() {
         $this->view('home/privacy', [
             'title' => 'นโยบายความเป็นส่วนตัว - Discover Rangsit'

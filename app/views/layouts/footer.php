@@ -3,15 +3,14 @@
         <div class="container mx-auto px-4">
             <div class="flex flex-col items-center gap-6">
                 <div class="text-center space-y-2">
-                    <p class="text-white font-bold text-base">&copy; <?= date('Y') ?> Discover Rangsit - Smart City Platform</p>
+                    <p class="text-white font-bold text-base">&copy; <?= date('Y') ?> <?= t('footer.platform') ?></p>
                     <p class="text-slate-500 text-xs leading-relaxed max-w-2xl mx-auto">
-                        Develop by : งานสถิติและข้อมูลสารสนเทศ ฝ่ายบริการและเผยแพร่วิชาการ<br>
-                        กองยุทธศาสตร์และงบประมาณ เทศบาลนครรังสิต
+                        <?= t('footer.dev') ?>
                     </p>
                 </div>
                 <div class="flex space-x-6">
-                    <a href="<?= BASE_URL ?>/privacy" class="hover:text-white transition">Privacy Policy</a>
-                    <a href="<?= BASE_URL ?>/terms" class="hover:text-white transition">Terms of Service</a>
+                    <a href="<?= BASE_URL ?>/privacy" class="hover:text-white transition"><?= t('footer.privacy') ?></a>
+                    <a href="<?= BASE_URL ?>/terms" class="hover:text-white transition"><?= t('footer.terms') ?></a>
                 </div>
             </div>
         </div>
@@ -20,17 +19,17 @@
     <!-- PDPA Cookie Consent Banner -->
     <div id="cookieConsent" class="hidden fixed bottom-6 inset-x-4 md:left-auto md:right-6 md:w-[450px] bg-white/95 backdrop-blur-md rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-white z-[3000] p-6 animate-fade-in-up">
         <div class="flex items-start gap-4">
-            <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#0088CC] flex items-center justify-center text-xl shrink-0">
                 <i class="fas fa-cookie-bite"></i>
             </div>
             <div class="flex-1">
-                <h4 class="font-bold text-slate-800 mb-1 text-sm">การใช้คุกกี้ (Cookie Policy)</h4>
+                <h4 class="font-bold text-slate-800 mb-1 text-sm"><?= t('footer.cookie.title') ?></h4>
                 <p class="text-slate-500 text-[11px] leading-relaxed mb-4">
-                    เราใช้คุกกี้เพื่อเพิ่มประสิทธิภาพและประสบการณ์ที่ดีในการใช้งาน หากคุณใช้งานเว็บไซต์นี้ต่อไป ถือว่าคุณยอมรับการใช้งานคุกกี้ตาม <a href="<?= BASE_URL ?>/privacy" class="text-teal-600 underline">นโยบายความเป็นส่วนตัว</a> ของเรา
+                    <?= t('footer.cookie.desc') ?> <a href="<?= BASE_URL ?>/privacy" class="text-[#0088CC] underline"><?= t('footer.cookie.policy') ?></a><?= isLang('th') ? ' ของเรา' : '.' ?>
                 </p>
                 <div class="flex gap-2">
-                    <button onclick="acceptCookies()" class="flex-1 bg-navy-800 text-white py-2 rounded-xl text-xs font-bold hover:bg-navy-900 transition">ยอมรับทั้งหมด</button>
-                    <button onclick="closeCookieBanner()" class="px-4 py-2 text-slate-400 text-xs font-bold">ปิด</button>
+                    <button onclick="acceptCookies()" class="flex-1 bg-[#0088CC] text-white py-2 rounded-xl text-xs font-bold hover:bg-[#006BA8] transition"><?= t('footer.cookie.accept') ?></button>
+                    <button onclick="closeCookieBanner()" class="px-4 py-2 text-slate-400 text-xs font-bold"><?= t('footer.cookie.close') ?></button>
                 </div>
             </div>
         </div>

@@ -49,6 +49,7 @@ return [
     'map.loading'           => 'กำลังโหลด...',
 
     // ─── Place Detail ─────────────────────────────────────────────────────
+    'place.posted_by'       => 'โพสต์โดย',
     'place.about'           => 'เกี่ยวกับสถานที่นี้',
     'place.reviews'         => 'รีวิวล่าสุด',
     'place.write_review'    => 'เขียนรีวิว',

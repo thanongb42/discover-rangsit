@@ -1,0 +1,6 @@
+{
+    "clustering_enabled": true,
+    "disable_clustering_at_zoom": 10,
+    "max_cluster_radius": 20,
+    "spiderfy_on_max_zoom": true
+}

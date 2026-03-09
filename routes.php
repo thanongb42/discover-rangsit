@@ -9,6 +9,7 @@ $router->get('/', 'HomeController', 'index');
 $router->get('/sitemap.xml', 'SitemapController', 'index');
 $router->get('/city-map', 'MapController', 'index');
 $router->get('/line-manual', 'HomeController', 'lineManual');
+$router->get('/pr', 'HomeController', 'pr');
 $router->get('/privacy', 'HomeController', 'privacy');
 $router->get('/terms', 'HomeController', 'terms');
 $router->get('/api/places', 'ApiController', 'places');

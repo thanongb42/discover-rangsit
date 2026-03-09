@@ -155,15 +155,16 @@
                     <!-- User Dropdown (Visible on all screens) -->
                     <div class="relative">
                         <button onclick="toggleUserDropdown()" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white font-bold border border-white/20 hover:bg-white/20 transition overflow-hidden">
-                            <?php 
-                                $profile_img = $_SESSION['profile_image'] ?? null;
-                                if($profile_img): 
+                            <?php
+                                $profile_img  = $_SESSION['profile_image'] ?? null;
+                                $display_name = $_SESSION['user_name'] ?? $_SESSION['username'] ?? 'User';
+                                if ($profile_img) {
                                     $img_src = (strpos($profile_img, 'http') === 0) ? $profile_img : BASE_URL . '/' . $profile_img;
+                                } else {
+                                    $img_src = 'https://ui-avatars.com/api/?name=' . urlencode($display_name) . '&size=80&background=1e3a8a&color=fff';
+                                }
                             ?>
-                                <img src="<?= $img_src ?>" class="w-full h-full object-cover header-avatar-img">
-                            <?php else: ?>
-                                <span class="header-avatar-img"><?= strtoupper(substr($_SESSION['username'] ?? $_SESSION['user_name'] ?? 'U', 0, 1)) ?></span>
-                            <?php endif; ?>
+                            <img src="<?= htmlspecialchars($img_src) ?>" class="w-full h-full object-cover header-avatar-img" alt="<?= htmlspecialchars($display_name) ?>">
                         </button>
                         
                         <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fade-in text-slate-800">

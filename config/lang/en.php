@@ -49,6 +49,7 @@ return [
     'map.loading'           => 'Loading...',
 
     // ─── Place Detail ─────────────────────────────────────────────────────
+    'place.posted_by'       => 'Posted by',
     'place.about'           => 'About this place',
     'place.reviews'         => 'Recent Reviews',
     'place.write_review'    => 'Write a Review',

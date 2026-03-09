@@ -137,7 +137,7 @@
                                 <i class="fas fa-sync text-white text-2xl"></i>
                             </div>
                         </div>
-                        <input id="fileInput" name="cover_image" type="file" class="hidden" accept="image/*" onchange="handlePreview(this, 'coverPreview', 'coverPlaceholder', 'coverOverlay', 'หน้าปก')">
+                        <input id="fileInput" name="cover_image" type="file" accept="image/*" onchange="handlePreview(this, 'coverPreview', 'coverPlaceholder', 'coverOverlay', 'หน้าปก')" style="position:absolute;opacity:0;width:0.1px;height:0.1px;overflow:hidden;pointer-events:none;">
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">LINE QR Code</label>
@@ -154,7 +154,7 @@
                                 <i class="fas fa-sync text-white text-2xl"></i>
                             </div>
                         </div>
-                        <input id="lineQrInput" name="line_qr" type="file" class="hidden" accept="image/*" onchange="handlePreview(this, 'qrPreview', 'qrPlaceholder', 'qrOverlay', 'LINE QR')">
+                        <input id="lineQrInput" name="line_qr" type="file" accept="image/*" onchange="handlePreview(this, 'qrPreview', 'qrPlaceholder', 'qrOverlay', 'LINE QR')" style="position:absolute;opacity:0;width:0.1px;height:0.1px;overflow:hidden;pointer-events:none;">
                     </div>
                 </div>
 
@@ -261,68 +261,104 @@ function syncMapFromInputs() {
 }
 
 function handlePreview(input, previewId, placeholderId, overlayId, label) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const img = new Image();
-            img.src = e.target.result;
-            
-            img.onload = function() {
-                // Resize logic
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                const max_size = label === 'หน้าปก' ? 1200 : 800;
+    if (!input.files || !input.files[0]) return;
 
-                if (width > height) {
-                    if (width > max_size) {
-                        height *= max_size / width;
-                        width = max_size;
+    const file = input.files[0];
+    const ext  = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'eps') {
+        Swal.fire('ไม่รองรับ', 'ไฟล์ .eps ไม่สามารถประมวลผลได้บนเบราว์เซอร์ กรุณาใช้ .jpg, .png หรือ .heic', 'error');
+        input.value = '';
+        return;
+    }
+
+    const fileMB    = file.size / (1024 * 1024);
+    const objectUrl = URL.createObjectURL(file); // สร้างใน user-gesture context ทันที
+
+    function doProcess() {
+        Swal.fire({ title: 'กำลังประมวลผลรูปภาพ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
+        const img = new Image();
+
+        img.onerror = function() {
+            URL.revokeObjectURL(objectUrl);
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดรูปภาพได้ อาจเป็นรูปแบบที่เบราว์เซอร์ไม่รองรับในอุปกรณ์นี้', 'error');
+            input.value = '';
+        };
+
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width  = img.width;
+            let height = img.height;
+            const max_size = label === 'หน้าปก' ? 1200 : 800;
+
+            if (width > height) {
+                if (width > max_size) { height *= max_size / width; width = max_size; }
+            } else {
+                if (height > max_size) { width *= max_size / height; height = max_size; }
+            }
+
+            canvas.width  = Math.round(width);
+            canvas.height = Math.round(height);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(objectUrl);
+
+            const MAX_BYTES = 800 * 1024;
+            let quality = 0.82;
+
+            function tryBlob() {
+                canvas.toBlob(function(blob) {
+                    if (blob.size > MAX_BYTES && quality > 0.3) {
+                        quality = Math.max(quality - 0.1, 0.3);
+                        tryBlob();
+                        return;
                     }
-                } else {
-                    if (height > max_size) {
-                        width *= max_size / height;
-                        height = max_size;
-                    }
-                }
 
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        if (label === 'หน้าปก') {
+                            document.getElementById('coverBase64').value = ev.target.result;
+                        } else {
+                            document.getElementById('qrBase64').value = ev.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(blob);
 
-                // Store in hidden field
-                const base64Data = canvas.toDataURL('image/jpeg', 0.8);
-                if (label === 'หน้าปก') {
-                    document.getElementById('coverBase64').value = base64Data;
-                } else {
-                    document.getElementById('qrBase64').value = base64Data;
-                }
+                    document.getElementById(previewId).src = URL.createObjectURL(blob);
+                    document.getElementById(previewId).classList.remove('hidden');
+                    document.getElementById(placeholderId).classList.add('hidden');
+                    document.getElementById(overlayId).classList.remove('hidden');
 
-                // Update Preview UI
-                const preview = document.getElementById(previewId);
-                const placeholder = document.getElementById(placeholderId);
-                const overlay = document.getElementById(overlayId);
-                
-                preview.src = base64Data;
-                preview.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                overlay.classList.remove('hidden');
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'เตรียมรูป' + label + 'แล้ว',
-                    text: 'รูปภาพถูกปรับขนาดเพื่อความรวดเร็วในการส่งข้อมูล',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
-                });
-            };
-        }
-        reader.readAsDataURL(file);
+                    const kb = Math.round(blob.size / 1024);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'เตรียมรูป' + label + 'แล้ว',
+                        text: `ปรับขนาดเสร็จสิ้น · ขนาดไฟล์: ${kb} KB`,
+                        timer: 2000, showConfirmButton: false, toast: true, position: 'top-end'
+                    });
+                }, 'image/jpeg', quality);
+            }
+            tryBlob();
+        };
+
+        img.src = objectUrl;
+    }
+
+    if (fileMB > 2) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'ขนาดไฟล์ใหญ่เกินไป',
+            text: `ไฟล์มีขนาด ${fileMB.toFixed(1)} MB ระบบจะทำการลดขนาดเพื่อให้สามารถอัปโหลดได้`,
+            showCancelButton: true,
+            confirmButtonText: 'OK ดำเนินการต่อ',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#2795F5',
+        }).then(result => {
+            if (result.isConfirmed) doProcess();
+            else { URL.revokeObjectURL(objectUrl); input.value = ''; }
+        });
+    } else {
+        doProcess();
     }
 }
 

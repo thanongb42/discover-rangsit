@@ -32,6 +32,7 @@ if ($is_admin) {
             ['id' => 'usermanager', 'icon' => 'fa-users-cog', 'label' => 'จัดการผู้ใช้งาน', 'url' => BASE_URL . '/admin/users'],
             ['id' => 'categories', 'icon' => 'fa-list', 'label' => 'หมวดหมู่ธุรกิจ', 'url' => BASE_URL . '/admin/categories'],
             ['id' => 'logs', 'icon' => 'fa-history', 'label' => 'ประวัติการใช้งาน', 'url' => BASE_URL . '/admin/logs'],
+            ['id' => 'map_settings', 'icon' => 'fa-sliders-h', 'label' => 'ตั้งค่าแผนที่', 'url' => BASE_URL . '/admin/map-settings'],
         ]
     ];
 }
@@ -60,16 +61,16 @@ $menu_groups['business'] = [
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0f7ff',
-                            100: '#e0effe',
-                            200: '#bae0fd',
-                            300: '#7cc8fb',
-                            400: '#2795F5', // The target color
-                            500: '#2795F5',
-                            600: '#1d76cc',
-                            700: '#1a5ea3',
-                            800: '#1a4f86',
-                            900: '#1a436f',
+                            50: '#e8f5fc',
+                            100: '#c8e8f8',
+                            200: '#93d0f0',
+                            300: '#4db5e8',
+                            400: '#0088CC',
+                            500: '#0088CC',
+                            600: '#006BA8',
+                            700: '#005A8E',
+                            800: '#004A74',
+                            900: '#003A5C',
                         }
                     }
                 }
@@ -79,18 +80,18 @@ $menu_groups['business'] = [
     <style>
         /* Custom Blue Button Styles */
         .btn-primary {
-            background-color: #2795F5 !important;
-            border-color: #2795F5 !important;
+            background-color: #0088CC !important;
+            border-color: #0088CC !important;
             color: white !important;
         }
         .btn-primary:hover {
-            background-color: #1d76cc !important;
-            border-color: #1d76cc !important;
+            background-color: #006BA8 !important;
+            border-color: #006BA8 !important;
         }
         /* Sidebar Styles */
         #sidebar {
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 45%, #2795F5 100%);
-            box-shadow: 2px 0 12px rgba(30, 58, 138, 0.2);
+            background: linear-gradient(180deg, #005A8E 0%, #0088CC 60%, #33AADC 100%);
+            box-shadow: 2px 0 12px rgba(0, 136, 204, 0.25);
         }
         .sidebar-menu-item {
             display: flex;

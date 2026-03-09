@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฝากร้านกับ Discover Rangsit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Sarabun', sans-serif; background: #f1f5f9; }
+
+        /* ── POSTER ── */
+        .poster {
+            width: 800px;
+            margin: 40px auto 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 40%, #0f766e 100%);
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 30px 80px rgba(30,58,138,.4);
+        }
+        .poster-bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: .08;
+            background: white;
+        }
+        .poster-bg-circle.c1 { width: 500px; height: 500px; top: -200px; right: -150px; }
+        .poster-bg-circle.c2 { width: 300px; height: 300px; bottom: -100px; left: -80px; }
+        .poster-bg-circle.c3 { width: 200px; height: 200px; top: 200px; left: 100px; }
+
+        .poster-inner { position: relative; z-index: 1; padding: 56px 60px 48px; }
+
+        .poster-top { display: flex; align-items: center; gap: 16px; margin-bottom: 36px; }
+        .poster-logo {
+            width: 64px; height: 64px;
+            background: white;
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,.2);
+        }
+        .poster-logo img { width: 56px; height: 56px; object-fit: contain; }
+        .poster-brand { color: white; }
+        .poster-brand-name { font-size: 22px; font-weight: 800; line-height: 1.1; }
+        .poster-brand-sub { font-size: 13px; opacity: .75; font-weight: 400; }
+
+        .poster-badge {
+            display: inline-block;
+            background: #facc15;
+            color: #1e3a8a;
+            font-size: 13px; font-weight: 800;
+            padding: 6px 18px;
+            border-radius: 999px;
+            margin-bottom: 20px;
+            letter-spacing: .5px;
+        }
+
+        .poster-headline {
+            color: white;
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+        .poster-headline span { color: #fde047; }
+
+        .poster-sub {
+            color: rgba(255,255,255,.82);
+            font-size: 18px;
+            line-height: 1.7;
+            margin-bottom: 36px;
+            max-width: 480px;
+        }
+
+        .poster-features {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        .poster-feature {
+            background: rgba(255,255,255,.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,.2);
+            color: white;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .poster-feature-icon { font-size: 18px; }
+
+        .poster-cta-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .poster-cta {
+            background: #facc15;
+            color: #1e3a8a;
+            font-size: 18px;
+            font-weight: 800;
+            padding: 16px 36px;
+            border-radius: 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 30px rgba(250,204,21,.4);
+            transition: transform .15s;
+        }
+        .poster-cta:hover { transform: translateY(-2px); }
+        .poster-url {
+            color: rgba(255,255,255,.7);
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .poster-url strong { color: white; }
+
+        .poster-stats {
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255,255,255,.15);
+            display: flex;
+            gap: 40px;
+        }
+        .poster-stat { color: white; }
+        .poster-stat-num { font-size: 32px; font-weight: 800; color: #fde047; line-height: 1; }
+        .poster-stat-label { font-size: 13px; opacity: .7; margin-top: 4px; }
+
+        .poster-free {
+            position: absolute;
+            top: 40px; right: 40px;
+            background: #ef4444;
+            color: white;
+            font-weight: 800;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            transform: rotate(8deg);
+            box-shadow: 0 4px 16px rgba(239,68,68,.5);
+        }
+
+        /* ── GUIDE ── */
+        .guide {
+            width: 800px;
+            margin: 32px auto 40px;
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 8px 40px rgba(0,0,0,.08);
+        }
+        .guide-header {
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            padding: 36px 48px;
+            color: white;
+        }
+        .guide-header h2 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+        .guide-header p { opacity: .75; font-size: 15px; }
+
+        .guide-body { padding: 48px; }
+
+        .guide-steps { display: flex; flex-direction: column; gap: 0; }
+
+        .guide-step {
+            display: flex;
+            gap: 24px;
+            position: relative;
+        }
+        .guide-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 23px;
+            top: 56px;
+            bottom: -8px;
+            width: 2px;
+            background: linear-gradient(180deg, #1e3a8a33, #0f766e22);
+        }
+        .guide-step { padding-bottom: 32px; }
+        .guide-step:last-child { padding-bottom: 0; }
+
+        .guide-step-num {
+            width: 48px; height: 48px;
+            min-width: 48px;
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
+            color: white;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 800;
+            box-shadow: 0 4px 16px rgba(30,58,138,.25);
+            position: relative;
+            z-index: 1;
+        }
+
+        .guide-step-content { flex: 1; }
+        .guide-step-title {
+            font-size: 18px; font-weight: 800;
+            color: #1e3a8a;
+            margin-bottom: 6px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .guide-step-title .step-tag {
+            font-size: 11px;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+        }
+        .guide-step-desc {
+            color: #475569;
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .guide-step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+        .guide-step-box ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .guide-step-box ul li {
+            font-size: 14px;
+            color: #334155;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.5;
+        }
+        .guide-step-box ul li::before {
+            content: '✓';
+            color: #0f766e;
+            font-weight: 800;
+            font-size: 13px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .guide-step-img {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 12px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 13px;
+            font-weight: 600;
+            border: 2px dashed #cbd5e1;
+            margin-top: 12px;
+        }
+
+        .guide-tip {
+            background: linear-gradient(135deg, #fef9c3, #fef3c7);
+            border: 1px solid #fde047;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 12px;
+            font-size: 14px;
+            color: #78350f;
+            display: flex;
+            gap: 10px;
+        }
+        .guide-tip-icon { font-size: 18px; flex-shrink: 0; }
+
+        .guide-success {
+            margin-top: 40px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac;
+            border-radius: 16px;
+            padding: 28px 32px;
+            text-align: center;
+        }
+        .guide-success h3 { font-size: 22px; font-weight: 800; color: #14532d; margin-bottom: 8px; }
+        .guide-success p { color: #166534; font-size: 15px; }
+
+        .guide-footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 24px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .guide-footer-brand { font-size: 15px; font-weight: 700; color: #1e3a8a; }
+        .guide-footer-url { font-size: 14px; color: #64748b; }
+
+        @media print {
+            body { background: white; }
+            .poster, .guide { box-shadow: none; }
+            .no-print { display: none; }
+        }
+
+        .print-btn {
+            display: block;
+            width: 800px;
+            margin: 20px auto 0;
+            text-align: right;
+        }
+        .print-btn button {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Sarabun', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .print-btn button:hover { background: #1e40af; }
+    </style>
+</head>
+<body>
+
+    <div class="print-btn no-print">
+        <button onclick="window.print()">🖨️ พิมพ์ / บันทึก PDF</button>
+    </div>
+
+    <!-- ═══════════════════════════════ POSTER ═══════════════════════════════ -->
+    <div class="poster">
+        <div class="poster-bg-circle c1"></div>
+        <div class="poster-bg-circle c2"></div>
+        <div class="poster-bg-circle c3"></div>
+        <div class="poster-free">ฟรี! ไม่มีค่าใช้จ่าย</div>
+
+        <div class="poster-inner">
+            <div class="poster-top">
+                <div class="poster-logo">
+                    <img src="../images/rangsit-logo.png" alt="Rangsit Logo" onerror="this.style.display='none';this.parentElement.innerHTML='🏙️'">
+                </div>
+                <div class="poster-brand">
+                    <div class="poster-brand-name">Discover Rangsit</div>
+                    <div class="poster-brand-sub">แพลตฟอร์มค้นพบทุกสิ่งในเมืองรังสิต</div>
+                </div>
+            </div>
+
+            <div class="poster-badge">📢 ประชาสัมพันธ์ร้านของคุณ</div>
+
+            <h1 class="poster-headline">
+                ฝากร้านดัง<br>
+                <span>รังสิต</span> ของคุณ<br>
+                ให้คนรู้จัก!
+            </h1>
+
+            <p class="poster-sub">
+                เปิดร้านอยู่ที่รังสิต? สมัครฟรี! โพสต์ข้อมูลร้านคุณบนแพลตฟอร์ม
+                Discover Rangsit ให้ลูกค้าค้นหาเจอง่ายขึ้น ทุกวัน ทุกที่
+            </p>
+
+            <div class="poster-features">
+                <div class="poster-feature"><span class="poster-feature-icon">📍</span> แสดงบนแผนที่</div>
+                <div class="poster-feature"><span class="poster-feature-icon">⭐</span> รับรีวิวจากลูกค้า</div>
+                <div class="poster-feature"><span class="poster-feature-icon">📱</span> ลิงก์โซเชียล</div>
+                <div class="poster-feature"><span class="poster-feature-icon">💚</span> เชื่อมต่อ LINE</div>
+                <div class="poster-feature"><span class="poster-feature-icon">🆓</span> สมัครฟรี</div>
+            </div>
+
+            <div class="poster-cta-row">
+                <a class="poster-cta" href="https://discover.rangsitcity.go.th">
+                    🚀 เริ่มโพสต์เลย
+                </a>
+                <div class="poster-url">
+                    🌐 <strong>discover.rangsitcity.go.th</strong>
+                </div>
+            </div>
+
+            <div class="poster-stats">
+                <div class="poster-stat">
+                    <div class="poster-stat-num">ฟรี</div>
+                    <div class="poster-stat-label">ไม่มีค่าใช้จ่าย</div>
+                </div>
+                <div class="poster-stat">
+                    <div class="poster-stat-num">24/7</div>
+                    <div class="poster-stat-label">เข้าถึงได้ตลอดเวลา</div>
+                </div>
+                <div class="poster-stat">
+                    <div class="poster-stat-num">📲</div>
+                    <div class="poster-stat-label">รองรับมือถือ</div>
+                </div>
+                <div class="poster-stat">
+                    <div class="poster-stat-num">🗺️</div>
+                    <div class="poster-stat-label">แสดงบน City Map</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════ GUIDE ═══════════════════════════════ -->
+    <div class="guide">
+        <div class="guide-header">
+            <h2>📋 คู่มือการโพสต์ร้านบน Discover Rangsit</h2>
+            <p>ทำตามขั้นตอนง่ายๆ ภายใน 5 นาที — ฟรี ไม่มีค่าใช้จ่าย</p>
+        </div>
+
+        <div class="guide-body">
+            <div class="guide-steps">
+
+                <!-- STEP 1 -->
+                <div class="guide-step">
+                    <div class="guide-step-num">1</div>
+                    <div class="guide-step-content">
+                        <div class="guide-step-title">
+                            เข้าเว็บไซต์ Discover Rangsit
+                            <span class="step-tag">เริ่มต้น</span>
+                        </div>
+                        <p class="guide-step-desc">เปิดเบราว์เซอร์แล้วไปที่ URL ด้านล่าง หรือสแกน QR Code</p>
+                        <div class="guide-step-box">
+                            <ul>
+                                <li>พิมพ์ <strong>discover.rangsitcity.go.th</strong> ในแถบ URL</li>
+                                <li>กดปุ่ม <strong>"เข้าสู่ระบบ"</strong> ที่มุมขวาบนของหน้าเว็บ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div class="guide-step">
+                    <div class="guide-step-num">2</div>
+                    <div class="guide-step-content">
+                        <div class="guide-step-title">
+                            สมัครสมาชิก / เข้าสู่ระบบ
+                            <span class="step-tag">ต้องมีบัญชี</span>
+                        </div>
+                        <p class="guide-step-desc">เลือกวิธีเข้าสู่ระบบที่สะดวกที่สุดสำหรับคุณ</p>
+                        <div class="guide-step-box">
+                            <ul>
+                                <li><strong>LINE Login</strong> — กดปุ่มสีเขียว "เข้าสู่ระบบด้วย LINE" อนุญาตแล้วระบบ Login อัตโนมัติ</li>
+                                <li><strong>Google Login</strong> — กดปุ่ม "เข้าสู่ระบบด้วย Google" เลือกบัญชี Gmail</li>
+                                <li><strong>Email/Password</strong> — กรอกอีเมลและรหัสผ่าน หรือกด "สมัครสมาชิก" ถ้ายังไม่มีบัญชี</li>
+                            </ul>
+                        </div>
+                        <div class="guide-tip">
+                            <span class="guide-tip-icon">💡</span>
+                            <span>แนะนำให้ใช้ <strong>LINE Login</strong> เพราะสะดวกและรวดเร็วที่สุด ไม่ต้องจำรหัสผ่าน</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div class="guide-step">
+                    <div class="guide-step-num">3</div>
+                    <div class="guide-step-content">
+                        <div class="guide-step-title">
+                            ไปที่ Dashboard แล้วกด "เพิ่มสถานที่"
+                            <span class="step-tag">เพิ่มร้าน</span>
+                        </div>
+                        <p class="guide-step-desc">หลัง Login แล้วจะเห็นเมนูด้านบน กดที่ชื่อของคุณ → "Dashboard"</p>
+                        <div class="guide-step-box">
+                            <ul>
+                                <li>กดปุ่ม <strong>"+ เพิ่มสถานที่ใหม่"</strong> ในหน้า Dashboard</li>
+                                <li>หรือกดเมนู <strong>"เพิ่มสถานที่"</strong> ในแถบด้านบน</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div class="guide-step">
+                    <div class="guide-step-num">4</div>
+                    <div class="guide-step-content">
+                        <div class="guide-step-title">
+                            กรอกข้อมูลร้านของคุณ
+                            <span class="step-tag">ข้อมูลสำคัญ</span>
+                        </div>
+                        <p class="guide-step-desc">กรอกข้อมูลให้ครบถ้วน ยิ่งครบยิ่งดี ลูกค้าจะค้นหาเจอง่ายขึ้น</p>
+                        <div class="guide-step-box">
+                            <ul>
+                                <li><strong>ชื่อร้าน / สถานที่</strong> — กรอกชื่อที่คนรู้จัก</li>
+                                <li><strong>หมวดหมู่</strong> — เลือกประเภทของร้าน เช่น ร้านอาหาร, คาเฟ่, ร้านค้า</li>
+                                <li><strong>รายละเอียด</strong> — เขียนอธิบายร้านของคุณ สินค้า บริการ จุดเด่น</li>
+                                <li><strong>ที่อยู่</strong> — กรอกที่อยู่ให้ชัดเจน เพื่อแสดงบนแผนที่</li>
+                                <li><strong>เบอร์โทร</strong> — ลูกค้าจะได้ติดต่อได้ง่าย</li>
+                                <li><strong>รูปภาพหน้าปก</strong> — อัปโหลดรูปสวยๆ ของร้านคุณ</li>
+                                <li><strong>โซเชียล</strong> — Facebook, LINE, Instagram (ถ้ามี)</li>
+                            </ul>
+                        </div>
+                        <div class="guide-tip">
+                            <span class="guide-tip-icon">📸</span>
+                            <span>รูปภาพสำคัญมาก! ร้านที่มีรูปสวยจะได้รับความสนใจมากกว่าถึง 3 เท่า แนะนำรูปขนาดอย่างน้อย 800x600px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5 -->
+                <div class="guide-step">
+                    <div class="guide-step-num">5</div>
+                    <div class="guide-step-content">
+                        <div class="guide-step-title">
+                            ปักหมุดตำแหน่งบนแผนที่
+                            <span class="step-tag">แผนที่</span>
+                        </div>
+                        <p class="guide-step-desc">ช่วยให้ลูกค้าหาร้านคุณเจอบน City Map ได้ง่ายขึ้น</p>
+                        <div class="guide-step-box">
+                            <ul>
+                                <li>กดที่แผนที่เพื่อปักหมุดตำแหน่งร้านของคุณ</li>
+                                <li>หรือกรอก Latitude / Longitude ถ้าทราบพิกัด</li>
+                                <li>ลากหมุดเพื่อปรับตำแหน่งให้ถูกต้อง</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 6 -->
+                <div class="guide-step">
+                    <div class="guide-step-num">6</div>
+                    <div class="guide-step-content">
+                        <div class="guide-step-title">
+                            กดส่ง รอการอนุมัติ
+                            <span class="step-tag">เกือบเสร็จแล้ว!</span>
+                        </div>
+                        <p class="guide-step-desc">กดปุ่ม <strong>"ส่งเพื่อรอการอนุมัติ"</strong> แล้วรอทีมงานตรวจสอบ</p>
+                        <div class="guide-step-box">
+                            <ul>
+                                <li>ทีมงานจะตรวจสอบข้อมูลภายใน <strong>1-3 วันทำการ</strong></li>
+                                <li>เมื่ออนุมัติแล้ว ร้านของคุณจะแสดงบนเว็บทันที</li>
+                                <li>ดูสถานะได้ที่ Dashboard → "ร้านของฉัน"</li>
+                            </ul>
+                        </div>
+                        <div class="guide-tip">
+                            <span class="guide-tip-icon">⏳</span>
+                            <span>ถ้าข้อมูลครบถ้วนและถูกต้อง ทีมงานจะอนุมัติให้เร็วที่สุด ข้อมูลที่ไม่เหมาะสมอาจถูกปฏิเสธ</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /guide-steps -->
+
+            <!-- SUCCESS -->
+            <div class="guide-success">
+                <h3>🎉 ยินดีด้วย! ร้านของคุณพร้อมให้คนค้นหาแล้ว</h3>
+                <p>ร้านของคุณจะแสดงบนหน้าหลัก, แผนที่ City Map และผลการค้นหา<br>
+                แชร์ลิงก์ร้านของคุณให้ลูกค้าและเพื่อนๆ ได้เลย!</p>
+            </div>
+
+        </div><!-- /guide-body -->
+
+        <div class="guide-footer">
+            <div class="guide-footer-brand">🏙️ Discover Rangsit — เทศบาลนครรังสิต</div>
+            <div class="guide-footer-url">🌐 discover.rangsitcity.go.th</div>
+        </div>
+    </div>
+
+</body>
+</html>
