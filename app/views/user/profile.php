@@ -262,7 +262,14 @@
                 method: 'POST',
                 body: formData
             });
-            const res = await response.json();
+            const text = await response.text();
+            let res;
+            try {
+                res = JSON.parse(text);
+            } catch(e) {
+                Swal.fire('Error', 'Server returned non-JSON response: ' + text.substring(0, 200), 'error');
+                return;
+            }
 
             if (res.success) {
                 Swal.fire({ icon: 'success', title: 'สำเร็จ', text: res.message, timer: 1500, showConfirmButton: false });

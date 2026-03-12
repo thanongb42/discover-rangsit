@@ -66,57 +66,86 @@ class UserController extends Controller {
     }
 
     public function updateAvatar() {
-        header('Content-Type: application/json');
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if(isset($_FILES['avatar'])) {
-                if ($_FILES['avatar']['error'] !== 0) {
-                    $errors = [
-                        1 => 'ไฟล์มีขนาดใหญ่เกินกว่าที่เซิร์ฟเวอร์กำหนด (php.ini)',
-                        2 => 'ไฟล์มีขนาดใหญ่เกินไป',
-                        3 => 'ไฟล์ถูกอัปโหลดมาไม่สมบูรณ์',
-                        4 => 'ไม่มีการส่งไฟล์มา',
-                        6 => 'ไม่พบโฟลเดอร์ชั่วคราวสำหรับอัปโหลด',
-                        7 => 'ไม่สามารถเขียนไฟล์ลงดิสก์ได้',
-                        8 => 'PHP extension หยุดการอัปโหลด'
-                    ];
-                    $msg = $errors[$_FILES['avatar']['error']] ?? 'Unknown upload error';
-                    echo json_encode(['success' => false, 'message' => $msg]);
-                    return;
-                }
-
-                $ext = strtolower(pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION));
-                $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-                if (!in_array($ext, $allowed)) {
-                    echo json_encode(['success' => false, 'message' => 'รองรับเฉพาะไฟล์รูปภาพ (jpg, png, webp) เท่านั้น']);
-                    return;
-                }
-
-                $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
-                $upload_dir = APP_ROOT . '/public/uploads/avatars/';
-                
-                // สร้างโฟลเดอร์ถ้ายังไม่มี
-                if (!is_dir($upload_dir)) {
-                    mkdir($upload_dir, 0777, true);
-                }
-                
-                $target = $upload_dir . $filename;
-                
-                if(move_uploaded_file($_FILES['avatar']['tmp_name'], $target)) {
-                    $userModel = $this->model('User');
-                    $db_path = 'uploads/avatars/' . $filename;
-                    if($userModel->updateAvatar($_SESSION['user_id'], $db_path)) {
-                        $_SESSION['profile_image'] = $db_path;
-                        $this->logActivity('AVATAR_UPDATE', "Uploaded new profile picture");
-                        echo json_encode(['success' => true, 'message' => 'อัปโหลดรูปโปรไฟล์สำเร็จ', 'path' => $db_path]);
-                    } else {
-                        echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการบันทึกฐานข้อมูล']);
-                    }
-                } else {
-                    echo json_encode(['success' => false, 'message' => 'ไม่สามารถย้ายไฟล์ไปยังโฟลเดอร์ปลายทางได้ (Permission denied?)']);
-                }
-            } else {
-                echo json_encode(['success' => false, 'message' => 'ไม่พบข้อมูลไฟล์ที่ส่งมา']);
+        ob_start();
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+                return;
             }
+
+            if (!isset($_FILES['avatar'])) {
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'ไม่พบข้อมูลไฟล์ที่ส่งมา']);
+                return;
+            }
+
+            if ($_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
+                $errors = [
+                    UPLOAD_ERR_INI_SIZE   => 'ไฟล์มีขนาดใหญ่เกินกว่าที่เซิร์ฟเวอร์กำหนด (upload_max_filesize)',
+                    UPLOAD_ERR_FORM_SIZE  => 'ไฟล์มีขนาดใหญ่เกินไป',
+                    UPLOAD_ERR_PARTIAL    => 'ไฟล์ถูกอัปโหลดมาไม่สมบูรณ์',
+                    UPLOAD_ERR_NO_FILE    => 'ไม่มีการส่งไฟล์มา',
+                    UPLOAD_ERR_NO_TMP_DIR => 'ไม่พบโฟลเดอร์ชั่วคราวสำหรับอัปโหลด',
+                    UPLOAD_ERR_CANT_WRITE => 'ไม่สามารถเขียนไฟล์ลงดิสก์ได้',
+                    UPLOAD_ERR_EXTENSION  => 'PHP extension หยุดการอัปโหลด'
+                ];
+                $msg = $errors[$_FILES['avatar']['error']] ?? 'Upload error code: ' . $_FILES['avatar']['error'];
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $msg]);
+                return;
+            }
+
+            $ext = strtolower(pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+            if (!in_array($ext, $allowed)) {
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'รองรับเฉพาะไฟล์รูปภาพ (jpg, png, webp) เท่านั้น']);
+                return;
+            }
+
+            $upload_dir = APP_ROOT . '/public/uploads/avatars/';
+            if (!is_dir($upload_dir)) {
+                if (!mkdir($upload_dir, 0755, true)) {
+                    ob_end_clean();
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'ไม่สามารถสร้างโฟลเดอร์อัปโหลดได้ (Permission denied)']);
+                    return;
+                }
+            }
+
+            $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $ext;
+            $target   = $upload_dir . $filename;
+
+            if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $target)) {
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'ไม่สามารถย้ายไฟล์ไปยังโฟลเดอร์ปลายทางได้ — กรุณาตรวจสอบสิทธิ์โฟลเดอร์ uploads/avatars/']);
+                return;
+            }
+
+            $userModel = $this->model('User');
+            $db_path   = 'uploads/avatars/' . $filename;
+            if ($userModel->updateAvatar($_SESSION['user_id'], $db_path)) {
+                $_SESSION['profile_image'] = $db_path;
+                $this->logActivity('AVATAR_UPDATE', "Uploaded new profile picture");
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'message' => 'อัปโหลดรูปโปรไฟล์สำเร็จ', 'path' => $db_path]);
+            } else {
+                @unlink($target);
+                ob_end_clean();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'เกิดข้อผิดพลาดในการบันทึกฐานข้อมูล']);
+            }
+        } catch (Exception $e) {
+            ob_end_clean();
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
         }
     }
 
