@@ -61,7 +61,7 @@
                 <span class="badge bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-black uppercase"><?= $data['user']->role ?></span>
             </div>
             <div class="p-8">
-                <form action="<?= BASE_URL ?>/profile/update" method="POST">
+                <form id="profileForm" action="<?= BASE_URL ?>/profile/update" method="POST">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">ชื่อผู้ใช้งาน (Username)</label>
@@ -168,6 +168,29 @@
 
 <script>
     let resizedBlob = null;
+
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        if (resizedBlob) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'มีรูปโปรไฟล์ที่ยังไม่ได้บันทึก',
+                text: 'กรุณากด "บันทึกรูปภาพใหม่" ก่อน แล้วค่อยบันทึกข้อมูลส่วนตัว',
+                confirmButtonText: 'บันทึกรูปภาพตอนนี้',
+                showCancelButton: true,
+                cancelButtonText: 'ข้ามการเปลี่ยนรูป',
+                confirmButtonColor: '#2795F5',
+            }).then(result => {
+                if (result.isConfirmed) {
+                    uploadAvatar();
+                } else if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
+                    resizedBlob = null;
+                    document.getElementById('btnUpdateAvatar').classList.add('hidden');
+                    document.getElementById('profileForm').submit();
+                }
+            });
+        }
+    });
 
     function previewAvatar(input) {
         if (!input.files || !input.files[0]) return;
