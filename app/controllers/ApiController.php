@@ -35,6 +35,49 @@ class ApiController extends Controller {
         echo json_encode($trending);
     }
 
+    public function recommendations() {
+        header('Content-Type: application/json');
+        $type    = preg_replace('/[^a-z_]/', '', $_GET['type']    ?? 'for_you');
+        $placeId = (int)($_GET['place_id'] ?? 0);
+        $limit   = min((int)($_GET['limit'] ?? 6), 12);
+
+        $placeModel = $this->model('Place');
+
+        switch ($type) {
+            case 'also_viewed':
+                if (!$placeId) { echo json_encode([]); return; }
+                $data = $placeModel->getAlsoViewed($placeId, $limit);
+                break;
+
+            case 'hot_now':
+                $hours = min((int)($_GET['hours'] ?? 48), 168);
+                $data  = $placeModel->getHotNow($limit, $hours);
+                break;
+
+            case 'similar':
+                if (!$placeId) { echo json_encode([]); return; }
+                $place  = $placeModel->getById($placeId);
+                $catId  = $place ? (int)$place->category_id : 0;
+                $data   = $catId ? $placeModel->getSimilarByCategory($placeId, $catId, $limit) : [];
+                break;
+
+            case 'for_you':
+            default:
+                $userId = (int)($_GET['user_id'] ?? ($_SESSION['user_id'] ?? 0));
+                if (!$userId) {
+                    $data = $placeModel->getHotNow($limit, 72);
+                } else {
+                    $data = $placeModel->getPersonalizedScore($userId, $limit);
+                    if (empty($data)) {
+                        $data = $placeModel->getRecommendations($userId, $limit);
+                    }
+                }
+                break;
+        }
+
+        echo json_encode($data);
+    }
+
     public function categoriesAdd() {
         header('Content-Type: application/json');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {

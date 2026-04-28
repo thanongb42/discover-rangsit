@@ -78,6 +78,21 @@ class DeliveryLink extends Model
         return $this->db->resultSet();
     }
 
+    public function getClicksByDay(int $placeId, int $days = 30): array
+    {
+        $this->db->query("
+            SELECT DATE(clicked_at) as date, platform, COUNT(*) as clicks
+            FROM place_delivery_clicks
+            WHERE place_id = :place_id
+              AND clicked_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+            GROUP BY DATE(clicked_at), platform
+            ORDER BY date ASC
+        ");
+        $this->db->bind(':place_id', $placeId);
+        $this->db->bind(':days',     $days);
+        return $this->db->resultSet();
+    }
+
     public function getOwnerPlaceId(int $linkId): ?int
     {
         $this->db->query('SELECT place_id FROM place_delivery_links WHERE id = :id');

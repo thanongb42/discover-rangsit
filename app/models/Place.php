@@ -237,6 +237,101 @@ class Place extends Model {
         return $this->db->resultSet();
     }
 
+    public function getCitySummary(): object|false
+    {
+        $this->db->query("
+            SELECT
+                COUNT(*)                                                         AS total_businesses,
+                SUM(status = 'approved')                                         AS approved,
+                SUM(status = 'pending')                                          AS pending,
+                SUM(status = 'rejected')                                         AS rejected,
+                COALESCE(SUM(views_count), 0)                                    AS total_views,
+                ROUND(AVG(CASE WHEN rating_count > 0 THEN rating_avg END), 2)    AS avg_rating,
+                SUM(rating_count > 0)                                            AS has_reviews,
+                (SELECT COUNT(*) FROM users WHERE status = 'active')             AS total_users,
+                (SELECT COUNT(*) FROM place_likes)                               AS total_likes,
+                (SELECT COUNT(*) FROM ratings)                                   AS total_reviews,
+                (SELECT COUNT(*) FROM place_delivery_clicks)                     AS total_delivery_clicks,
+                (SELECT COUNT(DISTINCT place_id) FROM place_delivery_links WHERE is_active = 1) AS delivery_shops
+            FROM places
+            WHERE status != 'trash'
+        ");
+        return $this->db->single();
+    }
+
+    public function getNewBusinessesByMonth(int $months = 6): array
+    {
+        $this->db->query("
+            SELECT DATE_FORMAT(created_at, '%Y-%m') AS month,
+                   DATE_FORMAT(created_at, '%b %Y')  AS label,
+                   COUNT(*)                           AS count
+            FROM places
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL :months MONTH)
+              AND status != 'trash'
+            GROUP BY month, label
+            ORDER BY month ASC
+        ");
+        $this->db->bind(':months', $months);
+        return $this->db->resultSet();
+    }
+
+    public function getTopPlacesByViews(int $limit = 10): array
+    {
+        $this->db->query("
+            SELECT p.id, p.name, p.slug, p.cover_image, p.views_count,
+                   p.rating_avg, p.rating_count,
+                   c.name AS category_name
+            FROM places p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.status = 'approved'
+            ORDER BY p.views_count DESC
+            LIMIT :lim
+        ");
+        $this->db->bind(':lim', $limit);
+        return $this->db->resultSet();
+    }
+
+    public function getApprovedWithCoords(): array
+    {
+        $this->db->query("
+            SELECT id, name, slug, latitude, longitude, views_count,
+                   rating_avg, cover_image
+            FROM places
+            WHERE status = 'approved'
+              AND latitude IS NOT NULL AND longitude IS NOT NULL
+        ");
+        return $this->db->resultSet();
+    }
+
+    public function getDeliveryAdoption(): array
+    {
+        $this->db->query("
+            SELECT dl.platform,
+                   COUNT(DISTINCT dl.place_id)  AS shop_count,
+                   SUM(dl.click_count)          AS total_clicks
+            FROM place_delivery_links dl
+            WHERE dl.is_active = 1
+            GROUP BY dl.platform
+            ORDER BY shop_count DESC
+        ");
+        return $this->db->resultSet();
+    }
+
+    public function getEngagementByMonth(int $months = 6): array
+    {
+        $this->db->query("
+            SELECT DATE_FORMAT(viewed_at, '%Y-%m') AS month,
+                   DATE_FORMAT(viewed_at, '%b %Y')  AS label,
+                   COUNT(*)                          AS views
+            FROM place_views
+            WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL :months MONTH)
+            GROUP BY month, label
+            ORDER BY month ASC
+        ");
+        $this->db->bind(':months', $months);
+        return $this->db->resultSet();
+    }
+
     public function getViewStats() {
         // Get views for the last 7 days
         $this->db->query("SELECT DATE(viewed_at) as date, COUNT(*) as count 
@@ -257,6 +352,83 @@ class Place extends Model {
                           HAVING approved_count > 0
                           ORDER BY approved_count DESC");
         return $this->db->resultSet();
+    }
+
+    public function getViewsByPlace(int $placeId, int $days = 30): array
+    {
+        $this->db->query("
+            SELECT DATE(viewed_at) as date, COUNT(*) as views
+            FROM place_views
+            WHERE place_id = :place_id
+              AND viewed_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+            GROUP BY DATE(viewed_at)
+            ORDER BY date ASC
+        ");
+        $this->db->bind(':place_id', $placeId);
+        $this->db->bind(':days', $days);
+        return $this->db->resultSet();
+    }
+
+    public function getLikesByPlace(int $placeId, int $days = 30): array
+    {
+        $this->db->query("
+            SELECT DATE(created_at) as date, COUNT(*) as likes
+            FROM place_likes
+            WHERE place_id = :place_id
+              AND created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        ");
+        $this->db->bind(':place_id', $placeId);
+        $this->db->bind(':days', $days);
+        return $this->db->resultSet();
+    }
+
+    public function getRatingDistribution(int $placeId): array
+    {
+        $this->db->query("
+            SELECT rating, COUNT(*) as count
+            FROM ratings
+            WHERE place_id = :place_id
+            GROUP BY rating
+            ORDER BY rating DESC
+        ");
+        $this->db->bind(':place_id', $placeId);
+        return $this->db->resultSet();
+    }
+
+    public function getCategoryBenchmark(int $categoryId): object|false
+    {
+        $this->db->query("
+            SELECT
+                AVG(views_count)  as avg_views,
+                AVG(rating_avg)   as avg_rating,
+                AVG(rating_count) as avg_reviews
+            FROM places
+            WHERE category_id = :cat_id AND status = 'approved'
+        ");
+        $this->db->bind(':cat_id', $categoryId);
+        return $this->db->single();
+    }
+
+    public function getAnalyticsSummary(int $placeId, int $days = 30): object|false
+    {
+        $this->db->query("
+            SELECT
+                p.views_count,
+                p.rating_avg,
+                p.rating_count,
+                p.category_id,
+                (SELECT COUNT(*) FROM place_likes  WHERE place_id = p.id) as like_count,
+                (SELECT COUNT(*) FROM place_views  WHERE place_id = p.id AND viewed_at >= DATE_SUB(NOW(), INTERVAL :days DAY)) as views_period,
+                (SELECT COUNT(*) FROM ratings      WHERE place_id = p.id AND created_at >= DATE_SUB(NOW(), INTERVAL :days2 DAY)) as reviews_period
+            FROM places p
+            WHERE p.id = :place_id
+        ");
+        $this->db->bind(':place_id', $placeId);
+        $this->db->bind(':days',     $days);
+        $this->db->bind(':days2',    $days);
+        return $this->db->single();
     }
 
     public function getPlacesByOwner($owner_id) {
@@ -406,6 +578,104 @@ class Place extends Model {
         $this->db->bind(':id', $id);
         $row = $this->db->single();
         return $row ? (int)$row->owner_user_id : null;
+    }
+
+    public function getAlsoViewed(int $placeId, int $limit = 6): array
+    {
+        $this->db->query("
+            SELECT p.*, c.name AS category_name, c.icon AS category_icon, c.color AS category_color,
+                   COUNT(pv2.place_id) AS co_views
+            FROM place_views pv1
+            JOIN place_views pv2
+                ON pv1.ip_address = pv2.ip_address
+               AND pv2.place_id  != :pid
+               AND pv2.viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            JOIN places p     ON pv2.place_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE pv1.place_id  = :pid2
+              AND pv1.viewed_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+              AND p.status = 'approved'
+            GROUP BY p.id
+            ORDER BY co_views DESC, p.rating_avg DESC
+            LIMIT :lim
+        ");
+        $this->db->bind(':pid',  $placeId);
+        $this->db->bind(':pid2', $placeId);
+        $this->db->bind(':lim',  $limit);
+        return $this->db->resultSet();
+    }
+
+    public function getHotNow(int $limit = 8, int $hours = 48): array
+    {
+        $this->db->query("
+            SELECT p.*, c.name AS category_name, c.icon AS category_icon, c.color AS category_color,
+                   COUNT(pv.id) AS recent_views
+            FROM places p
+            JOIN place_views pv ON p.id = pv.place_id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.status = 'approved'
+              AND pv.viewed_at >= DATE_SUB(NOW(), INTERVAL :hrs HOUR)
+            GROUP BY p.id
+            ORDER BY recent_views DESC, p.rating_avg DESC
+            LIMIT :lim
+        ");
+        $this->db->bind(':hrs', $hours);
+        $this->db->bind(':lim', $limit);
+        return $this->db->resultSet();
+    }
+
+    public function getSimilarByCategory(int $placeId, int $categoryId, int $limit = 6): array
+    {
+        $this->db->query("
+            SELECT p.*, c.name AS category_name, c.icon AS category_icon, c.color AS category_color
+            FROM places p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.status = 'approved'
+              AND p.category_id = :cat_id
+              AND p.id != :pid
+            ORDER BY p.rating_avg DESC, p.views_count DESC
+            LIMIT :lim
+        ");
+        $this->db->bind(':cat_id', $categoryId);
+        $this->db->bind(':pid',    $placeId);
+        $this->db->bind(':lim',    $limit);
+        return $this->db->resultSet();
+    }
+
+    public function getPersonalizedScore(int $userId, int $limit = 8): array
+    {
+        $this->ensureInterestsTable();
+        $this->db->query("
+            SELECT p.*, c.name AS category_name, c.icon AS category_icon, c.color AS category_color,
+                   COALESCE(ui.score, 0)                             AS interest_score,
+                   COALESCE(pl.liked, 0)                            AS user_liked,
+                   (COALESCE(ui.score, 0) * 3
+                    + COALESCE(pl.liked, 0) * 5
+                    + (p.rating_avg * 2)
+                    + LOG(p.views_count + 1))                        AS ai_score
+            FROM places p
+            LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN user_interests ui
+                ON ui.category_id = p.category_id AND ui.user_id = :uid
+            LEFT JOIN (SELECT place_id, 1 AS liked FROM place_likes WHERE user_id = :uid2) pl
+                ON pl.place_id = p.id
+            WHERE p.status = 'approved'
+              AND p.id NOT IN (
+                  SELECT DISTINCT place_id FROM place_views WHERE ip_address IN (
+                      SELECT ip_address FROM place_views pv2
+                      JOIN users u ON u.user_id = :uid3
+                      WHERE pv2.viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                      LIMIT 5
+                  ) AND viewed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+              )
+            ORDER BY ai_score DESC
+            LIMIT :lim
+        ");
+        $this->db->bind(':uid',  $userId);
+        $this->db->bind(':uid2', $userId);
+        $this->db->bind(':uid3', $userId);
+        $this->db->bind(':lim',  $limit);
+        return $this->db->resultSet();
     }
 
     public function getRecommendations($user_id, $limit = 6) {

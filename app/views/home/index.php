@@ -118,38 +118,74 @@
     </div>
 </section>
 
-<!-- For You Section (logged-in users with interest history) -->
+<?php
+// Shared place card helper
+function renderPlaceCard($p, $baseUrl, $badge = null) {
+    $cover  = htmlspecialchars($p->cover_image ?: 'default.jpg');
+    $slug   = htmlspecialchars($p->slug);
+    $name   = htmlspecialchars($p->name);
+    $cat    = htmlspecialchars($p->category_name ?? '');
+    $rating = (float)($p->rating_avg ?? 0);
+    $color  = htmlspecialchars($p->category_color ?? '#0088CC');
+    $badgeHtml = $badge ? "<span class='absolute top-2 left-2 text-[10px] font-black text-white px-2 py-0.5 rounded-full' style='background:{$color}'>{$badge}</span>" : '';
+    $ratingHtml = $rating > 0 ? "<span class='text-yellow-500 font-bold'>★ " . number_format($rating,1) . "</span>" : '';
+    return "
+    <a href='{$baseUrl}/place/{$slug}' class='group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300 overflow-hidden flex flex-col'>
+        <div class='relative h-32 overflow-hidden bg-slate-100'>
+            <img src='{$baseUrl}/uploads/covers/{$cover}' class='w-full h-full object-cover group-hover:scale-105 transition duration-500' loading='lazy' alt=''>
+            {$badgeHtml}
+        </div>
+        <div class='p-3 flex-1'>
+            <p class='font-bold text-slate-800 text-sm leading-tight truncate'>{$name}</p>
+            <p class='text-[10px] font-bold uppercase mt-0.5 truncate' style='color:{$color}'>{$cat}</p>
+            <div class='text-xs mt-1'>{$ratingHtml}</div>
+        </div>
+    </a>";
+}
+?>
+
+<!-- For You Section -->
 <?php if (!empty($data['has_interests']) && !empty($data['recommendations'])): ?>
 <section class="bg-gradient-to-b from-slate-50 to-white pt-12 pb-4">
     <div class="container mx-auto px-4">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-xl">✨</span>
+            </div>
             <div>
-                <h2 class="text-2xl font-black text-slate-800 flex items-center gap-2">
-                    <span class="text-2xl">✨</span>
-                    <?= isLang('en') ? 'Recommended for You' : 'แนะนำสำหรับคุณ' ?>
-                </h2>
-                <p class="text-slate-400 text-sm mt-0.5">
-                    <?= isLang('en') ? 'Based on your browsing interests' : 'จากความสนใจของคุณ' ?>
-                </p>
+                <h2 class="text-xl font-black text-slate-800"><?= isLang('en') ? 'Recommended for You' : 'แนะนำสำหรับคุณ' ?></h2>
+                <p class="text-slate-400 text-xs"><?= isLang('en') ? 'Personalized based on your interests & likes' : 'คัดสรรจากความสนใจและสิ่งที่คุณชอบ' ?></p>
             </div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <?php foreach ($data['recommendations'] as $rec): ?>
-            <a href="<?= BASE_URL ?>/place/<?= htmlspecialchars($rec->slug) ?>"
-               class="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all duration-300 overflow-hidden flex flex-col">
-                <div class="h-32 overflow-hidden">
-                    <img src="<?= BASE_URL ?>/uploads/covers/<?= htmlspecialchars($rec->cover_image ?: 'default.jpg') ?>"
-                         class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="">
-                </div>
-                <div class="p-3 flex-1">
-                    <p class="font-bold text-slate-800 text-sm truncate"><?= htmlspecialchars($rec->name) ?></p>
-                    <div class="flex items-center gap-1 mt-1 text-yellow-500 text-xs">
-                        <i class="fas fa-star"></i>
-                        <span class="font-bold text-slate-600"><?= number_format($rec->rating_avg, 1) ?></span>
-                    </div>
-                </div>
-            </a>
-            <?php endforeach; ?>
+            <?php foreach ($data['recommendations'] as $i => $rec):
+                $aiScore = isset($rec->ai_score) ? number_format((float)$rec->ai_score, 0) : null;
+                $badge = $i === 0 ? '🏆 Top Pick' : null;
+                echo renderPlaceCard($rec, BASE_URL, $badge);
+            endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Hot Now Section -->
+<?php if (!empty($data['hot_now'])): ?>
+<section class="bg-white pt-12 pb-4 border-t border-slate-100">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span class="text-xl">🔥</span>
+            </div>
+            <div>
+                <h2 class="text-xl font-black text-slate-800">กำลังเป็นที่นิยม</h2>
+                <p class="text-slate-400 text-xs">สถานที่ที่คนเข้าดูมากที่สุดใน 48 ชั่วโมงล่าสุด</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+            <?php foreach ($data['hot_now'] as $i => $p):
+                $badge = $i < 3 ? ['🔥','📈','⭐'][$i] . ' Hot' : null;
+                echo renderPlaceCard($p, BASE_URL, $badge);
+            endforeach; ?>
         </div>
     </div>
 </section>

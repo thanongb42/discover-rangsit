@@ -200,6 +200,50 @@ class PlaceController extends Controller {
         }
     }
 
+    public function analytics($id) {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+
+        $placeModel    = $this->model('Place');
+        $deliveryModel = $this->model('DeliveryLink');
+
+        $place = $placeModel->getById($id);
+        if (!$place || (int)$place->owner_user_id !== (int)$_SESSION['user_id']) {
+            $_SESSION['error'] = 'คุณไม่มีสิทธิ์เข้าถึงข้อมูลนี้';
+            header('Location: ' . BASE_URL . '/my-businesses');
+            exit;
+        }
+
+        $days    = (int)($_GET['days'] ?? 30);
+        $days    = in_array($days, [7, 30, 90]) ? $days : 30;
+
+        $summary       = $placeModel->getAnalyticsSummary($id, $days);
+        $viewsByDay    = $placeModel->getViewsByPlace($id, $days);
+        $likesByDay    = $placeModel->getLikesByPlace($id, $days);
+        $ratingDist    = $placeModel->getRatingDistribution($id);
+        $deliveryStats = $deliveryModel->getClickStats($id);
+        $deliveryByDay = $deliveryModel->getClicksByDay($id, $days);
+        $benchmark     = $place->category_id ? $placeModel->getCategoryBenchmark($place->category_id) : null;
+        $reviews       = $placeModel->getReviews($id);
+
+        $this->view('user/analytics', [
+            'title'         => 'Analytics — ' . htmlspecialchars($place->name),
+            'place'         => $place,
+            'days'          => $days,
+            'summary'       => $summary,
+            'views_by_day'  => $viewsByDay,
+            'likes_by_day'  => $likesByDay,
+            'rating_dist'   => $ratingDist,
+            'delivery_stats'=> $deliveryStats,
+            'delivery_by_day'=> $deliveryByDay,
+            'benchmark'     => $benchmark,
+            'reviews'       => array_slice($reviews, 0, 5),
+            'current_page'  => 'my_businesses',
+        ]);
+    }
+
     public function editPlace($id) {
         if (!isset($_SESSION['user_id'])) {
             header('Location: ' . BASE_URL . '/login');

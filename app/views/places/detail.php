@@ -422,6 +422,86 @@
     </div>
 </main>
 
+<!-- AI Recommendations -->
+<div class="bg-slate-50 border-t border-slate-100">
+    <div class="container mx-auto px-4 py-12 space-y-12">
+
+        <!-- Hot Now -->
+        <section id="section-hot" class="hidden">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="text-2xl">🔥</span>
+                <div>
+                    <h2 class="text-xl font-black text-slate-800">กำลังเป็นที่นิยม</h2>
+                    <p class="text-slate-400 text-xs">สถานที่ที่คนดูมากที่สุดใน 48 ชั่วโมงล่าสุด</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="hot-grid"></div>
+        </section>
+
+        <!-- Also Viewed -->
+        <section id="section-also" class="hidden">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="text-2xl">👥</span>
+                <div>
+                    <h2 class="text-xl font-black text-slate-800">คนที่ดูร้านนี้ยังดู...</h2>
+                    <p class="text-slate-400 text-xs">จากพฤติกรรมของผู้เยี่ยมชมร้านนี้</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="also-grid"></div>
+        </section>
+
+        <!-- Similar -->
+        <section id="section-similar" class="hidden">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="text-2xl">🏷️</span>
+                <div>
+                    <h2 class="text-xl font-black text-slate-800">ร้านในหมวดเดียวกัน</h2>
+                    <p class="text-slate-400 text-xs">สถานที่ประเภทเดียวกันที่คุณอาจสนใจ</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="similar-grid"></div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    const BASE = '<?= BASE_URL ?>';
+    const PLACE_ID = <?= $place->id ?>;
+
+    function buildCard(p) {
+        const cover = `${BASE}/uploads/covers/${p.cover_image || 'default.jpg'}`;
+        const rating = p.rating_avg > 0 ? `<span class="text-yellow-500 font-bold text-xs">★ ${parseFloat(p.rating_avg).toFixed(1)}</span>` : '';
+        return `
+        <a href="${BASE}/place/${p.slug}" class="group block bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-lg transition-all hover:-translate-y-1">
+            <div class="aspect-square overflow-hidden bg-slate-100">
+                <img src="${cover}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy" onerror="this.src='${BASE}/images/rangsit-logo.png'">
+            </div>
+            <div class="p-3">
+                <p class="font-bold text-slate-800 text-sm leading-tight truncate">${p.name}</p>
+                <p class="text-[10px] text-primary-500 font-bold uppercase mt-0.5 truncate">${p.category_name || ''}</p>
+                <div class="mt-1">${rating}</div>
+            </div>
+        </a>`;
+    }
+
+    async function loadSection(type, gridId, sectionId, extraParams = '') {
+        try {
+            const res = await fetch(`${BASE}/api/recommendations?type=${type}&place_id=${PLACE_ID}&limit=6${extraParams}`);
+            const items = await res.json();
+            if (!items || items.length === 0) return;
+            document.getElementById(gridId).innerHTML = items.map(buildCard).join('');
+            document.getElementById(sectionId).classList.remove('hidden');
+        } catch (e) { /* silent fail */ }
+    }
+
+    loadSection('hot_now',    'hot-grid',    'section-hot');
+    loadSection('also_viewed','also-grid',   'section-also');
+    loadSection('similar',    'similar-grid','section-similar');
+})();
+</script>
+
 <!-- Gallery Lightbox -->
 <?php if (!empty($data['gallery'])): ?>
 <div id="galleryLightbox" class="hidden fixed inset-0 bg-black/90 z-[3000] flex items-center justify-center p-4"

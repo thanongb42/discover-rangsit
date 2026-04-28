@@ -36,6 +36,30 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function cityDashboard() {
+        $placeModel = $this->model('Place');
+
+        $summary        = $placeModel->getCitySummary();
+        $categoryStats  = $placeModel->getCategoryStats();
+        $topPlaces      = $placeModel->getTopPlacesByViews(10);
+        $mapPlaces      = $placeModel->getApprovedWithCoords();
+        $newByMonth     = $placeModel->getNewBusinessesByMonth(6);
+        $engByMonth     = $placeModel->getEngagementByMonth(6);
+        $deliveryAdopt  = $placeModel->getDeliveryAdoption();
+
+        $this->view('admin/city_dashboard', [
+            'title'          => 'City Economic Dashboard - เทศบาลนครรังสิต',
+            'summary'        => $summary,
+            'category_stats' => $categoryStats,
+            'top_places'     => $topPlaces,
+            'map_places'     => $mapPlaces,
+            'new_by_month'   => $newByMonth,
+            'eng_by_month'   => $engByMonth,
+            'delivery_adopt' => $deliveryAdopt,
+            'current_page'   => 'city_dashboard',
+        ]);
+    }
+
     public function categories() {
         $this->view('admin/categories', [
             'title' => 'จัดการหมวดหมู่ธุรกิจ - Admin Dashboard',

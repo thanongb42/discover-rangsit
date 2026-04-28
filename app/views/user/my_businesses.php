@@ -52,13 +52,18 @@
                         </div>
                     </div>
 
-                    <div class="mt-auto flex gap-2">
-                        <a href="<?= BASE_URL ?>/dashboard/edit-place/<?= $place->id ?>" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-center py-2.5 rounded-xl text-xs font-bold transition">
-                            <i class="fas fa-edit mr-1"></i> แก้ไขข้อมูล
+                    <div class="mt-auto space-y-2">
+                        <a href="<?= BASE_URL ?>/dashboard/analytics/<?= $place->id ?>" class="flex items-center justify-center gap-2 w-full bg-primary-500 hover:bg-primary-600 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm shadow-primary-500/30">
+                            <i class="fas fa-chart-line"></i> ดู Analytics
                         </a>
-                        <a href="<?= BASE_URL ?>/place/<?= $place->slug ?>" target="_blank" class="w-10 h-10 bg-primary-500 text-white rounded-xl flex items-center justify-center hover:bg-primary-600 transition">
-                            <i class="fas fa-external-link-alt text-xs"></i>
-                        </a>
+                        <div class="flex gap-2">
+                            <a href="<?= BASE_URL ?>/dashboard/edit-place/<?= $place->id ?>" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-center py-2.5 rounded-xl text-xs font-bold transition">
+                                <i class="fas fa-edit mr-1"></i> แก้ไข
+                            </a>
+                            <a href="<?= BASE_URL ?>/place/<?= $place->slug ?>" target="_blank" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl flex items-center justify-center transition">
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

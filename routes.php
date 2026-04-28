@@ -18,7 +18,8 @@ $router->get('/api/categories', 'ApiController', 'categories');
 $router->post('/api/categories/add', 'ApiController', 'categoriesAdd');
 $router->post('/api/categories/update', 'ApiController', 'categoriesUpdate');
 $router->post('/api/categories/delete', 'ApiController', 'categoriesDelete');
-$router->get('/api/top-places', 'ApiController', 'topPlaces');
+$router->get('/api/top-places',      'ApiController', 'topPlaces');
+$router->get('/api/recommendations', 'ApiController', 'recommendations');
 $router->post('/api/place/review', 'ApiController', 'placeReview');
 $router->post('/api/place/like', 'ApiController', 'placeLike');
 $router->get('/api/place/likers', 'ApiController', 'placeLikers');
@@ -53,7 +54,8 @@ $router->get('/my-reviews', 'UserController', 'myReviews');
 $router->get('/dashboard', 'DashboardController', 'index');
 $router->get('/dashboard/add-place', 'PlaceController', 'create');
 $router->post('/dashboard/add-place', 'PlaceController', 'store');
-$router->get('/dashboard/edit-place/{id}', 'PlaceController', 'editPlace');
+$router->get('/dashboard/edit-place/{id}',  'PlaceController', 'editPlace');
+$router->get('/dashboard/analytics/{id}',   'PlaceController', 'analytics');
 
 // Delivery Links
 $router->get('/admin/places/delivery/{id}', 'DeliveryController', 'index');
@@ -63,6 +65,7 @@ $router->post('/api/delivery/delete',       'DeliveryController', 'delete');
 $router->get('/track-click',               'DeliveryController', 'trackClick');
 
 // Admin Actions
+$router->get('/admin/city-dashboard', 'AdminController', 'cityDashboard');
 $router->get('/admin/pending', 'AdminController', 'pending');
 $router->post('/api/admin/approve', 'ApiController', 'placeApprove');
 $router->post('/api/admin/reject', 'ApiController', 'placeReject');

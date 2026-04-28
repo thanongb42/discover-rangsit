@@ -27,6 +27,7 @@ if ($is_admin) {
     $menu_groups['manage'] = [
         'label' => 'จัดการระบบ',
         'items' => [
+            ['id' => 'city_dashboard', 'icon' => 'fa-city', 'label' => 'City Dashboard', 'url' => BASE_URL . '/admin/city-dashboard'],
             ['id' => 'pending', 'icon' => 'fa-clock', 'label' => 'รอการอนุมัติ', 'url' => BASE_URL . '/admin/pending'],
             ['id' => 'rejected', 'icon' => 'fa-times-circle', 'label' => 'ไม่อนุมัติ', 'url' => BASE_URL . '/admin/places?tab=rejected'],
             ['id' => 'admin_places', 'icon' => 'fa-map-location-dot', 'label' => 'จัดการสถานที่', 'url' => BASE_URL . '/admin/places'],

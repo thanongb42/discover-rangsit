@@ -9,13 +9,23 @@ class HomeController extends Controller {
         $hasInterests    = false;
         if (isset($_SESSION['user_id'])) {
             try {
-                $hasInterests    = $placeModel->hasInterests($_SESSION['user_id']);
-                $recommendations = $hasInterests ? $placeModel->getRecommendations($_SESSION['user_id']) : [];
+                $hasInterests = $placeModel->hasInterests($_SESSION['user_id']);
+                if ($hasInterests) {
+                    $recommendations = $placeModel->getPersonalizedScore($_SESSION['user_id'], 6);
+                    if (empty($recommendations)) {
+                        $recommendations = $placeModel->getRecommendations($_SESSION['user_id'], 6);
+                    }
+                }
             } catch (Exception $e) {
                 $hasInterests    = false;
                 $recommendations = [];
             }
         }
+
+        $hotNow = [];
+        try {
+            $hotNow = $placeModel->getHotNow(8, 48);
+        } catch (Exception $e) {}
 
         $this->view('home/index', [
             'title'           => 'Discover Rangsit - ค้นพบทุกสิ่งในเมืองรังสิต',
@@ -23,6 +33,7 @@ class HomeController extends Controller {
             'categories'      => $categories,
             'recommendations' => $recommendations,
             'has_interests'   => $hasInterests,
+            'hot_now'         => $hotNow,
         ]);
     }
 
