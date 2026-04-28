@@ -60,6 +60,7 @@ $router->get('/admin/places/delivery/{id}', 'DeliveryController', 'index');
 $router->get('/dashboard/delivery/{id}',    'DeliveryController', 'index');
 $router->post('/api/delivery/save',         'DeliveryController', 'save');
 $router->post('/api/delivery/delete',       'DeliveryController', 'delete');
+$router->get('/track-click',               'DeliveryController', 'trackClick');
 
 // Admin Actions
 $router->get('/admin/pending', 'AdminController', 'pending');

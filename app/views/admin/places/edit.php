@@ -5,22 +5,86 @@
         <h1 class="text-2xl font-bold text-gray-800">แก้ไขข้อมูลสถานที่</h1>
         <p class="text-gray-500 text-sm">ปรับปรุงรายละเอียด ตำแหน่งพิกัด และจัดการคลังภาพ</p>
     </div>
-    <div class="flex items-center gap-3">
-        <?php if($data['current_page'] === 'my_businesses'): ?>
-        <a href="<?= BASE_URL ?>/my-businesses" class="text-gray-500 hover:text-gray-800 font-bold flex items-center transition">
-            <i class="fas fa-arrow-left mr-2"></i> กลับธุรกิจของฉัน
-        </a>
-        <a href="<?= BASE_URL ?>/dashboard/delivery/<?= $data['place']->id ?>" class="inline-flex items-center gap-2 bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white border border-orange-200 px-4 py-2 rounded-xl font-bold text-sm transition">
-            <i class="fas fa-motorcycle"></i> Delivery Links
-        </a>
-        <?php else: ?>
-        <a href="<?= BASE_URL ?>/admin/places" class="text-gray-500 hover:text-gray-800 font-bold flex items-center transition">
-            <i class="fas fa-arrow-left mr-2"></i> กลับหน้ารายการ
-        </a>
-        <a href="<?= BASE_URL ?>/admin/places/delivery/<?= $data['place']->id ?>" class="inline-flex items-center gap-2 bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white border border-orange-200 px-4 py-2 rounded-xl font-bold text-sm transition">
-            <i class="fas fa-motorcycle"></i> Delivery Links
-        </a>
-        <?php endif; ?>
+    <?php if($data['current_page'] === 'my_businesses'): ?>
+    <a href="<?= BASE_URL ?>/my-businesses" class="text-gray-500 hover:text-gray-800 font-bold flex items-center transition">
+        <i class="fas fa-arrow-left mr-2"></i> กลับธุรกิจของฉัน
+    </a>
+    <?php else: ?>
+    <a href="<?= BASE_URL ?>/admin/places" class="text-gray-500 hover:text-gray-800 font-bold flex items-center transition">
+        <i class="fas fa-arrow-left mr-2"></i> กลับหน้ารายการ
+    </a>
+    <?php endif; ?>
+</div>
+
+<?php
+$deliveryUrl = $data['current_page'] === 'my_businesses'
+    ? BASE_URL . '/dashboard/delivery/' . $data['place']->id
+    : BASE_URL . '/admin/places/delivery/' . $data['place']->id;
+?>
+
+<!-- Delivery Feature Banner -->
+<div class="mb-8 rounded-[2rem] overflow-hidden shadow-lg" style="background: linear-gradient(135deg, #06C755 0%, #05a847 50%, #039939 100%);">
+    <div class="p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center gap-6">
+
+        <!-- Icon -->
+        <div class="flex-shrink-0 w-20 h-20 bg-white/20 rounded-[1.5rem] flex items-center justify-center shadow-inner">
+            <i class="fas fa-motorcycle text-white text-4xl"></i>
+        </div>
+
+        <!-- Text -->
+        <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+                <span class="bg-white/25 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">ฟีเจอร์ใหม่</span>
+            </div>
+            <h2 class="text-white font-black text-xl md:text-2xl mb-1">เชื่อมร้านกับ Delivery แพลตฟอร์ม</h2>
+            <p class="text-green-100 text-sm leading-relaxed mb-4">
+                ให้ลูกค้าสั่งอาหาร/สินค้าจากร้านคุณผ่าน LINE MAN, GrabFood, foodpanda และอื่นๆ ได้ในคลิกเดียว — พร้อม <strong class="text-white">QR Code</strong> ให้สแกนหน้าร้าน
+            </p>
+
+            <!-- Platform Pills -->
+            <div class="flex flex-wrap gap-2 mb-5">
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"><i class="fa-brands fa-line"></i> LINE MAN</span>
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"><i class="fas fa-utensils"></i> GrabFood</span>
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"><i class="fas fa-paw"></i> foodpanda</span>
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"><i class="fas fa-shopping-bag"></i> ShopeeFood</span>
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"><i class="fas fa-hat-wizard"></i> Robinhood</span>
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5"><i class="fas fa-truck"></i> Lalamove</span>
+            </div>
+
+            <!-- Steps -->
+            <div class="flex flex-wrap gap-3 mb-6">
+                <div class="flex items-center gap-2 bg-white/15 rounded-2xl px-4 py-2.5">
+                    <span class="w-6 h-6 bg-white text-green-600 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0">1</span>
+                    <span class="text-white text-xs font-semibold">กดปุ่มด้านล่าง</span>
+                </div>
+                <div class="flex items-center gap-2 text-green-200 flex-shrink-0 self-center">
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </div>
+                <div class="flex items-center gap-2 bg-white/15 rounded-2xl px-4 py-2.5">
+                    <span class="w-6 h-6 bg-white text-green-600 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0">2</span>
+                    <span class="text-white text-xs font-semibold">วาง URL หน้าร้านของแต่ละแพลตฟอร์ม</span>
+                </div>
+                <div class="flex items-center gap-2 text-green-200 flex-shrink-0 self-center">
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </div>
+                <div class="flex items-center gap-2 bg-white/15 rounded-2xl px-4 py-2.5">
+                    <span class="w-6 h-6 bg-white text-green-600 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0">3</span>
+                    <span class="text-white text-xs font-semibold">ปุ่มปรากฏบนหน้าร้านทันที!</span>
+                </div>
+            </div>
+
+            <a href="<?= $deliveryUrl ?>" class="inline-flex items-center gap-3 bg-white text-green-600 hover:bg-green-50 font-black px-8 py-3.5 rounded-2xl shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl text-sm">
+                <i class="fas fa-motorcycle text-lg"></i>
+                ตั้งค่า Delivery Links ของร้านฉัน
+                <i class="fas fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+
+        <!-- Decorative Icon -->
+        <div class="hidden lg:flex flex-shrink-0 w-32 h-32 items-center justify-center opacity-20">
+            <i class="fas fa-qrcode text-white" style="font-size:100px;"></i>
+        </div>
+
     </div>
 </div>
 

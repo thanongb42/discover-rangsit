@@ -385,23 +385,16 @@
                             $cfg = DeliveryPlatforms::get($link->platform);
                             if (!$cfg) continue;
                             $btnLabel = htmlspecialchars($link->display_label ?: 'สั่งผ่าน ' . $cfg['name'], ENT_QUOTES, 'UTF-8');
-                            $trackUrl = BASE_URL . '/../track-click.php?place=' . $place->id . '&platform=' . urlencode($link->platform);
+                            $trackUrl = BASE_URL . '/track-click?place=' . $place->id . '&platform=' . urlencode($link->platform);
                         ?>
-                        <div class="delivery-btn-card relative rounded-2xl overflow-hidden flex items-center group"
-                             data-direct-url="<?= htmlspecialchars($link->url, ENT_QUOTES, 'UTF-8') ?>"
-                             data-platform-name="<?= htmlspecialchars($cfg['name'], ENT_QUOTES, 'UTF-8') ?>">
-                            <a href="<?= $trackUrl ?>" target="_blank" rel="noopener noreferrer"
-                               class="flex items-center gap-3 flex-1 text-white font-bold py-3 px-4 transition hover:opacity-90"
-                               style="background: <?= $cfg['color'] ?>">
-                                <i class="<?= $cfg['icon'] ?> text-xl w-6 text-center flex-shrink-0"></i>
-                                <span class="text-sm"><?= $btnLabel ?></span>
-                            </a>
-                            <button type="button" class="delivery-qr-btn flex-shrink-0 w-11 h-full flex items-center justify-center text-white/80 hover:text-white transition border-l border-white/20"
-                                    style="background: <?= $cfg['color'] ?>"
-                                    title="แสดง QR Code">
-                                <i class="fas fa-qrcode text-lg"></i>
-                            </button>
-                        </div>
+                        <a href="<?= $trackUrl ?>" target="_blank" rel="noopener noreferrer"
+                           class="delivery-btn-card flex items-center gap-3 w-full text-white font-bold py-3 px-4 rounded-2xl transition hover:opacity-90"
+                           style="background: <?= $cfg['color'] ?>"
+                           data-direct-url="<?= htmlspecialchars($link->url, ENT_QUOTES, 'UTF-8') ?>"
+                           data-platform-name="<?= htmlspecialchars($cfg['name'], ENT_QUOTES, 'UTF-8') ?>">
+                            <i class="<?= $cfg['icon'] ?> text-xl w-6 text-center flex-shrink-0"></i>
+                            <span class="text-sm"><?= $btnLabel ?></span>
+                        </a>
                         <?php endforeach; ?>
                     </div>
                 </div>

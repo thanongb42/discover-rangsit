@@ -142,6 +142,14 @@
                     <a href="<?= BASE_URL ?>/register" class="bg-white/15 hover:bg-white/25 border border-white/30 px-5 py-2 rounded-xl text-sm font-bold transition">
                         <i class="fas fa-plus mr-1"></i> <?= t('nav.add_business') ?>
                     </a>
+                <?php else: ?>
+                    <div class="w-px h-5 bg-white/20"></div>
+                    <a href="<?= BASE_URL ?>/my-businesses" class="hover:text-blue-100 transition font-medium flex items-center gap-1.5">
+                        <i class="fas fa-building text-sm"></i> ธุรกิจของฉัน
+                    </a>
+                    <a href="<?= BASE_URL ?>/dashboard/add-place" class="bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-4 py-2 rounded-xl text-sm font-extrabold transition flex items-center gap-1.5">
+                        <i class="fas fa-plus"></i> เพิ่มธุรกิจ
+                    </a>
                 <?php endif; ?>
             </div>
 
@@ -167,20 +175,27 @@
                             <img src="<?= htmlspecialchars($img_src) ?>" class="w-full h-full object-cover header-avatar-img" alt="<?= htmlspecialchars($display_name) ?>">
                         </button>
                         
-                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 animate-fade-in text-slate-800">
-                            <div class="px-4 py-2 border-b border-gray-50 mb-1 lg:hidden">
-                                <p class="text-sm font-bold text-gray-800"><?= $_SESSION['user_name'] ?? 'User' ?></p>
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-fade-in text-slate-800">
+                            <div class="px-4 py-3 border-b border-gray-100 mb-1">
+                                <p class="text-sm font-bold text-gray-800 truncate"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></p>
                                 <p class="text-[10px] text-gray-400 uppercase tracking-wider"><?= $_SESSION['user_role'] ?? 'member' ?></p>
                             </div>
-                            <a href="<?= BASE_URL ?>/profile" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
-                                <i class="fas fa-user-circle mr-2"></i> <?= t('nav.profile') ?>
+                            <a href="<?= BASE_URL ?>/my-businesses" class="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition font-semibold">
+                                <i class="fas fa-building mr-3 text-primary-400 w-4 text-center"></i> ธุรกิจของฉัน
                             </a>
-                            <a href="<?= BASE_URL ?>/dashboard" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
-                                <i class="fas fa-tachometer-alt mr-2"></i> <?= t('nav.dashboard') ?>
+                            <a href="<?= BASE_URL ?>/dashboard/add-place" class="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition font-semibold">
+                                <i class="fas fa-plus-circle mr-3 text-primary-400 w-4 text-center"></i> เพิ่มธุรกิจใหม่
                             </a>
-                            <div class="border-t border-gray-50 mt-1">
-                                <a href="<?= BASE_URL ?>/logout" class="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition">
-                                    <i class="fas fa-sign-out-alt mr-2"></i> <?= t('nav.logout') ?>
+                            <a href="<?= BASE_URL ?>/my-reviews" class="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition font-semibold">
+                                <i class="fas fa-star mr-3 text-yellow-400 w-4 text-center"></i> รีวิวของฉัน
+                            </a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="<?= BASE_URL ?>/profile" class="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
+                                <i class="fas fa-user-circle mr-3 text-gray-400 w-4 text-center"></i> <?= t('nav.profile') ?>
+                            </a>
+                            <div class="border-t border-gray-100 mt-1">
+                                <a href="<?= BASE_URL ?>/logout" class="flex items-center px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition">
+                                    <i class="fas fa-sign-out-alt mr-3 w-4 text-center"></i> <?= t('nav.logout') ?>
                                 </a>
                             </div>
                         </div>
@@ -206,6 +221,30 @@
                     <a href="<?= BASE_URL ?>/register" class="bg-white/15 border border-white/30 text-white text-center py-4 rounded-2xl font-bold transition">
                         <?= t('nav.add_business') ?>
                     </a>
+                <?php else: ?>
+                    <div class="bg-white/10 rounded-2xl p-4 border border-white/15">
+                        <p class="text-white font-bold text-sm mb-3 truncate">
+                            <i class="fas fa-user-circle mr-2 text-blue-200"></i>
+                            <?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?>
+                        </p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="<?= BASE_URL ?>/my-businesses" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-bold text-xs px-3 py-2.5 rounded-xl transition">
+                                <i class="fas fa-building"></i> ธุรกิจของฉัน
+                            </a>
+                            <a href="<?= BASE_URL ?>/dashboard/add-place" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-bold text-xs px-3 py-2.5 rounded-xl transition">
+                                <i class="fas fa-plus-circle"></i> เพิ่มธุรกิจ
+                            </a>
+                            <a href="<?= BASE_URL ?>/my-reviews" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-bold text-xs px-3 py-2.5 rounded-xl transition">
+                                <i class="fas fa-star text-yellow-300"></i> รีวิวของฉัน
+                            </a>
+                            <a href="<?= BASE_URL ?>/profile" class="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-bold text-xs px-3 py-2.5 rounded-xl transition">
+                                <i class="fas fa-user-circle"></i> โปรไฟล์
+                            </a>
+                        </div>
+                        <a href="<?= BASE_URL ?>/logout" class="flex items-center justify-center gap-2 mt-3 bg-red-500/30 hover:bg-red-500/50 text-white font-bold text-xs px-3 py-2.5 rounded-xl transition w-full">
+                            <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                        </a>
+                    </div>
                 <?php endif; ?>
 
                 <!-- Language Toggle (Mobile) -->
