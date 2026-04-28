@@ -121,6 +121,17 @@ class Place extends Model {
         return $this->db->resultSet();
     }
 
+    public function slugExists($slug, $excludeId = null) {
+        if ($excludeId) {
+            $this->db->query("SELECT id FROM places WHERE slug = :slug AND id != :id");
+            $this->db->bind(':id', $excludeId);
+        } else {
+            $this->db->query("SELECT id FROM places WHERE slug = :slug");
+        }
+        $this->db->bind(':slug', $slug);
+        return $this->db->single() ? true : false;
+    }
+
     public function getBySlug($slug) {
         $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color,
                           CONCAT(u.first_name, ' ', u.last_name) as owner_name, u.profile_image as owner_avatar

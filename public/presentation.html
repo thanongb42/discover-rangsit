@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discover Rangsit — นำเสนอสำหรับผู้ประกอบการ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: #0f172a;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* Slide Container */
+  .slideshow {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+    opacity: 0;
+    transform: translateX(80px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.exit {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+
+  /* Navigation */
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.3); }
+  .nav-btn.prev { left: 20px; }
+  .nav-btn.next { right: 20px; }
+
+  /* Progress Bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #60a5fa, #34d399);
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  /* Slide Counter */
+  .slide-counter {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active {
+    background: #fff;
+    transform: scale(1.3);
+  }
+
+  /* Slide number label */
+  .slide-num {
+    position: fixed;
+    bottom: 20px;
+    right: 24px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    z-index: 100;
+  }
+
+  /* Keyboard hint */
+  .key-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 24px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    z-index: 100;
+  }
+
+  /* ===== SLIDE THEMES ===== */
+
+  /* Slide 1: Cover */
+  .slide-1 {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #0ea5e9 100%);
+    text-align: center;
+  }
+
+  /* Slide 2: About */
+  .slide-2 {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  /* Slide 3: Benefits */
+  .slide-3 {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  }
+
+  /* Slide 4: Features */
+  .slide-4 {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  }
+
+  /* Slide 5: Login methods */
+  .slide-5 {
+    background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+  }
+
+  /* Slide 6: Steps */
+  .slide-6 {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+
+  /* Slide 7: Fill form */
+  .slide-7 {
+    background: linear-gradient(135deg, #4a044e 0%, #701a75 100%);
+  }
+
+  /* Slide 8: Place profile */
+  .slide-8 {
+    background: linear-gradient(135deg, #7c2d12 0%, #9a3412 100%);
+  }
+
+  /* Slide 9: Map */
+  .slide-9 {
+    background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+  }
+
+  /* Slide 10: CTA */
+  .slide-10 {
+    background: linear-gradient(135deg, #172554 0%, #1e3a8a 50%, #1d4ed8 100%);
+    text-align: center;
+  }
+
+  /* ===== TYPOGRAPHY ===== */
+  .slide-tag {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 16px;
+  }
+
+  h1.main-title {
+    font-size: 72px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  h2.slide-title {
+    font-size: 48px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  h3.slide-subtitle {
+    font-size: 24px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 40px;
+    line-height: 1.5;
+  }
+
+  .highlight { color: #fbbf24; }
+  .highlight-green { color: #34d399; }
+  .highlight-blue { color: #60a5fa; }
+
+  /* ===== CARDS ===== */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin-top: 20px;
+  }
+
+  .card-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 700px;
+  }
+
+  .card-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 960px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    background: rgba(255,255,255,0.18);
+  }
+
+  .card .icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .card h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .card p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+  }
+
+  /* ===== BENEFIT LIST ===== */
+  .benefit-list {
+    list-style: none;
+    width: 100%;
+    max-width: 720px;
+    margin-top: 20px;
+  }
+
+  .benefit-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+
+  .benefit-list .check {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .benefit-list .txt strong {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .benefit-list .txt span {
+    font-size: 14px;
+    color: rgba(255,255,255,0.65);
+  }
+
+  /* ===== STEPS ===== */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 960px;
+    margin-top: 20px;
+  }
+
+  .step-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 20px 16px;
+    position: relative;
+  }
+
+  .step-num {
+    width: 36px; height: 36px;
+    background: #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  .step-card h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .step-card p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.5;
+  }
+
+  /* ===== TWO COLUMN LAYOUT ===== */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    width: 100%;
+    max-width: 960px;
+    align-items: center;
+  }
+
+  .info-list {
+    list-style: none;
+  }
+
+  .info-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .info-list li:last-child { border-bottom: none; }
+
+  /* ===== FREE BADGE ===== */
+  .free-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 800;
+    padding: 10px 32px;
+    border-radius: 50px;
+    margin: 20px 0;
+    box-shadow: 0 8px 32px rgba(239,68,68,0.4);
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { box-shadow: 0 8px 32px rgba(239,68,68,0.4); }
+    50% { box-shadow: 0 8px 48px rgba(239,68,68,0.7); }
+  }
+
+  /* ===== URL Display ===== */
+  .url-box {
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 16px;
+    padding: 20px 40px;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 24px 0;
+    color: #fbbf24;
+  }
+
+  /* Login methods */
+  .login-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 32px 28px;
+    text-align: center;
+    flex: 1;
+  }
+
+  .login-icon {
+    font-size: 52px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .login-card h4 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .login-card p {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Map features */
+  .map-feature-list {
+    list-style: none;
+    max-width: 600px;
+    margin-top: 20px;
+  }
+
+  .map-feature-list li {
+    font-size: 20px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  /* Divider */
+  .divider {
+    width: 60px; height: 4px;
+    background: linear-gradient(90deg, #60a5fa, #34d399);
+    border-radius: 2px;
+    margin: 16px 0 24px;
+  }
+
+  /* Print Mode */
+  @media print {
+    body { background: #fff; overflow: visible; }
+    .slideshow { height: auto; overflow: visible; }
+    .slide {
+      position: relative;
+      opacity: 1;
+      transform: none;
+      page-break-after: always;
+      height: 100vh;
+      min-height: 600px;
+    }
+    .nav-btn, .progress-bar, .slide-counter, .slide-num, .key-hint { display: none; }
+  }
+
+  /* Full bleed logo area */
+  .logo-circle {
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    margin: 0 auto 24px;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    gap: 24px;
+    margin-top: 32px;
+    justify-content: center;
+  }
+
+  .stat-box {
+    background: rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 16px 28px;
+    text-align: center;
+  }
+
+  .stat-box .num {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fbbf24;
+  }
+
+  .stat-box .lbl {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* Social row */
+  .social-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .social-pill {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Approval timeline */
+  .timeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 32px;
+  }
+
+  .tl-step {
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    min-width: 140px;
+  }
+
+  .tl-arrow {
+    font-size: 24px;
+    color: rgba(255,255,255,0.4);
+    margin: 0 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="slideshow" id="slideshow">
+
+  <!-- ====== SLIDE 1: COVER ====== -->
+  <div class="slide slide-1 active">
+    <div class="logo-circle">🌆</div>
+    <div class="slide-tag">เทศบาลนครรังสิต · Smart City Platform</div>
+    <h1 class="main-title">Discover<br><span class="highlight">Rangsit</span></h1>
+    <h3 class="slide-subtitle">แพลตฟอร์มรวมข้อมูลร้านค้า ร้านอาหาร สถานที่ และบริการในรังสิต<br>ครบจบในที่เดียว — <strong style="color:#34d399">ฟรี 100%</strong></h3>
+    <div style="font-size:15px; color:rgba(255,255,255,0.5); margin-top: 20px;">
+      นำเสนอสำหรับผู้ประกอบการ ร้านค้าในเขตเทศบาลนครรังสิต · เมษายน 2569
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="num">24/7</div>
+        <div class="lbl">เปิดตลอด</div>
+      </div>
+      <div class="stat-box">
+        <div class="num">ฟรี</div>
+        <div class="lbl">ไม่มีค่าใช้จ่าย</div>
+      </div>
+      <div class="stat-box">
+        <div class="num">100%</div>
+        <div class="lbl">ใช้งานบนมือถือ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 2: WHAT IS IT ====== -->
+  <div class="slide slide-2">
+    <div style="width:100%; max-width:860px;">
+      <div class="slide-tag">รู้จักกับ</div>
+      <h2 class="slide-title">Discover Rangsit<br><span class="highlight-blue">คืออะไร?</span></h2>
+      <div class="divider"></div>
+      <div class="two-col" style="gap:60px;">
+        <div>
+          <p style="font-size:20px; line-height:1.8; color:rgba(255,255,255,0.85);">
+            เว็บไซต์สำหรับ <strong>ค้นพบธุรกิจและสถานที่</strong> ในเมืองรังสิต<br>พัฒนาโดยเทศบาลนครรังสิต ให้บริการฟรีแก่ผู้ประกอบการและประชาชน
+          </p>
+          <br>
+          <p style="font-size:18px; line-height:1.8; color:rgba(255,255,255,0.7);">
+            ประชาชนสามารถ<strong style="color:#60a5fa;">ค้นหา</strong> ร้านอาหาร ร้านค้า คาเฟ่ และสถานที่ต่างๆ ผ่าน <strong style="color:#60a5fa;">แผนที่แบบ Interactive</strong> และรับ<strong style="color:#60a5fa;">รีวิวจากผู้ใช้จริง</strong>
+          </p>
+        </div>
+        <div>
+          <ul class="benefit-list">
+            <li>
+              <span class="check">🗺️</span>
+              <span class="txt"><strong>แผนที่เมือง Interactive</strong><span>ค้นหาสถานที่บนแผนที่ได้ทันที</span></span>
+            </li>
+            <li>
+              <span class="check">⭐</span>
+              <span class="txt"><strong>ระบบรีวิวและคะแนน</strong><span>ลูกค้ารีวิวร้านผ่านเว็บได้เลย</span></span>
+            </li>
+            <li>
+              <span class="check">📍</span>
+              <span class="txt"><strong>ค้นหาร้านใกล้ฉัน</strong><span>ระบุตำแหน่ง GPS หาร้านใกล้เคียง</span></span>
+            </li>
+            <li>
+              <span class="check">🌤️</span>
+              <span class="txt"><strong>ข้อมูล Realtime</strong><span>สภาพอากาศ + ค่าฝุ่น PM2.5</span></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 3: WHY REGISTER ====== -->
+  <div class="slide slide-3">
+    <div style="width:100%; max-width:900px; text-align:center;">
+      <div class="slide-tag">เหตุผลที่ควรสมัคร</div>
+      <h2 class="slide-title">ทำไมต้อง<br><span class="highlight">ลงทะเบียนร้านของคุณ?</span></h2>
+      <div class="divider" style="margin:16px auto 0;"></div>
+      <div class="card-grid" style="margin-top:32px;">
+        <div class="card">
+          <span class="icon">🗺️</span>
+          <h4>แสดงบนแผนที่เมือง</h4>
+          <p>ร้านคุณจะปรากฏบนแผนที่แบบ Interactive ให้ลูกค้าค้นหาเจอ</p>
+        </div>
+        <div class="card">
+          <span class="icon">⭐</span>
+          <h4>รับรีวิวจากลูกค้า</h4>
+          <p>ลูกค้าให้คะแนน รีวิว และแชร์ประสบการณ์ผ่านเว็บได้เลย</p>
+        </div>
+        <div class="card">
+          <span class="icon">📱</span>
+          <h4>เชื่อมต่อโซเชียล</h4>
+          <p>ลิงก์ LINE, Facebook, Instagram, TikTok ครบในหน้าเดียว</p>
+        </div>
+        <div class="card">
+          <span class="icon">💚</span>
+          <h4>QR Code LINE ร้าน</h4>
+          <p>ลูกค้าสแกน QR Code เพื่อ Add LINE ร้านได้ทันที</p>
+        </div>
+        <div class="card">
+          <span class="icon">📸</span>
+          <h4>Gallery รูปภาพ</h4>
+          <p>อัปโหลดรูปร้านได้หลายรูป โชว์ผลงาน สินค้า อาหาร</p>
+        </div>
+        <div class="card">
+          <span class="icon">🆓</span>
+          <h4>ฟรี ไม่มีค่าใช้จ่าย</h4>
+          <p>บริการจากเทศบาลนครรังสิต ไม่มีค่าสมาชิก ไม่มีค่ารายปี</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 4: WHAT YOU GET ====== -->
+  <div class="slide slide-4">
+    <div style="width:100%; max-width:900px;">
+      <div class="slide-tag">สิ่งที่ผู้ประกอบการจะได้รับ</div>
+      <h2 class="slide-title"><span class="highlight-blue">หน้าร้านของคุณ</span><br>บน Discover Rangsit</h2>
+      <div class="divider"></div>
+      <div class="two-col">
+        <div>
+          <ul class="info-list">
+            <li>🖼️ <strong>รูปหน้าปกร้าน</strong> (Cover Image)</li>
+            <li>📝 <strong>ชื่อ + รายละเอียดธุรกิจ</strong></li>
+            <li>🏷️ <strong>หมวดหมู่ธุรกิจ</strong> (อาหาร, คาเฟ่ ฯลฯ)</li>
+            <li>📍 <strong>ที่อยู่ + Pin บนแผนที่</strong></li>
+            <li>📞 <strong>เบอร์โทรศัพท์</strong> (กดโทรได้เลย)</li>
+            <li>🌐 <strong>ลิงก์เว็บไซต์ร้าน</strong></li>
+            <li>💬 <strong>LINE ID + QR Code</strong></li>
+            <li>📷 <strong>Gallery รูปภาพ</strong> หลายรูป</li>
+            <li>⭐ <strong>คะแนนรีวิว</strong> จากลูกค้าจริง</li>
+          </ul>
+        </div>
+        <div>
+          <div class="card" style="text-align:left; padding:28px;">
+            <h4 style="font-size:18px; margin-bottom:16px;">โซเชียลมีเดียที่รองรับ</h4>
+            <div class="social-row" style="justify-content:flex-start;">
+              <div class="social-pill">💚 LINE</div>
+              <div class="social-pill">📘 Facebook</div>
+              <div class="social-pill">📷 Instagram</div>
+              <div class="social-pill">🎵 TikTok</div>
+              <div class="social-pill">▶️ YouTube</div>
+              <div class="social-pill">🐦 X (Twitter)</div>
+            </div>
+          </div>
+          <br>
+          <div class="card" style="text-align:left; padding:28px;">
+            <h4 style="font-size:18px; margin-bottom:12px;">จัดการร้านได้ตลอดเวลา</h4>
+            <p style="font-size:15px; color:rgba(255,255,255,0.75); line-height:1.6;">
+              แก้ไขข้อมูลร้าน อัปเดตรูปภาพ เพิ่ม Gallery ผ่าน <strong>แดชบอร์ด</strong> ได้เองทุกเมื่อ ไม่ต้องรอเจ้าหน้าที่
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 5: HOW TO LOGIN ====== -->
+  <div class="slide slide-5">
+    <div style="width:100%; max-width:860px; text-align:center;">
+      <div class="slide-tag">ขั้นตอนแรก</div>
+      <h2 class="slide-title">สมัครสมาชิก<br><span class="highlight">ง่ายมาก — 3 วิธี</span></h2>
+      <div class="divider" style="margin:16px auto 0;"></div>
+      <div style="display:flex; gap:24px; margin-top:32px;">
+        <div class="login-card" style="border-color:rgba(0,185,74,0.4); background:rgba(0,185,74,0.1);">
+          <span class="login-icon">💚</span>
+          <h4>LINE Login</h4>
+          <p>แนะนำ! กดล็อกอินด้วย LINE ได้เลย ไม่ต้องสร้าง account ใหม่</p>
+          <div style="margin-top:16px; font-size:13px; background:rgba(0,185,74,0.2); border-radius:8px; padding:8px; color:rgba(255,255,255,0.8);">
+            ใช้ LINE ที่มีอยู่แล้วได้เลย
+          </div>
+        </div>
+        <div class="login-card" style="border-color:rgba(66,133,244,0.4); background:rgba(66,133,244,0.1);">
+          <span class="login-icon">🔵</span>
+          <h4>Google Login</h4>
+          <p>ล็อกอินด้วย Gmail ที่มีอยู่ได้เลย สะดวกรวดเร็ว</p>
+          <div style="margin-top:16px; font-size:13px; background:rgba(66,133,244,0.2); border-radius:8px; padding:8px; color:rgba(255,255,255,0.8);">
+            ใช้ Gmail account ที่มีอยู่แล้ว
+          </div>
+        </div>
+        <div class="login-card" style="border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.08);">
+          <span class="login-icon">📧</span>
+          <h4>Email / Password</h4>
+          <p>สมัครด้วย Email และตั้ง Password เองได้ หากไม่ต้องการใช้ LINE หรือ Google</p>
+          <div style="margin-top:16px; font-size:13px; background:rgba(255,255,255,0.1); border-radius:8px; padding:8px; color:rgba(255,255,255,0.8);">
+            กรอก Email + Password ใหม่
+          </div>
+        </div>
+      </div>
+      <p style="margin-top:28px; font-size:16px; color:rgba(255,255,255,0.6);">
+        หลังล็อกอินแล้ว → ไปที่เมนู <strong style="color:#fbbf24;">"แดชบอร์ด" → "เพิ่มธุรกิจ"</strong> ได้เลย
+      </p>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 6: 6 STEPS ====== -->
+  <div class="slide slide-6">
+    <div style="width:100%; max-width:980px; text-align:center;">
+      <div class="slide-tag">วิธีลงทะเบียน</div>
+      <h2 class="slide-title"><span class="highlight-green">6 ขั้นตอน</span> เพิ่มร้านของคุณ</h2>
+      <div class="divider" style="margin:16px auto 0;"></div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h4>เข้าเว็บไซต์</h4>
+          <p>เปิด <strong style="color:#fbbf24;">discover.rangsitcity.go.th</strong> บนมือถือหรือคอมพิวเตอร์</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h4>ล็อกอิน</h4>
+          <p>กดปุ่ม "เข้าสู่ระบบ" เลือก LINE, Google หรือสมัครด้วย Email</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h4>แดชบอร์ด → เพิ่มธุรกิจ</h4>
+          <p>กดเมนูชื่อตัวเอง เลือก "แดชบอร์ด" แล้วกด "เพิ่มธุรกิจ"</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num" style="background:#8b5cf6;">4</div>
+          <h4>กรอกข้อมูลร้าน</h4>
+          <p>ชื่อร้าน หมวดหมู่ รายละเอียด เบอร์โทร โซเชียลมีเดีย และรูปภาพ</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num" style="background:#8b5cf6;">5</div>
+          <h4>ปักหมุดบนแผนที่</h4>
+          <p>กดปุ่ม "ตำแหน่งปัจจุบัน" หรือเลือกจุดบนแผนที่ด้วยตนเอง</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num" style="background:#10b981;">6</div>
+          <h4>ส่งรอการอนุมัติ</h4>
+          <p>กด "ส่งข้อมูล" รอเจ้าหน้าที่ตรวจสอบ <strong style="color:#34d399;">1–3 วันทำการ</strong></p>
+        </div>
+      </div>
+      <div class="timeline" style="margin-top:28px; justify-content:center;">
+        <div class="tl-step">ส่งข้อมูล</div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-step">เจ้าหน้าที่ตรวจสอบ</div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-step" style="background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4);">อนุมัติ ✓</div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-step" style="background:rgba(96,165,250,0.2); border:1px solid rgba(96,165,250,0.4);">แสดงบนแผนที่ 🗺️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 7: FILL FORM TIPS ====== -->
+  <div class="slide slide-7">
+    <div style="width:100%; max-width:860px;">
+      <div class="slide-tag">เคล็ดลับการกรอกข้อมูล</div>
+      <h2 class="slide-title">กรอกข้อมูลอย่างไร<br><span class="highlight">ให้ได้ผลดีที่สุด?</span></h2>
+      <div class="divider"></div>
+      <div class="two-col">
+        <div>
+          <ul class="benefit-list">
+            <li>
+              <span class="check">📸</span>
+              <span class="txt">
+                <strong>รูปภาพสำคัญที่สุด</strong>
+                <span>ใช้รูปคมชัด แสงดี ขนาด > 800×600px ร้านที่มีรูปสวยได้รับความสนใจมากกว่า</span>
+              </span>
+            </li>
+            <li>
+              <span class="check">✍️</span>
+              <span class="txt">
+                <strong>รายละเอียดชัดเจน</strong>
+                <span>อธิบายสินค้า/บริการ เวลาเปิด-ปิด จุดเด่นของร้าน</span>
+              </span>
+            </li>
+            <li>
+              <span class="check">📍</span>
+              <span class="txt">
+                <strong>ปักหมุดให้ถูกต้อง</strong>
+                <span>กด "ตำแหน่งปัจจุบัน" ขณะอยู่ที่ร้าน หรือเลือกจุดบนแผนที่</span>
+              </span>
+            </li>
+            <li>
+              <span class="check">💚</span>
+              <span class="txt">
+                <strong>ใส่ LINE ID ของร้าน</strong>
+                <span>ลูกค้าจะสแกน QR Code Add LINE ร้านได้โดยตรง</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <div class="card" style="text-align:left; padding:24px; margin-bottom:16px;">
+            <h4 style="font-size:17px; margin-bottom:10px; color:#fbbf24;">ข้อมูลที่กรอกได้</h4>
+            <ul style="list-style:none; font-size:14px; line-height:2; color:rgba(255,255,255,0.8);">
+              <li>✓ ชื่อร้านและหมวดหมู่</li>
+              <li>✓ รายละเอียดธุรกิจ / เมนู / บริการ</li>
+              <li>✓ ที่อยู่และพิกัด GPS</li>
+              <li>✓ เบอร์โทร + เว็บไซต์</li>
+              <li>✓ LINE / Facebook / Instagram / TikTok</li>
+              <li>✓ รูปหน้าปก + QR Code LINE + Gallery</li>
+            </ul>
+          </div>
+          <div class="card" style="text-align:left; padding:24px; background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.3);">
+            <h4 style="font-size:17px; margin-bottom:8px; color:#f87171;">ข้อควรระวัง</h4>
+            <p style="font-size:14px; color:rgba(255,255,255,0.75); line-height:1.6;">
+              ห้ามใส่ข้อมูลส่วนตัวที่ระบุตัวตนได้ เช่น ใบหน้าบุคคล ทะเบียนรถ เลขบัตรประชาชน
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 8: MAP FEATURES ====== -->
+  <div class="slide slide-8">
+    <div style="width:100%; max-width:880px;">
+      <div class="slide-tag">ฟีเจอร์สำหรับลูกค้า</div>
+      <h2 class="slide-title"><span class="highlight">แผนที่เมืองรังสิต</span><br>ค้นหาร้านง่ายขึ้นกว่าเดิม</h2>
+      <div class="divider"></div>
+      <div class="two-col">
+        <div>
+          <ul class="map-feature-list">
+            <li>🔍 <strong>ค้นหาตามชื่อร้าน</strong> หรือหมวดหมู่</li>
+            <li>📍 <strong>หาร้านใกล้ฉัน</strong> ตาม GPS ระยะ 1-10km</li>
+            <li>⭐ <strong>กรองตามคะแนน</strong> 4.0+ / 3.0+ ดาว</li>
+            <li>🔥 <strong>Heatmap</strong> แสดงความหนาแน่นธุรกิจ</li>
+            <li>🚗 <strong>นำทางด้วย Google Maps</strong> ได้ทันที</li>
+            <li>📱 <strong>รองรับมือถือ</strong> ทั้ง iOS และ Android</li>
+          </ul>
+        </div>
+        <div>
+          <div class="card" style="padding:28px; text-align:center;">
+            <div style="font-size:80px; margin-bottom:12px;">🗺️</div>
+            <h4 style="font-size:20px; margin-bottom:8px;">ลูกค้าเปิดแผนที่</h4>
+            <p style="font-size:15px; line-height:1.7; color:rgba(255,255,255,0.75);">
+              ลูกค้าเห็นร้านของคุณบนแผนที่<br>กดดูรายละเอียด → โทร → นำทาง<br>ได้ในคลิกเดียว
+            </p>
+          </div>
+          <br>
+          <div class="card" style="padding:20px; text-align:center; background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3);">
+            <p style="font-size:16px; font-weight:600; color:#34d399;">
+              ยิ่งข้อมูลครบ ยิ่งติดอันดับสูง<br>ในหน้า "สถานที่ยอดนิยม"
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 9: REVIEWS & ENGAGEMENT ====== -->
+  <div class="slide slide-9">
+    <div style="width:100%; max-width:860px; text-align:center;">
+      <div class="slide-tag">ระบบรีวิวและการมีส่วนร่วม</div>
+      <h2 class="slide-title">ลูกค้ารีวิวร้านคุณ<br><span class="highlight-green">บนเว็บได้เลย!</span></h2>
+      <div class="divider" style="margin:16px auto 0;"></div>
+      <div class="card-grid card-grid-2" style="max-width:760px; margin-top:28px;">
+        <div class="card" style="text-align:left;">
+          <span class="icon" style="font-size:36px;">⭐⭐⭐⭐⭐</span>
+          <h4>ระบบให้คะแนน 5 ดาว</h4>
+          <p>ลูกค้าให้คะแนน 1-5 ดาวพร้อมเขียนความคิดเห็น แสดงผลบนหน้าร้านทันที</p>
+        </div>
+        <div class="card" style="text-align:left;">
+          <span class="icon" style="font-size:36px;">👍</span>
+          <h4>ระบบ Like</h4>
+          <p>ลูกค้ากด "ถูกใจ" ร้าน พร้อมแสดงรายชื่อผู้ที่กดถูกใจ สร้าง Social Proof ให้ร้าน</p>
+        </div>
+        <div class="card" style="text-align:left;">
+          <span class="icon" style="font-size:36px;">👁️</span>
+          <h4>นับยอดการเข้าชม</h4>
+          <p>ระบบนับจำนวนครั้งที่มีคนดูหน้าร้านคุณ ดูสถิติผ่านแดชบอร์ด</p>
+        </div>
+        <div class="card" style="text-align:left;">
+          <span class="icon" style="font-size:36px;">🔥</span>
+          <h4>หน้ายอดนิยม (Trending)</h4>
+          <p>ร้านที่มีคนดูมาก ติดอันดับหน้า "สถานที่ยอดนิยม" โดยอัตโนมัติ</p>
+        </div>
+      </div>
+      <p style="margin-top:24px; font-size:17px; color:rgba(255,255,255,0.7); line-height:1.7;">
+        รีวิวดีๆ จากลูกค้าจริง ช่วยสร้าง<strong style="color:#fbbf24;"> ความน่าเชื่อถือ</strong>และดึงดูด<strong style="color:#fbbf24;">ลูกค้าใหม่</strong>ได้มากขึ้น
+      </p>
+    </div>
+  </div>
+
+  <!-- ====== SLIDE 10: CTA ====== -->
+  <div class="slide slide-10">
+    <div class="logo-circle" style="width:90px; height:90px; font-size:40px;">🌆</div>
+    <div class="slide-tag">เริ่มต้นได้เลยวันนี้</div>
+    <h2 class="slide-title" style="font-size:52px;">ลงทะเบียนร้านของคุณ<br><span class="highlight">ได้เลยทันที — ฟรี!</span></h2>
+    <div class="free-badge">ฟรี 100% · ไม่มีค่าใช้จ่ายใดๆ</div>
+    <div style="display:flex; align-items:center; gap:40px; margin-top:8px; flex-wrap:wrap; justify-content:center;">
+      <div style="text-align:center;">
+        <div class="url-box" style="margin:0 0 12px;">discover.rangsitcity.go.th</div>
+        <p style="font-size:17px; color:rgba(255,255,255,0.75); line-height:1.8;">
+          เปิดเว็บ → ล็อกอิน → เพิ่มธุรกิจ → รอ 1-3 วันทำการ<br>
+          ร้านของคุณจะปรากฏบนแผนที่เมืองรังสิต!
+        </p>
+      </div>
+      <div style="background:rgba(255,255,255,0.95); border-radius:20px; padding:16px; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.3); flex-shrink:0;">
+        <img src="images/qrcode.svg" onerror="this.src='images/qrcode.png'" alt="QR Code Discover Rangsit" style="width:160px; height:160px; display:block;">
+        <div style="color:#1e3a8a; font-size:13px; font-weight:700; margin-top:8px;">สแกนเพื่อเข้าเว็บไซต์</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap; justify-content:center;">
+      <div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:12px 20px; font-size:15px; border:1px solid rgba(255,255,255,0.2);">
+        📞 สอบถามเพิ่มเติม: งานสถิติและข้อมูลสารสนเทศ
+      </div>
+      <div style="background:rgba(255,255,255,0.1); border-radius:12px; padding:12px 20px; font-size:15px; border:1px solid rgba(255,255,255,0.2);">
+        🏛️ กองยุทธศาสตร์และงบประมาณ เทศบาลนครรังสิต
+      </div>
+    </div>
+  </div>
+
+</div><!-- end slideshow -->
+
+<!-- Navigation Buttons -->
+<button class="nav-btn prev" id="prevBtn" onclick="changeSlide(-1)">&#8592;</button>
+<button class="nav-btn next" id="nextBtn" onclick="changeSlide(1)">&#8594;</button>
+
+<!-- Dot indicators -->
+<div class="slide-counter" id="dotContainer"></div>
+
+<!-- Slide number -->
+<div class="slide-num" id="slideNum"></div>
+
+<!-- Keyboard hint -->
+<div class="key-hint">← → Arrow keys | Space to advance</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  let current = 0;
+  let isAnimating = false;
+
+  // Build dots
+  const dotContainer = document.getElementById('dotContainer');
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dotContainer.appendChild(dot);
+  });
+
+  function updateUI() {
+    const progress = ((current + 1) / totalSlides) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+    document.getElementById('slideNum').textContent = (current + 1) + ' / ' + totalSlides;
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+    document.getElementById('prevBtn').style.opacity = current === 0 ? '0.3' : '1';
+    document.getElementById('nextBtn').style.opacity = current === totalSlides - 1 ? '0.3' : '1';
+  }
+
+  function goTo(index) {
+    if (isAnimating || index === current || index < 0 || index >= totalSlides) return;
+    isAnimating = true;
+
+    const prev = current;
+    current = index;
+
+    slides[prev].classList.add('exit');
+    slides[prev].classList.remove('active');
+
+    setTimeout(() => {
+      slides[prev].classList.remove('exit');
+    }, 500);
+
+    slides[current].classList.add('active');
+    updateUI();
+
+    setTimeout(() => { isAnimating = false; }, 500);
+  }
+
+  function changeSlide(dir) {
+    goTo(current + dir);
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      changeSlide(1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      changeSlide(-1);
+    }
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 50) changeSlide(dx > 0 ? 1 : -1);
+  });
+
+  updateUI();
+</script>
+</body>
+</html>

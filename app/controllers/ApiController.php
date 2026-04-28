@@ -130,7 +130,7 @@ class ApiController extends Controller {
 
     public function placeUpdate() {
         header('Content-Type: application/json');
-        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+        if (!isset($_SESSION['user_id'])) {
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             return;
         }
@@ -139,6 +139,13 @@ class ApiController extends Controller {
             $id = $_POST['id'];
             $placeModel = $this->model('Place');
             $currentPlace = $placeModel->getById($id);
+
+            $isAdmin = $_SESSION['user_role'] === 'admin';
+            $isOwner = $currentPlace && (int)$currentPlace->owner_user_id === (int)$_SESSION['user_id'];
+            if (!$isAdmin && !$isOwner) {
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                return;
+            }
 
             $data = [
                 'id' => $id,
@@ -156,7 +163,7 @@ class ApiController extends Controller {
                 'instagram' => trim($_POST['instagram']),
                 'youtube' => trim($_POST['youtube']),
                 'tiktok' => trim($_POST['tiktok']),
-                'status' => $_POST['status'],
+                'status' => $isAdmin ? $_POST['status'] : $currentPlace->status,
                 'cover_image' => $currentPlace->cover_image,
                 'line_qr' => $currentPlace->line_qr
             ];
@@ -271,13 +278,21 @@ class ApiController extends Controller {
 
     public function placeCoverUpdate() {
         header('Content-Type: application/json');
-        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+        if (!isset($_SESSION['user_id'])) {
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
+            $placeModel = $this->model('Place');
+            $currentPlace = $placeModel->getById($id);
+            $isAdmin = $_SESSION['user_role'] === 'admin';
+            $isOwner = $currentPlace && (int)$currentPlace->owner_user_id === (int)$_SESSION['user_id'];
+            if (!$isAdmin && !$isOwner) {
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                return;
+            }
             $filename = null;
 
             // Priority 1: Base64 data (resized on client)
@@ -344,13 +359,21 @@ class ApiController extends Controller {
 
     public function placeLineQrUpdate() {
         header('Content-Type: application/json');
-        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+        if (!isset($_SESSION['user_id'])) {
             echo json_encode(['success' => false, 'message' => 'Unauthorized']);
             return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
+            $placeModel = $this->model('Place');
+            $currentPlace = $placeModel->getById($id);
+            $isAdmin = $_SESSION['user_role'] === 'admin';
+            $isOwner = $currentPlace && (int)$currentPlace->owner_user_id === (int)$_SESSION['user_id'];
+            if (!$isAdmin && !$isOwner) {
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                return;
+            }
             $filename = null;
 
             // Priority 1: Base64
@@ -655,6 +678,147 @@ class ApiController extends Controller {
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'ไม่สามารถบันทึกไฟล์ได้']);
+        }
+    }
+
+    public function saveSettings() {
+        ob_start();
+        try {
+            header('Content-Type: application/json');
+            if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                return;
+            }
+            $input = json_decode(file_get_contents('php://input'), true);
+            if (!$input) {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'message' => 'Invalid data']);
+                return;
+            }
+            $allowed_sections = ['hero', 'footer', 'email'];
+            $file = APP_ROOT . '/config/site_settings.json';
+            $current = file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];
+            $section = $input['section'] ?? '';
+            if (!in_array($section, $allowed_sections)) {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'message' => 'Invalid section']);
+                return;
+            }
+            $current[$section] = $input['data'] ?? [];
+            ob_end_clean();
+            if (file_put_contents($file, json_encode($current, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) !== false) {
+                echo json_encode(['success' => true, 'message' => 'บันทึกการตั้งค่าสำเร็จ']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'ไม่สามารถบันทึกไฟล์ได้ (Permission denied?)']);
+            }
+        } catch (Exception $e) {
+            ob_end_clean();
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function dbBackup() {
+        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+            header('HTTP/1.0 403 Forbidden');
+            echo 'Unauthorized';
+            return;
+        }
+        try {
+            $pdo = new PDO(
+                'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+                DB_USER, DB_PASS,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+            );
+            $output  = "-- Discover Rangsit DB Backup\n";
+            $output .= "-- Generated: " . date('Y-m-d H:i:s') . "\n";
+            $output .= "-- Database: " . DB_NAME . "\n\n";
+            $output .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
+
+            $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+            foreach ($tables as $table) {
+                $createRow = $pdo->query("SHOW CREATE TABLE `$table`")->fetch(PDO::FETCH_ASSOC);
+                $createSql = array_values($createRow)[1];
+                $output .= "DROP TABLE IF EXISTS `$table`;\n";
+                $output .= $createSql . ";\n\n";
+
+                $rows = $pdo->query("SELECT * FROM `$table`")->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($rows)) {
+                    $cols = '`' . implode('`, `', array_keys($rows[0])) . '`';
+                    $chunks = array_chunk($rows, 100);
+                    foreach ($chunks as $chunk) {
+                        $values = [];
+                        foreach ($chunk as $row) {
+                            $escaped = array_map(function($v) use ($pdo) {
+                                return is_null($v) ? 'NULL' : $pdo->quote($v);
+                            }, array_values($row));
+                            $values[] = '(' . implode(', ', $escaped) . ')';
+                        }
+                        $output .= "INSERT INTO `$table` ($cols) VALUES\n" . implode(",\n", $values) . ";\n";
+                    }
+                    $output .= "\n";
+                }
+            }
+            $output .= "SET FOREIGN_KEY_CHECKS=1;\n";
+
+            $filename = 'backup_' . DB_NAME . '_' . date('Ymd_His') . '.sql';
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-Length: ' . strlen($output));
+            echo $output;
+        } catch (Exception $e) {
+            header('HTTP/1.0 500 Internal Server Error');
+            echo 'Backup failed: ' . $e->getMessage();
+        }
+    }
+
+    public function dbRestore() {
+        ob_start();
+        try {
+            header('Content-Type: application/json');
+            if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                return;
+            }
+            if (!isset($_FILES['sql_file']) || $_FILES['sql_file']['error'] !== UPLOAD_ERR_OK) {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'message' => 'ไม่พบไฟล์ SQL ที่ส่งมา']);
+                return;
+            }
+            $ext = strtolower(pathinfo($_FILES['sql_file']['name'], PATHINFO_EXTENSION));
+            if ($ext !== 'sql') {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'message' => 'รองรับเฉพาะไฟล์ .sql เท่านั้น']);
+                return;
+            }
+            $sql = file_get_contents($_FILES['sql_file']['tmp_name']);
+            if (empty($sql)) {
+                ob_end_clean();
+                echo json_encode(['success' => false, 'message' => 'ไฟล์ SQL ว่างเปล่า']);
+                return;
+            }
+            $pdo = new PDO(
+                'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+                DB_USER, DB_PASS,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+            );
+            $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+            $statements = array_filter(
+                array_map('trim', preg_split('/;\s*[\r\n]+/', $sql)),
+                fn($s) => $s !== '' && strpos($s, '--') !== 0
+            );
+            foreach ($statements as $stmt) {
+                if (!empty(trim($stmt))) {
+                    $pdo->exec($stmt);
+                }
+            }
+            $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
+            ob_end_clean();
+            echo json_encode(['success' => true, 'message' => 'คืนค่าฐานข้อมูลสำเร็จ ' . count($statements) . ' statements']);
+        } catch (Exception $e) {
+            ob_end_clean();
+            echo json_encode(['success' => false, 'message' => 'Restore failed: ' . $e->getMessage()]);
         }
     }
 

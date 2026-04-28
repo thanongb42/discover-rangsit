@@ -23,7 +23,7 @@ class AuthController extends Controller {
                 $userModel->updateLastLogin($loggedInUser->user_id);
                 $this->logActivity('LOGIN', "User logged in via standard form");
                 
-                header('Location: ' . BASE_URL . '/dashboard');
+                header('Location: ' . BASE_URL . '/my-businesses');
             } else {
                 $this->logActivity('LOGIN_FAILED', "Failed login attempt for: " . $identity);
                 $_SESSION['error'] = 'Invalid username/email or password';
@@ -141,7 +141,7 @@ class AuthController extends Controller {
             $this->_setGoogleSession($existingUser, $profile);
             $userModel->updateLastLogin($existingUser->user_id);
             $this->logActivity('LOGIN', "User logged in via Google");
-            header('Location: ' . BASE_URL . '/dashboard');
+            header('Location: ' . BASE_URL . '/my-businesses');
             return;
         }
 
@@ -153,7 +153,7 @@ class AuthController extends Controller {
                 $this->_setGoogleSession($emailUser, $profile);
                 $userModel->updateLastLogin($emailUser->user_id);
                 $this->logActivity('LOGIN', "User logged in via Google (email match)");
-                header('Location: ' . BASE_URL . '/dashboard');
+                header('Location: ' . BASE_URL . '/my-businesses');
                 return;
             }
         }
@@ -175,7 +175,7 @@ class AuthController extends Controller {
             $userModel->linkGoogleAccount($newUser->user_id, $profile);
             $this->_setGoogleSession($newUser, $profile);
             $this->logActivity('REGISTER', "New user registered via Google");
-            header('Location: ' . BASE_URL . '/dashboard');
+            header('Location: ' . BASE_URL . '/my-businesses');
         }
     }
 
@@ -191,21 +191,33 @@ class AuthController extends Controller {
     public function lineLogin() {
         $state = bin2hex(random_bytes(16));
         $_SESSION['line_state'] = $state;
-        
+        setcookie('line_oauth_state', $state, [
+            'expires'  => time() + 300,
+            'path'     => '/',
+            'secure'   => true,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+
         $url = "https://access.line.me/oauth2/v2.1/authorize?" . http_build_query([
             'response_type' => 'code',
-            'client_id' => LINE_CLIENT_ID,
-            'redirect_uri' => LINE_REDIRECT_URI,
-            'state' => $state,
-            'scope' => 'profile openid email'
+            'client_id'     => LINE_CLIENT_ID,
+            'redirect_uri'  => LINE_REDIRECT_URI,
+            'state'         => $state,
+            'scope'         => 'profile openid email'
         ]);
-        
+
         header('Location: ' . $url);
     }
 
     public function lineCallback() {
-        if (!isset($_GET['code']) || $_GET['state'] !== $_SESSION['line_state']) {
-            die('Invalid request');
+        $expectedState = $_SESSION['line_state'] ?? ($_COOKIE['line_oauth_state'] ?? '');
+        setcookie('line_oauth_state', '', time() - 1, '/');
+
+        if (!isset($_GET['code']) || empty($_GET['state']) || $_GET['state'] !== $expectedState) {
+            $_SESSION['error'] = 'การเข้าสู่ระบบด้วย LINE ล้มเหลว กรุณาลองใหม่อีกครั้ง';
+            header('Location: ' . BASE_URL . '/login');
+            exit;
         }
 
         // 1. Exchange code for Access Token
@@ -222,7 +234,11 @@ class AuthController extends Controller {
         $response = json_decode(curl_exec($ch), true);
         curl_close($ch);
 
-        if (!isset($response['access_token'])) die('Authentication failed');
+        if (!isset($response['access_token'])) {
+            $_SESSION['error'] = 'ไม่สามารถเชื่อมต่อกับ LINE ได้ กรุณาลองใหม่อีกครั้ง';
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
 
         // 2. Get User Profile
         $ch = curl_init("https://api.line.me/v2/profile");
@@ -257,7 +273,7 @@ class AuthController extends Controller {
             $_SESSION['profile_image'] = $existingUser->line_picture_url ?: $existingUser->profile_image;
             
             $userModel->updateLastLogin($existingUser->user_id);
-            header('Location: ' . BASE_URL . '/dashboard');
+            header('Location: ' . BASE_URL . '/my-businesses');
         } else {
             // New user via LINE - Create record
             $data = [
@@ -279,7 +295,7 @@ class AuthController extends Controller {
                 $_SESSION['user_name'] = $data['first_name'];
                 $_SESSION['user_role'] = $data['role'];
                 $_SESSION['profile_image'] = $profile['pictureUrl'];
-                header('Location: ' . BASE_URL . '/dashboard');
+                header('Location: ' . BASE_URL . '/my-businesses');
             }
         }
     }

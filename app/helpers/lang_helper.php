@@ -27,3 +27,18 @@ function currentLang(): string {
 function isLang(string $lang): bool {
     return currentLang() === $lang;
 }
+
+function site_setting(string $path, string $default = ''): string {
+    static $settings = null;
+    if ($settings === null) {
+        $file = APP_ROOT . '/config/site_settings.json';
+        $settings = file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];
+    }
+    $keys = explode('.', $path);
+    $val  = $settings;
+    foreach ($keys as $k) {
+        if (!isset($val[$k])) return $default;
+        $val = $val[$k];
+    }
+    return (string)$val;
+}

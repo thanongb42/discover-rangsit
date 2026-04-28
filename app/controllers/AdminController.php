@@ -101,6 +101,17 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function settings() {
+        $file = APP_ROOT . '/config/site_settings.json';
+        $settings = file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];
+
+        $this->view('admin/settings', [
+            'title'        => 'ตั้งค่าระบบ - Admin Dashboard',
+            'settings'     => $settings,
+            'current_page' => 'settings'
+        ]);
+    }
+
     public function logs() {
         $logModel = $this->model('ActivityLog');
         

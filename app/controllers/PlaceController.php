@@ -28,9 +28,11 @@ class PlaceController extends Controller {
             $placeModel->trackInterest($_SESSION['user_id'], $place->category_id);
         }
 
-        // Fetch reviews & gallery
-        $reviews = $placeModel->getReviews($place->id);
-        $gallery = $placeModel->getGallery($place->id);
+        // Fetch reviews, gallery, delivery links
+        $reviews       = $placeModel->getReviews($place->id);
+        $gallery       = $placeModel->getGallery($place->id);
+        $deliveryModel = $this->model('DeliveryLink');
+        $deliveryLinks = $deliveryModel->getByPlace($place->id);
 
         // Like data
         $likeCount = $placeModel->getLikeCount($place->id);
@@ -50,11 +52,12 @@ class PlaceController extends Controller {
             'og_type'     => 'business.business',
             'og_image'    => BASE_URL . '/uploads/covers/' . ($place->cover_image ?: 'default.jpg'),
             'og_url'      => BASE_URL . '/place/' . $place->slug,
-            'place'       => $place,
-            'gallery'     => $gallery,
-            'reviews'     => $reviews,
-            'like_count'  => $likeCount,
-            'has_liked'   => $hasLiked,
+            'place'          => $place,
+            'gallery'        => $gallery,
+            'reviews'        => $reviews,
+            'like_count'     => $likeCount,
+            'has_liked'      => $hasLiked,
+            'delivery_links' => $deliveryLinks,
         ]);
     }
 
@@ -94,9 +97,16 @@ class PlaceController extends Controller {
                 exit;
             }
 
-            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name)));
-            if (empty($slug) || $slug === '-') {
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+            if (empty($slug) || !preg_match('/[a-z0-9]/', $slug)) {
                 $slug = 'place-' . time() . '-' . rand(100, 999);
+            }
+
+            $placeModel = $this->model('Place');
+            $baseSlug = $slug;
+            $counter = 2;
+            while ($placeModel->slugExists($slug)) {
+                $slug = $baseSlug . '-' . $counter++;
             }
 
             $data = [
@@ -166,8 +176,6 @@ class PlaceController extends Controller {
                 }
             }
 
-            $placeModel = $this->model('Place');
-            
             try {
                 if($placeModel->add($data)) {
                     $this->logActivity('PLACE_CREATE', "User submitted new business: " . $name);
@@ -190,6 +198,32 @@ class PlaceController extends Controller {
             header('Location: ' . BASE_URL . '/dashboard/add-place');
             exit;
         }
+    }
+
+    public function editPlace($id) {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: ' . BASE_URL . '/login');
+            exit;
+        }
+        $placeModel = $this->model('Place');
+        $place = $placeModel->getById($id);
+
+        if (!$place || (int)$place->owner_user_id !== (int)$_SESSION['user_id']) {
+            $_SESSION['error'] = 'คุณไม่มีสิทธิ์แก้ไขธุรกิจนี้';
+            header('Location: ' . BASE_URL . '/my-businesses');
+            exit;
+        }
+
+        $categories = $placeModel->getCategories();
+        $gallery = $placeModel->getGallery($id);
+
+        $this->view('admin/places/edit', [
+            'title' => 'แก้ไขข้อมูลธุรกิจ - Discover Rangsit',
+            'place' => $place,
+            'categories' => $categories,
+            'gallery' => $gallery,
+            'current_page' => 'my_businesses'
+        ]);
     }
 
     public function rate() {

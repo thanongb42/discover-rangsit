@@ -53,6 +53,13 @@ $router->get('/my-reviews', 'UserController', 'myReviews');
 $router->get('/dashboard', 'DashboardController', 'index');
 $router->get('/dashboard/add-place', 'PlaceController', 'create');
 $router->post('/dashboard/add-place', 'PlaceController', 'store');
+$router->get('/dashboard/edit-place/{id}', 'PlaceController', 'editPlace');
+
+// Delivery Links
+$router->get('/admin/places/delivery/{id}', 'DeliveryController', 'index');
+$router->get('/dashboard/delivery/{id}',    'DeliveryController', 'index');
+$router->post('/api/delivery/save',         'DeliveryController', 'save');
+$router->post('/api/delivery/delete',       'DeliveryController', 'delete');
 
 // Admin Actions
 $router->get('/admin/pending', 'AdminController', 'pending');
@@ -83,6 +90,12 @@ $router->get('/api/map-settings', 'ApiController', 'getMapSettings');
 $router->get('/api/air-quality', 'ApiController', 'getAirQuality');
 $router->get('/api/weather', 'ApiController', 'getWeather');
 $router->post('/api/admin/map-settings/save', 'ApiController', 'saveMapSettings');
+
+// System Settings
+$router->get('/admin/settings', 'AdminController', 'settings');
+$router->post('/api/admin/settings/save', 'ApiController', 'saveSettings');
+$router->get('/api/admin/db-backup', 'ApiController', 'dbBackup');
+$router->post('/api/admin/db-restore', 'ApiController', 'dbRestore');
 
 
 

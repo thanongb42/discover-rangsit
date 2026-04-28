@@ -38,6 +38,10 @@
                 🏪 ฝากร้านของคุณ — ฟรี!
             </a>
 
+            <a href="<?= BASE_URL ?>/presentation.html" target="_blank" class="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white font-bold text-sm px-5 py-2.5 rounded-full border border-white/30 backdrop-blur transition-all hover:-translate-y-0.5">
+                <i class="fas fa-chalkboard"></i> นำเสนอสำหรับผู้ประกอบการ
+            </a>
+
             <!-- Weather Widget -->
             <div id="weatherWidget" class="hidden items-center gap-2 bg-white/10 backdrop-blur border border-white/20 rounded-2xl px-4 py-2.5">
                 <i id="weatherIcon" class="fas fa-sun text-yellow-300 text-lg"></i>

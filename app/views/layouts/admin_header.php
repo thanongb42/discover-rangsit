@@ -33,6 +33,7 @@ if ($is_admin) {
             ['id' => 'categories', 'icon' => 'fa-list', 'label' => 'หมวดหมู่ธุรกิจ', 'url' => BASE_URL . '/admin/categories'],
             ['id' => 'logs', 'icon' => 'fa-history', 'label' => 'ประวัติการใช้งาน', 'url' => BASE_URL . '/admin/logs'],
             ['id' => 'map_settings', 'icon' => 'fa-sliders-h', 'label' => 'ตั้งค่าแผนที่', 'url' => BASE_URL . '/admin/map-settings'],
+            ['id' => 'settings',     'icon' => 'fa-cog',       'label' => 'ตั้งค่าระบบ',   'url' => BASE_URL . '/admin/settings'],
         ]
     ];
 }
@@ -231,9 +232,22 @@ $menu_groups['business'] = [
                             <a href="<?= BASE_URL ?>/profile" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
                                 <i class="fas fa-user-circle mr-2"></i> โปรไฟล์ของฉัน
                             </a>
-                            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
+                            <div class="border-t border-gray-50 my-1"></div>
+                            <a href="<?= BASE_URL ?>/dashboard/add-place" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
+                                <i class="fas fa-plus-circle mr-2 text-primary-500"></i> เพิ่มธุรกิจใหม่
+                            </a>
+                            <a href="<?= BASE_URL ?>/my-businesses" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
+                                <i class="fas fa-building mr-2 text-primary-500"></i> ธุรกิจของฉัน
+                            </a>
+                            <a href="<?= BASE_URL ?>/my-reviews" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
+                                <i class="fas fa-star mr-2 text-yellow-400"></i> รีวิวของฉัน
+                            </a>
+                            <?php if($is_admin): ?>
+                            <div class="border-t border-gray-50 my-1"></div>
+                            <a href="<?= BASE_URL ?>/admin/settings" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-primary-600 transition">
                                 <i class="fas fa-cog mr-2"></i> ตั้งค่าระบบ
                             </a>
+                            <?php endif; ?>
                             <div class="border-t border-gray-50 mt-1">
                                 <a href="<?= BASE_URL ?>/logout" class="flex items-center px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition">
                                     <i class="fas fa-sign-out-alt mr-2"></i> ออกจากระบบ

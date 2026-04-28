@@ -321,6 +321,7 @@ function handlePreview(input, previewId, placeholderId, overlayId, label) {
                         } else {
                             document.getElementById('qrBase64').value = ev.target.result;
                         }
+                        input.value = ''; // ล้างไฟล์ต้นฉบับ ไม่ให้ส่งซ้ำกับ base64
                     };
                     reader.readAsDataURL(blob);
 

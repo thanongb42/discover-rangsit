@@ -5,9 +5,23 @@
         <h1 class="text-2xl font-bold text-gray-800">แก้ไขข้อมูลสถานที่</h1>
         <p class="text-gray-500 text-sm">ปรับปรุงรายละเอียด ตำแหน่งพิกัด และจัดการคลังภาพ</p>
     </div>
-    <a href="<?= BASE_URL ?>/admin/places" class="text-gray-500 hover:text-gray-800 font-bold flex items-center transition">
-        <i class="fas fa-arrow-left mr-2"></i> กลับหน้ารายการ
-    </a>
+    <div class="flex items-center gap-3">
+        <?php if($data['current_page'] === 'my_businesses'): ?>
+        <a href="<?= BASE_URL ?>/my-businesses" class="text-gray-500 hover:text-gray-800 font-bold flex items-center transition">
+            <i class="fas fa-arrow-left mr-2"></i> กลับธุรกิจของฉัน
+        </a>
+        <a href="<?= BASE_URL ?>/dashboard/delivery/<?= $data['place']->id ?>" class="inline-flex items-center gap-2 bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white border border-orange-200 px-4 py-2 rounded-xl font-bold text-sm transition">
+            <i class="fas fa-motorcycle"></i> Delivery Links
+        </a>
+        <?php else: ?>
+        <a href="<?= BASE_URL ?>/admin/places" class="text-gray-500 hover:text-gray-800 font-bold flex items-center transition">
+            <i class="fas fa-arrow-left mr-2"></i> กลับหน้ารายการ
+        </a>
+        <a href="<?= BASE_URL ?>/admin/places/delivery/<?= $data['place']->id ?>" class="inline-flex items-center gap-2 bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white border border-orange-200 px-4 py-2 rounded-xl font-bold text-sm transition">
+            <i class="fas fa-motorcycle"></i> Delivery Links
+        </a>
+        <?php endif; ?>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -46,9 +60,11 @@
                                         <option value="<?= $cat->id ?>" <?= $cat->id == $data['place']->category_id ? 'selected' : '' ?>><?= htmlspecialchars($cat->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
+                                <?php if($data['current_page'] !== 'my_businesses'): ?>
                                 <a href="<?= BASE_URL ?>/admin/categories" target="_blank" class="w-12 h-12 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:text-primary-600 hover:border-primary-200 transition shadow-sm" title="จัดการหมวดหมู่">
                                     <i class="fas fa-list-check"></i>
                                 </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -59,7 +75,80 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">สถานะการแสดงผล</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-3">สถานะการแสดงผล</label>
+                        <?php if($data['current_page'] === 'my_businesses'): ?>
+                        <?php
+                            $status = $data['place']->status;
+                            $isApproved = $status === 'approved';
+                            $isPending  = $status === 'pending';
+                            $isRejected = $status === 'rejected';
+                        ?>
+                        <input type="hidden" name="status" value="<?= htmlspecialchars($status) ?>">
+                        <div class="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+                            <div class="flex items-center gap-0">
+                                <!-- Step 1: ส่งข้อมูลแล้ว -->
+                                <div class="flex flex-col items-center">
+                                    <div class="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center shadow-sm">
+                                        <i class="fas fa-paper-plane text-white text-sm"></i>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-blue-600 mt-2 text-center whitespace-nowrap">ส่งข้อมูลแล้ว</span>
+                                </div>
+                                <!-- Line -->
+                                <div class="flex-1 h-1 mx-2 rounded-full <?= !$isPending || $isApproved || $isRejected ? 'bg-blue-300' : 'bg-blue-200' ?>"></div>
+                                <!-- Step 2: รอตรวจสอบ -->
+                                <div class="flex flex-col items-center">
+                                    <?php if($isPending): ?>
+                                        <div class="w-9 h-9 rounded-full bg-yellow-400 flex items-center justify-center shadow-sm animate-pulse">
+                                            <i class="fas fa-hourglass-half text-white text-sm"></i>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-yellow-500 mt-2 text-center whitespace-nowrap">รอการอนุมัติ</span>
+                                    <?php else: ?>
+                                        <div class="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center shadow-sm">
+                                            <i class="fas fa-check text-white text-sm"></i>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-blue-600 mt-2 text-center whitespace-nowrap">ตรวจสอบแล้ว</span>
+                                    <?php endif; ?>
+                                </div>
+                                <!-- Line -->
+                                <div class="flex-1 h-1 mx-2 rounded-full <?= $isApproved ? 'bg-green-300' : ($isRejected ? 'bg-red-200' : 'bg-gray-200') ?>"></div>
+                                <!-- Step 3: ผลการอนุมัติ -->
+                                <div class="flex flex-col items-center">
+                                    <?php if($isApproved): ?>
+                                        <div class="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center shadow-sm">
+                                            <i class="fas fa-check-circle text-white text-sm"></i>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-green-600 mt-2 text-center whitespace-nowrap">อนุมัติแล้ว</span>
+                                    <?php elseif($isRejected): ?>
+                                        <div class="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center shadow-sm">
+                                            <i class="fas fa-times-circle text-white text-sm"></i>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-red-500 mt-2 text-center whitespace-nowrap">ถูกปฏิเสธ</span>
+                                    <?php else: ?>
+                                        <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center">
+                                            <i class="fas fa-flag text-gray-400 text-sm"></i>
+                                        </div>
+                                        <span class="text-[11px] font-bold text-gray-400 mt-2 text-center whitespace-nowrap">อนุมัติ</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <!-- Status message -->
+                            <div class="mt-4 pt-4 border-t border-gray-100">
+                                <?php if($isPending): ?>
+                                    <p class="text-xs text-yellow-700 bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-2.5">
+                                        <i class="fas fa-clock mr-1.5"></i> ธุรกิจของคุณอยู่ระหว่างการตรวจสอบ รอเจ้าหน้าที่อนุมัติภายใน 1–3 วันทำการ
+                                    </p>
+                                <?php elseif($isApproved): ?>
+                                    <p class="text-xs text-green-700 bg-green-50 border border-green-100 rounded-xl px-4 py-2.5">
+                                        <i class="fas fa-map-marker-alt mr-1.5"></i> ธุรกิจของคุณได้รับการอนุมัติและแสดงบนแผนที่เมืองรังสิตแล้ว
+                                    </p>
+                                <?php elseif($isRejected): ?>
+                                    <p class="text-xs text-red-700 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">
+                                        <i class="fas fa-exclamation-circle mr-1.5"></i> ธุรกิจของคุณถูกปฏิเสธ กรุณาแก้ไขข้อมูลและติดต่อเจ้าหน้าที่
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php else: ?>
                         <div class="flex gap-4">
                             <label class="flex items-center cursor-pointer">
                                 <input type="radio" name="status" value="approved" <?= $data['place']->status == 'approved' ? 'checked' : '' ?> class="mr-2 text-green-500 focus:ring-green-500">
@@ -74,6 +163,7 @@
                                 <span class="text-sm font-medium text-red-600">ระงับ (Rejected)</span>
                             </label>
                         </div>
+                        <?php endif; ?>
                     </div>
 
                     <div class="pt-4 border-t border-gray-50">

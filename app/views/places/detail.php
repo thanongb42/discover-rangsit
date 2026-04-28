@@ -370,6 +370,55 @@
                     <?php endif; ?>
                 </div>
 
+                <!-- Delivery Platforms -->
+                <?php
+                require_once APP_ROOT . '/app/helpers/DeliveryPlatforms.php';
+                $deliveryLinks = $data['delivery_links'] ?? [];
+                if (!empty($deliveryLinks)):
+                ?>
+                <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6">
+                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fas fa-motorcycle text-primary-500"></i> สั่งอาหาร / จัดส่ง
+                    </h4>
+                    <div class="space-y-3">
+                        <?php foreach ($deliveryLinks as $link):
+                            $cfg = DeliveryPlatforms::get($link->platform);
+                            if (!$cfg) continue;
+                            $btnLabel = htmlspecialchars($link->display_label ?: 'สั่งผ่าน ' . $cfg['name'], ENT_QUOTES, 'UTF-8');
+                            $trackUrl = BASE_URL . '/../track-click.php?place=' . $place->id . '&platform=' . urlencode($link->platform);
+                        ?>
+                        <div class="delivery-btn-card relative rounded-2xl overflow-hidden flex items-center group"
+                             data-direct-url="<?= htmlspecialchars($link->url, ENT_QUOTES, 'UTF-8') ?>"
+                             data-platform-name="<?= htmlspecialchars($cfg['name'], ENT_QUOTES, 'UTF-8') ?>">
+                            <a href="<?= $trackUrl ?>" target="_blank" rel="noopener noreferrer"
+                               class="flex items-center gap-3 flex-1 text-white font-bold py-3 px-4 transition hover:opacity-90"
+                               style="background: <?= $cfg['color'] ?>">
+                                <i class="<?= $cfg['icon'] ?> text-xl w-6 text-center flex-shrink-0"></i>
+                                <span class="text-sm"><?= $btnLabel ?></span>
+                            </a>
+                            <button type="button" class="delivery-qr-btn flex-shrink-0 w-11 h-full flex items-center justify-center text-white/80 hover:text-white transition border-l border-white/20"
+                                    style="background: <?= $cfg['color'] ?>"
+                                    title="แสดง QR Code">
+                                <i class="fas fa-qrcode text-lg"></i>
+                            </button>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- QR Modal -->
+                <div id="delivery-qr-modal" class="hidden fixed inset-0 bg-black/60 z-[4000] items-center justify-center p-4">
+                    <div class="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-xs w-full">
+                        <h4 class="delivery-qr-title text-lg font-black text-slate-800 mb-4"></h4>
+                        <div id="delivery-qr-canvas" class="flex justify-center mb-4"></div>
+                        <p class="text-xs text-slate-400 mb-6">สแกนเพื่อสั่งจากแพลตฟอร์มนี้</p>
+                        <button type="button" class="delivery-qr-close w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl transition">ปิด</button>
+                    </div>
+                </div>
+                <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+                <script src="<?= BASE_URL ?>/js/delivery-qr.js"></script>
+                <?php endif; ?>
+
                 <!-- Navigation Button -->
                 <a href="https://www.google.com/maps/dir/?api=1&destination=<?= $place->latitude ?>,<?= $place->longitude ?>" target="_blank" class="flex items-center justify-center gap-3 w-full bg-emerald-500 text-white py-5 rounded-[2rem] font-black text-lg hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/30">
                     <i class="fas fa-directions text-2xl"></i>
