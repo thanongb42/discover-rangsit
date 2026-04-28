@@ -11,6 +11,17 @@ $is_admin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'
 $is_operator = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'operator');
 $is_member = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'member');
 
+// Pending count badge (admin only)
+$pending_count = 0;
+if ($is_admin) {
+    try {
+        $db = new Database();
+        $db->query("SELECT COUNT(*) as cnt FROM places WHERE status = 'pending'");
+        $row = $db->single();
+        $pending_count = (int)($row->cnt ?? 0);
+    } catch (Exception $e) {}
+}
+
 // Menu items configuration
 $menu_groups = [
     'main' => [
@@ -28,7 +39,7 @@ if ($is_admin) {
         'label' => 'จัดการระบบ',
         'items' => [
             ['id' => 'city_dashboard', 'icon' => 'fa-city', 'label' => 'City Dashboard', 'url' => BASE_URL . '/admin/city-dashboard'],
-            ['id' => 'pending', 'icon' => 'fa-clock', 'label' => 'รอการอนุมัติ', 'url' => BASE_URL . '/admin/pending'],
+            ['id' => 'pending', 'icon' => 'fa-clock', 'label' => 'รอการอนุมัติ', 'url' => BASE_URL . '/admin/pending', 'badge' => $pending_count],
             ['id' => 'rejected', 'icon' => 'fa-times-circle', 'label' => 'ไม่อนุมัติ', 'url' => BASE_URL . '/admin/places?tab=rejected'],
             ['id' => 'admin_places', 'icon' => 'fa-map-location-dot', 'label' => 'จัดการสถานที่', 'url' => BASE_URL . '/admin/places'],
             ['id' => 'usermanager', 'icon' => 'fa-users-cog', 'label' => 'จัดการผู้ใช้งาน', 'url' => BASE_URL . '/admin/users'],
@@ -177,7 +188,12 @@ $menu_groups['business'] = [
                     <?php foreach ($group['items'] as $item): ?>
                         <a href="<?= $item['url'] ?>" class="sidebar-menu-item <?= $current_page === $item['id'] ? 'active' : '' ?>">
                             <i class="fas <?= $item['icon'] ?> mr-3"></i>
-                            <span class="menu-text"><?= $item['label'] ?></span>
+                            <span class="menu-text flex-1"><?= $item['label'] ?></span>
+                            <?php if (!empty($item['badge'])): ?>
+                                <span class="menu-text ml-1 min-w-[1.35rem] h-[1.35rem] bg-orange-500 text-white text-[0.65rem] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                                    <?= $item['badge'] > 99 ? '99+' : $item['badge'] ?>
+                                </span>
+                            <?php endif; ?>
                         </a>
                     <?php endforeach; ?>
                 <?php endforeach; ?>
