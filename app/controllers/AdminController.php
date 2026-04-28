@@ -45,12 +45,14 @@ class AdminController extends Controller {
 
     public function places() {
         $placeModel = $this->model('Place');
-        $places = $placeModel->getAll();
+        $places   = $placeModel->getAll();
+        $rejected = $placeModel->getRejected();
 
         $this->view('admin/places/index', [
-            'title' => 'จัดการสถานที่และธุรกิจ - Admin Dashboard',
-            'places' => $places,
-            'current_page' => 'admin_places'
+            'title'         => 'จัดการสถานที่และธุรกิจ - Admin Dashboard',
+            'places'        => $places,
+            'rejected'      => $rejected,
+            'current_page'  => 'admin_places'
         ]);
     }
 

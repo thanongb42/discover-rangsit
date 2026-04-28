@@ -11,10 +11,17 @@
 </div>
 
 <!-- Tabs -->
-<div class="flex gap-2 mb-6">
+<div class="flex gap-2 mb-6 flex-wrap">
     <button onclick="showTab('active')" id="tab-active"
         class="tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border border-transparent bg-primary-500 text-white shadow">
         <i class="fas fa-list mr-1.5"></i> ทั้งหมด
+    </button>
+    <button onclick="showTab('rejected')" id="tab-rejected"
+        class="tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border border-gray-200 text-gray-500 hover:bg-gray-50">
+        <i class="fas fa-times-circle mr-1.5"></i> ไม่อนุมัติ
+        <?php if(!empty($data['rejected'])): ?>
+        <span class="ml-1 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full"><?= count($data['rejected']) ?></span>
+        <?php endif; ?>
     </button>
     <button onclick="showTab('trash')" id="tab-trash"
         class="tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border border-gray-200 text-gray-500 hover:bg-gray-50">
@@ -84,6 +91,74 @@
     </div>
 </div>
 
+<!-- Rejected Tab -->
+<div id="panel-rejected" class="hidden">
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4 flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-red-500"></i>
+        <p class="text-sm text-red-700 font-medium">รายการเหล่านี้ถูกปฏิเสธการอนุมัติ สามารถอนุมัติหรือลบออกจากระบบได้</p>
+    </div>
+    <?php if(empty($data['rejected'])): ?>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center">
+        <i class="fas fa-check-circle text-green-300 text-5xl mb-4 block"></i>
+        <p class="text-gray-400 font-medium">ไม่มีรายการที่ถูกปฏิเสธ</p>
+    </div>
+    <?php else: ?>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/50 border-b border-gray-100">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">สถานที่</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">หมวดหมู่</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase">เจ้าของ</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-center w-48">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <?php foreach($data['rejected'] as $place): ?>
+                    <tr class="hover:bg-gray-50/80 transition-colors" id="rejected-row-<?= $place->id ?>">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 rounded-lg bg-gray-200 overflow-hidden mr-4 border border-gray-100">
+                                    <img src="<?= BASE_URL ?>/../uploads/covers/<?= $place->cover_image ?>" class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <p class="font-bold text-gray-800"><?= htmlspecialchars($place->name) ?></p>
+                                    <p class="text-xs text-gray-400 truncate w-48"><?= htmlspecialchars($place->address) ?></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-xs font-bold text-gray-600"><?= htmlspecialchars($place->category_name) ?></span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 font-medium">
+                            <?= htmlspecialchars($place->owner_name ?: 'System Admin') ?>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-1">
+                                <button onclick="approveRejected(<?= $place->id ?>, '<?= addslashes(htmlspecialchars($place->name)) ?>')"
+                                    class="text-xs font-bold text-green-600 hover:bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                    <i class="fas fa-check text-[10px]"></i> อนุมัติ
+                                </button>
+                                <a href="<?= BASE_URL ?>/admin/places/edit/<?= $place->id ?>"
+                                    class="text-xs font-bold text-blue-600 hover:bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                    <i class="fas fa-edit text-[10px]"></i> แก้ไข
+                                </a>
+                                <button onclick="trashPlace(<?= $place->id ?>, '<?= addslashes(htmlspecialchars($place->name)) ?>')"
+                                    class="text-xs font-bold text-red-600 hover:bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+                                    <i class="fas fa-trash text-[10px]"></i> ลบ
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>
+
 <!-- Trash Tab -->
 <div id="panel-trash" class="hidden">
     <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-4 flex items-center gap-3">
@@ -115,17 +190,52 @@
 
 <script>
     const BASE_URL = '<?= BASE_URL ?>';
+    const INIT_TAB = '<?= isset($_GET['tab']) ? htmlspecialchars($_GET['tab']) : 'active' ?>';
 
     function showTab(tab) {
-        document.getElementById('panel-active').classList.toggle('hidden', tab !== 'active');
-        document.getElementById('panel-trash').classList.toggle('hidden', tab !== 'trash');
-        document.getElementById('tab-active').className = tab === 'active'
-            ? 'tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border border-transparent bg-primary-500 text-white shadow'
-            : 'tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border border-gray-200 text-gray-500 hover:bg-gray-50';
-        document.getElementById('tab-trash').className = tab === 'trash'
-            ? 'tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border border-transparent bg-orange-500 text-white shadow'
-            : 'tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border border-gray-200 text-gray-500 hover:bg-gray-50';
+        ['active', 'rejected', 'trash'].forEach(t => {
+            document.getElementById('panel-' + t).classList.toggle('hidden', t !== tab);
+        });
+        const styles = {
+            active:   'bg-primary-500 text-white',
+            rejected: 'bg-red-500 text-white',
+            trash:    'bg-orange-500 text-white',
+        };
+        ['active', 'rejected', 'trash'].forEach(t => {
+            const btn = document.getElementById('tab-' + t);
+            if (!btn) return;
+            btn.className = 'tab-btn px-5 py-2.5 rounded-xl text-sm font-bold transition border ' +
+                (t === tab
+                    ? 'border-transparent ' + styles[t] + ' shadow'
+                    : 'border-gray-200 text-gray-500 hover:bg-gray-50');
+        });
         if (tab === 'trash') loadTrash();
+    }
+
+    async function approveRejected(id, name) {
+        const result = await Swal.fire({
+            title: 'อนุมัติรายการนี้?',
+            text: `"${name}" จะแสดงบนแผนที่ทันที`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#22c55e',
+            confirmButtonText: 'อนุมัติ',
+            cancelButtonText: 'ยกเลิก'
+        });
+        if (!result.isConfirmed) return;
+
+        const fd = new FormData();
+        fd.append('id', id);
+        const res = await fetch(`${BASE_URL}/api/admin/approve`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+            Swal.fire({ icon: 'success', title: 'อนุมัติแล้ว', timer: 1500, showConfirmButton: false });
+            const row = document.getElementById(`rejected-row-${id}`);
+            row.classList.add('opacity-0', 'transition-all', 'duration-500');
+            setTimeout(() => row.remove(), 500);
+        } else {
+            Swal.fire('ข้อผิดพลาด', data.message, 'error');
+        }
     }
 
     async function loadTrash() {
@@ -243,6 +353,11 @@
             Swal.fire('ข้อผิดพลาด', data.message, 'error');
         }
     }
+
+    // Auto-open tab from URL param
+    document.addEventListener('DOMContentLoaded', () => {
+        if (['active', 'rejected', 'trash'].includes(INIT_TAB)) showTab(INIT_TAB);
+    });
 
     function updateTrashBadge() {
         const remaining = document.querySelectorAll('#trashTableBody tr[id^="trash-row-"]').length;

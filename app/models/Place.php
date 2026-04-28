@@ -186,6 +186,14 @@ class Place extends Model {
         return $this->db->resultSet();
     }
 
+    public function getRejected() {
+        $this->db->query("SELECT p.*, c.name as category_name, CONCAT(u.first_name, ' ', u.last_name) as owner_name FROM places p
+                          LEFT JOIN categories c ON p.category_id = c.id
+                          LEFT JOIN users u ON p.owner_user_id = u.user_id
+                          WHERE p.status = 'rejected' ORDER BY p.updated_at DESC");
+        return $this->db->resultSet();
+    }
+
     public function updateStatus($id, $status) {
         $this->db->query("UPDATE places SET status = :status WHERE id = :id");
         $this->db->bind(':status', $status);
