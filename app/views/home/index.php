@@ -191,6 +191,18 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
 </section>
 <?php endif; ?>
 
+<!-- SEO: ของดีรังสิต keyword section -->
+<section class="bg-white border-b border-slate-100 py-8">
+    <div class="container mx-auto px-4">
+        <div class="max-w-3xl">
+            <h2 class="text-2xl font-black text-slate-800 mb-2">ของดีรังสิต — รวมร้านค้า ร้านอาหาร คาเฟ่ สถานที่ท่องเที่ยวในนครรังสิต</h2>
+            <p class="text-slate-500 text-sm leading-relaxed">
+                Discover Rangsit คือแพลตฟอร์มรวม<strong>ของดีเมืองรังสิต</strong> และ<strong>ของดีนครรังสิต</strong> ครบทุกหมวดหมู่ — ร้านอาหารรังสิต คาเฟ่รังสิต ร้านค้ารังสิต สถานที่ท่องเที่ยวรังสิต ของเด็ดรังสิต ของดังรังสิต พร้อมแผนที่ รีวิวจากผู้ใช้จริง และข้อมูลที่ครบถ้วน ค้นหาง่าย ครบจบในที่เดียว โดยเทศบาลนครรังสิต
+            </p>
+        </div>
+    </div>
+</section>
+
 <!-- Content Section -->
 <div class="container mx-auto px-4 py-16">
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-10">

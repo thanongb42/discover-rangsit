@@ -13,14 +13,17 @@ echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
 
 // Static pages
+$today = date('Y-m-d');
 $staticPages = [
-    ['url' => BASE_URL,               'priority' => '1.0', 'freq' => 'daily'],
-    ['url' => BASE_URL . '/city-map', 'priority' => '0.9', 'freq' => 'weekly'],
-    ['url' => BASE_URL . '/trending', 'priority' => '0.8', 'freq' => 'daily'],
+    ['url' => BASE_URL,                  'priority' => '1.0', 'freq' => 'daily',   'lastmod' => $today],
+    ['url' => BASE_URL . '/trending',    'priority' => '0.9', 'freq' => 'daily',   'lastmod' => $today],
+    ['url' => BASE_URL . '/city-map',    'priority' => '0.8', 'freq' => 'weekly',  'lastmod' => $today],
+    ['url' => BASE_URL . '/pr',          'priority' => '0.6', 'freq' => 'monthly', 'lastmod' => $today],
 ];
 foreach ($staticPages as $page) {
     echo "  <url>\n";
     echo "    <loc>" . htmlspecialchars($page['url']) . "</loc>\n";
+    echo "    <lastmod>" . $page['lastmod'] . "</lastmod>\n";
     echo "    <changefreq>" . $page['freq'] . "</changefreq>\n";
     echo "    <priority>" . $page['priority'] . "</priority>\n";
     echo "  </url>\n";

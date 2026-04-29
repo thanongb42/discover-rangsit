@@ -6,11 +6,11 @@
     <title><?= isset($data['title']) ? htmlspecialchars($data['title']) : 'Discover Rangsit - ค้นพบของเด็ด ของดัง และทุกสิ่งในเมืองรังสิต' ?></title>
     
     <?php
-        $seo_desc     = $data['description'] ?? 'Discover Rangsit แพลตฟอร์มรวมร้านค้า ร้านอาหาร ของเด็ดรังสิต ของดังรังสิต ก๋วยเตี๋ยวเรือรังสิต สถานที่ท่องเที่ยว และบริการในเทศบาลนครรังสิต ค้นหาง่าย ครบจบในที่เดียว';
-        $seo_title    = $data['title'] ?? 'Discover Rangsit - ค้นพบทุกสิ่งในเมืองรังสิต';
+        $seo_desc     = $data['description'] ?? 'ค้นหาของดีรังสิต ของดีเมืองรังสิต ของดีนครรังสิต ร้านค้ารังสิต ร้านอาหารรังสิต คาเฟ่รังสิต สถานที่ท่องเที่ยวรังสิต ครบจบในที่เดียว Discover Rangsit แพลตฟอร์มของเทศบาลนครรังสิต';
+        $seo_title    = $data['title'] ?? 'Discover Rangsit — ของดีรังสิต ร้านค้า ร้านอาหาร คาเฟ่ สถานที่ท่องเที่ยวนครรังสิต';
         $seo_image    = $data['og_image'] ?? BASE_URL . '/images/og-cover.jpg';
         $seo_url      = $data['og_url']   ?? BASE_URL . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $seo_keywords = $data['keywords'] ?? 'รังสิต, ของเด็ดรังสิต, ของดังรังสิต, ก๋วยเตี๋ยวเรือรังสิต, ที่เที่ยวรังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต';
+        $seo_keywords = $data['keywords'] ?? 'ของดีรังสิต, ของดีเมืองรังสิต, ของดีนครรังสิต, ร้านค้ารังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, ที่เที่ยวรังสิต, ของเด็ดรังสิต, ของดังรังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต, ก๋วยเตี๋ยวเรือรังสิต';
     ?>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-99N779E4B7"></script>
@@ -61,16 +61,27 @@
       "@context": "https://schema.org/",
       "@type": "WebSite",
       "name": "Discover Rangsit",
+      "alternateName": "ของดีรังสิต",
       "url": "<?= BASE_URL ?>",
       "potentialAction": {
         "@type": "SearchAction",
         "target": "<?= BASE_URL ?>/?q={search_term_string}",
         "query-input": "required name=search_term_string"
       },
-      "description": "แพลตฟอร์มรวบรวมข้อมูลธุรกิจ ของเด็ด ของดัง ก๋วยเตี๋ยวเรือ และสถานที่ท่องเที่ยวในเมืองรังสิต",
+      "description": "ค้นหาของดีรังสิต ของดีนครรังสิต ร้านค้ารังสิต ร้านอาหาร คาเฟ่ สถานที่ท่องเที่ยวในเมืองรังสิต ครบจบในที่เดียว",
       "publisher": {
         "@type": "GovernmentOrganization",
-        "name": "เทศบาลนครรังสิต"
+        "name": "เทศบาลนครรังสิต",
+        "url": "https://www.rangsitcity.go.th",
+        "areaServed": {
+          "@type": "City",
+          "name": "รังสิต",
+          "alternateName": ["นครรังสิต", "เมืองรังสิต", "Rangsit"],
+          "containedInPlace": {
+            "@type": "State",
+            "name": "ปทุมธานี"
+          }
+        }
       }
     }
     </script>

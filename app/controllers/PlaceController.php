@@ -6,8 +6,10 @@ class PlaceController extends Controller {
         $trendingPlaces = $placeModel->getTrending();
 
         $this->view('places/trending', [
-            'title' => 'Trending Places - Discover Rangsit',
-            'places' => $trendingPlaces
+            'title'       => 'ของดีรังสิต ยอดนิยม — ร้านค้า ร้านอาหาร คาเฟ่ สถานที่ฮิตในนครรังสิต | Discover Rangsit',
+            'description' => 'รวมของดีรังสิต ของดีนครรังสิต ร้านค้า ร้านอาหาร คาเฟ่ และสถานที่ยอดนิยมในเมืองรังสิต จัดอันดับโดยผู้ใช้จริง',
+            'keywords'    => 'ของดีรังสิต, ของดียอดนิยม, ของดีนครรังสิต, ร้านค้ารังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, ที่เที่ยวรังสิต, Discover Rangsit',
+            'places'      => $trendingPlaces,
         ]);
     }
 
@@ -48,7 +50,7 @@ class PlaceController extends Controller {
         $this->view('places/detail', [
             'title'       => $place->name . ' - Discover Rangsit',
             'description' => $seoDesc,
-            'keywords'    => $place->name . ', ' . ($place->category_name ?? '') . ', รังสิต, Discover Rangsit, ' . ($place->address ?? ''),
+            'keywords'    => $place->name . ', ' . ($place->category_name ?? '') . ', ของดีรังสิต, ของดีนครรังสิต, ร้านค้ารังสิต, รังสิต, นครรังสิต, Discover Rangsit, ' . ($place->address ?? ''),
             'og_type'     => 'business.business',
             'og_image'    => BASE_URL . '/uploads/covers/' . ($place->cover_image ?: 'default.jpg'),
             'og_url'      => BASE_URL . '/place/' . $place->slug,
