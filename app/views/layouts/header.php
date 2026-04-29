@@ -10,7 +10,7 @@
         $seo_title    = $data['title'] ?? 'Discover Rangsit — ของดีรังสิต ร้านค้า ร้านอาหาร คาเฟ่ สถานที่ท่องเที่ยวนครรังสิต';
         $seo_image    = $data['og_image'] ?? BASE_URL . '/images/og-cover.jpg';
         $seo_url      = $data['og_url']   ?? BASE_URL . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $seo_keywords = $data['keywords'] ?? 'ของดีรังสิต, ของดีเมืองรังสิต, ของดีนครรังสิต, ร้านค้ารังสิต, ร้านอาหารรังสิต, คาเฟ่รังสิต, ที่เที่ยวรังสิต, ของเด็ดรังสิต, ของดังรังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต, ก๋วยเตี๋ยวเรือรังสิต';
+        $seo_keywords = $data['keywords'] ?? 'ของดีรังสิต, ของดีเมืองรังสิต, ของดีนครรังสิต, ของดีย่านรังสิต, ของกินรังสิต, ร้านค้ารังสิต, ร้านอาหารรังสิต, ร้านดังรังสิต, ร้านดังย่านรังสิต, ร้านเด็ดย่านรังสิต, คาเฟ่รังสิต, เที่ยวรังสิต, ที่เที่ยวรังสิต, ของเด็ดรังสิต, ของดังรังสิต, เทศบาลนครรังสิต, Discover Rangsit, แผนที่รังสิต, ก๋วยเตี๋ยวเรือรังสิต';
     ?>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-99N779E4B7"></script>
