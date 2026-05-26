@@ -8,7 +8,7 @@ $iconRaw  = $cat->icon ?? 'fa-tag';
 $iconCls  = (strpos($iconRaw, ' ') === false) ? 'fas ' . $iconRaw : $iconRaw;
 $count    = count($places);
 
-include BASE_PATH . '/app/views/layouts/header.php';
+require_once APP_ROOT . '/app/views/layouts/header.php';
 ?>
 
 <!-- JSON-LD: ItemList -->
@@ -141,4 +141,4 @@ include BASE_PATH . '/app/views/layouts/header.php';
 </section>
 <?php endif; ?>
 
-<?php include BASE_PATH . '/app/views/layouts/footer.php'; ?>
+<?php require_once APP_ROOT . '/app/views/layouts/footer.php'; ?>
