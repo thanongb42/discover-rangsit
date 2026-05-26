@@ -95,6 +95,16 @@ class Place extends Model {
         return $this->db->resultSet();
     }
 
+    public function getByCategoryId($categoryId) {
+        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color
+                          FROM places p
+                          LEFT JOIN categories c ON p.category_id = c.id
+                          WHERE p.status = 'approved' AND p.category_id = :category_id
+                          ORDER BY p.rating_avg DESC, p.rating_count DESC");
+        $this->db->bind(':category_id', $categoryId);
+        return $this->db->resultSet();
+    }
+
     public function getCategories() {
         $this->db->query("SELECT * FROM categories ORDER BY name ASC");
         return $this->db->resultSet();

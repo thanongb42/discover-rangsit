@@ -139,15 +139,25 @@
                 $catColor = htmlspecialchars($cat->color ?? '#0088CC');
                 $catName  = htmlspecialchars($cat->name);
                 $catId    = (int)$cat->id;
+                $catSlug  = htmlspecialchars($cat->slug ?? '');
             ?>
+            <?php if ($catSlug): ?>
+            <a href="<?= BASE_URL ?>/category/<?= $catSlug ?>"
+               class="cat-icon-btn flex flex-col items-center gap-2 shrink-0 focus:outline-none">
+            <?php else: ?>
             <button class="cat-icon-btn flex flex-col items-center gap-2 shrink-0 focus:outline-none"
                     onclick="selectCatIcon('<?= $catId ?>', this, '<?= $catColor ?>')">
+            <?php endif; ?>
                 <div class="cat-circle w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200"
                      style="background:<?= $catColor ?>;">
                     <i class="<?= htmlspecialchars($iconCls) ?> text-white text-xl"></i>
                 </div>
                 <span class="cat-label text-[11px] font-bold text-slate-500 text-center whitespace-nowrap max-w-[72px] truncate leading-tight"><?= $catName ?></span>
+            <?php if ($catSlug): ?>
+            </a>
+            <?php else: ?>
             </button>
+            <?php endif; ?>
             <?php endforeach; ?>
         </div>
     </div>

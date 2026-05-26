@@ -11,9 +11,22 @@ class Category extends Model {
         return $this->db->single();
     }
 
+    public function getBySlug($slug) {
+        $this->db->query("SELECT * FROM categories WHERE slug = :slug");
+        $this->db->bind(':slug', $slug);
+        return $this->db->single();
+    }
+
+    public function getAllWithSlug() {
+        $this->db->query("SELECT * FROM categories WHERE slug IS NOT NULL AND slug != '' ORDER BY name ASC");
+        return $this->db->resultSet();
+    }
+
     public function add($data) {
-        $this->db->query("INSERT INTO categories (name, icon, color) VALUES (:name, :icon, :color)");
+        $slug = $data['slug'] ?? $this->generateSlug($data['name']);
+        $this->db->query("INSERT INTO categories (name, slug, icon, color) VALUES (:name, :slug, :icon, :color)");
         $this->db->bind(':name', $data['name']);
+        $this->db->bind(':slug', $slug);
         $this->db->bind(':icon', $data['icon']);
         $this->db->bind(':color', $data['color']);
         return $this->db->execute();
@@ -26,6 +39,14 @@ class Category extends Model {
         $this->db->bind(':color', $data['color']);
         $this->db->bind(':id', $data['id']);
         return $this->db->execute();
+    }
+
+    private function generateSlug($name) {
+        $slug = strtolower(trim($name));
+        $slug = preg_replace('/[\s\/]+/', '-', $slug);
+        $slug = preg_replace('/[^\w\-\x{0E00}-\x{0E7F}]/u', '', $slug);
+        $slug = trim($slug, '-');
+        return $slug ?: 'category-' . time();
     }
 
     public function delete($id) {

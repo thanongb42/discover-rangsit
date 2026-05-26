@@ -4,10 +4,12 @@ require_once '../app/core/Database.php';
 
 header('Content-Type: application/xml; charset=utf-8');
 
-// Query approved places directly
 $db = new Database();
 $db->query("SELECT slug, updated_at FROM places WHERE status = 'approved' AND slug != '' ORDER BY updated_at DESC");
 $places = $db->resultSet();
+
+$db->query("SELECT slug FROM categories WHERE slug IS NOT NULL AND slug != '' ORDER BY id ASC");
+$categories = $db->resultSet();
 
 echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
 echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
@@ -26,6 +28,15 @@ foreach ($staticPages as $page) {
     echo "    <lastmod>" . $page['lastmod'] . "</lastmod>\n";
     echo "    <changefreq>" . $page['freq'] . "</changefreq>\n";
     echo "    <priority>" . $page['priority'] . "</priority>\n";
+    echo "  </url>\n";
+}
+
+// Category pages
+foreach ($categories as $cat) {
+    echo "  <url>\n";
+    echo "    <loc>" . htmlspecialchars(BASE_URL . '/category/' . $cat->slug) . "</loc>\n";
+    echo "    <changefreq>weekly</changefreq>\n";
+    echo "    <priority>0.8</priority>\n";
     echo "  </url>\n";
 }
 

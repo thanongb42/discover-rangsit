@@ -24,6 +24,9 @@ $router->post('/api/place/review', 'ApiController', 'placeReview');
 $router->post('/api/place/like', 'ApiController', 'placeLike');
 $router->get('/api/place/likers', 'ApiController', 'placeLikers');
 
+// Category pages (SEO)
+$router->get('/category/{slug}', 'CategoryController', 'index');
+
 // Businesses
 $router->get('/place/{slug}', 'PlaceController', 'detail');
 $router->post('/place/rate', 'PlaceController', 'rate');

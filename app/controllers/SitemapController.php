@@ -8,6 +8,9 @@ class SitemapController extends Controller {
         echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
 
+        $categoryModel = $this->model('Category');
+        $categories    = $categoryModel->getAllWithSlug();
+
         // Static pages
         $staticPages = [
             ['url' => BASE_URL,              'priority' => '1.0', 'freq' => 'daily'],
@@ -19,6 +22,16 @@ class SitemapController extends Controller {
             echo "    <loc>" . htmlspecialchars($page['url']) . "</loc>\n";
             echo "    <changefreq>" . $page['freq'] . "</changefreq>\n";
             echo "    <priority>" . $page['priority'] . "</priority>\n";
+            echo "  </url>\n";
+        }
+
+        // Category pages
+        foreach ($categories as $cat) {
+            if (empty($cat->slug)) continue;
+            echo "  <url>\n";
+            echo "    <loc>" . htmlspecialchars(BASE_URL . '/category/' . $cat->slug) . "</loc>\n";
+            echo "    <changefreq>weekly</changefreq>\n";
+            echo "    <priority>0.8</priority>\n";
             echo "  </url>\n";
         }
 
