@@ -8,5 +8,7 @@ Disallow: /dashboard
 Disallow: /profile
 Disallow: /admin/
 Disallow: /api/
+Disallow: /lang/
+Disallow: /track-click
 
 Sitemap: https://discover.rangsitcity.go.th/sitemap.xml

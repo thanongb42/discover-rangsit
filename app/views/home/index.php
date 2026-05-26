@@ -118,6 +118,41 @@
     </div>
 </section>
 
+<!-- Category Quick Nav Strip -->
+<section class="bg-white py-5 shadow-sm border-b border-slate-100">
+    <div class="container mx-auto px-4">
+        <div class="flex gap-3 overflow-x-auto pb-1" style="scrollbar-width:none;-ms-overflow-style:none;">
+            <!-- All -->
+            <button id="catIconAll"
+                    class="cat-icon-btn flex flex-col items-center gap-2 shrink-0 focus:outline-none"
+                    onclick="selectCatIcon('', this, '#0088CC')">
+                <div class="cat-circle w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200"
+                     style="background:linear-gradient(135deg,#0088CC,#005A8E);">
+                    <i class="fas fa-th text-white text-xl"></i>
+                </div>
+                <span class="cat-label text-[11px] font-bold text-slate-500 text-center whitespace-nowrap leading-tight">ทั้งหมด</span>
+            </button>
+
+            <?php foreach ($data['categories'] as $cat):
+                $iconRaw  = $cat->icon ?? 'fa-tag';
+                $iconCls  = (strpos($iconRaw, ' ') === false) ? 'fas ' . $iconRaw : $iconRaw;
+                $catColor = htmlspecialchars($cat->color ?? '#0088CC');
+                $catName  = htmlspecialchars($cat->name);
+                $catId    = (int)$cat->id;
+            ?>
+            <button class="cat-icon-btn flex flex-col items-center gap-2 shrink-0 focus:outline-none"
+                    onclick="selectCatIcon('<?= $catId ?>', this, '<?= $catColor ?>')">
+                <div class="cat-circle w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200"
+                     style="background:<?= $catColor ?>;">
+                    <i class="<?= htmlspecialchars($iconCls) ?> text-white text-xl"></i>
+                </div>
+                <span class="cat-label text-[11px] font-bold text-slate-500 text-center whitespace-nowrap max-w-[72px] truncate leading-tight"><?= $catName ?></span>
+            </button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
 <?php
 // Shared place card helper
 function renderPlaceCard($p, $baseUrl, $badge = null) {
@@ -259,14 +294,49 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
     };
     let currentView = 'grid';
 
+    let _activeCatBtn = null;
+
+    function _activateCatBtn(btn, color) {
+        if (_activeCatBtn) {
+            const prev = _activeCatBtn;
+            prev.querySelector('.cat-circle').style.outline    = '';
+            prev.querySelector('.cat-circle').style.boxShadow = '';
+            prev.querySelector('.cat-circle').style.transform  = '';
+            prev.querySelector('.cat-label').style.color       = '';
+            prev.querySelector('.cat-label').style.fontWeight  = '';
+        }
+        _activeCatBtn = btn;
+        const c = btn.querySelector('.cat-circle');
+        c.style.outline      = '3px solid white';
+        c.style.outlineOffset = '2px';
+        c.style.boxShadow    = `0 0 0 5px ${color}55, 0 4px 16px ${color}44`;
+        c.style.transform    = 'scale(1.1)';
+        btn.querySelector('.cat-label').style.color      = color;
+        btn.querySelector('.cat-label').style.fontWeight = '900';
+    }
+
+    function selectCatIcon(catId, btn, color) {
+        _activateCatBtn(btn, color);
+        document.getElementById('catFilter').value = catId;
+        filterLandingPlaces();
+        setTimeout(() => {
+            document.querySelector('.container.mx-auto.px-4.py-16')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        // Init category icon strip — activate "ทั้งหมด"
+        const allBtn = document.getElementById('catIconAll');
+        if (allBtn) _activateCatBtn(allBtn, '#0088CC');
+
         // Detect mobile and set default view to list
         if (window.innerWidth < 768) {
             switchView('list');
         } else {
             renderLandingPlaces(allPlaces);
         }
-        
+
         // Enter key for search
         document.getElementById('homeSearch').addEventListener('keyup', (e) => {
             if(e.key === 'Enter') filterLandingPlaces();
