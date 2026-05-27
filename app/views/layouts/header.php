@@ -31,7 +31,7 @@
     <meta name="description" content="<?= htmlspecialchars($seo_desc) ?>">
     <meta name="keywords" content="<?= htmlspecialchars($seo_keywords) ?>">
     <meta name="author" content="เทศบาลนครรังสิต">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="<?= htmlspecialchars($data['robots'] ?? 'index, follow') ?>">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="<?= isset($data['og_type']) ? $data['og_type'] : 'website' ?>">

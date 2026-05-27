@@ -48,6 +48,10 @@ class PlaceController extends Controller {
         }
         $seoDesc = mb_substr($seoDesc, 0, 160);
 
+        $isLowQuality = empty(trim($place->description ?? ''))
+                     && empty($place->address)
+                     && ($place->rating_count ?? 0) == 0;
+
         $this->view('places/detail', [
             'title'       => $place->name . ' - Discover Rangsit',
             'description' => $seoDesc,
@@ -55,6 +59,7 @@ class PlaceController extends Controller {
             'og_type'     => 'business.business',
             'og_image'    => BASE_URL . '/uploads/covers/' . ($place->cover_image ?: 'default.jpg'),
             'og_url'      => BASE_URL . '/place/' . $place->slug,
+            'robots'      => $isLowQuality ? 'noindex, follow' : 'index, follow',
             'place'          => $place,
             'gallery'        => $gallery,
             'reviews'        => $reviews,
@@ -104,7 +109,7 @@ class PlaceController extends Controller {
             $slug = preg_replace('/[\s\/]+/', '-', $slug);
             $slug = preg_replace('/[^\w\-\x{0E00}-\x{0E7F}]/u', '', $slug);
             $slug = trim($slug, '-');
-            if (empty($slug)) {
+            if (empty($slug) || mb_strlen($slug) < 3) {
                 $slug = 'place-' . time() . '-' . rand(100, 999);
             }
 
