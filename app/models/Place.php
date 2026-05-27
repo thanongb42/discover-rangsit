@@ -17,9 +17,10 @@ class Place extends Model {
     }
 
     public function update($data) {
-        $this->db->query("UPDATE places SET name = :name, slug = :slug, category_id = :category_id, description = :description, address = :address, latitude = :latitude, longitude = :longitude, phone = :phone, website = :website, facebook = :facebook, line = :line, x = :x, instagram = :instagram, youtube = :youtube, tiktok = :tiktok, line_qr = :line_qr, cover_image = :cover_image, status = :status WHERE id = :id");
+        $this->db->query("UPDATE places SET name = :name, slug = :slug, place_type = :place_type, category_id = :category_id, description = :description, address = :address, latitude = :latitude, longitude = :longitude, phone = :phone, website = :website, facebook = :facebook, line = :line, x = :x, instagram = :instagram, youtube = :youtube, tiktok = :tiktok, line_qr = :line_qr, cover_image = :cover_image, status = :status WHERE id = :id");
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':slug', $data['slug']);
+        $this->db->bind(':place_type', $data['place_type'] ?? 'business');
         $this->db->bind(':category_id', $data['category_id']);
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':address', $data['address']);
@@ -87,11 +88,12 @@ class Place extends Model {
         return $this->db->execute();
     }
 
-    public function getAllApproved() {
-        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color 
-                          FROM places p 
-                          LEFT JOIN categories c ON p.category_id = c.id 
-                          WHERE p.status = 'approved'
+    public function getAllApproved($type = null) {
+        $typeFilter = $type ? "AND p.place_type = '" . $type . "'" : '';
+        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color
+                          FROM places p
+                          LEFT JOIN categories c ON p.category_id = c.id
+                          WHERE p.status = 'approved' $typeFilter
                           ORDER BY p.rating_avg DESC, p.rating_count DESC");
         return $this->db->resultSet();
     }
@@ -166,7 +168,9 @@ class Place extends Model {
     }
 
     public function add($data) {
-        $this->db->query("INSERT INTO places (name, slug, description, category_id, address, latitude, longitude, phone, website, facebook, line, x, instagram, youtube, tiktok, line_qr, cover_image, owner_user_id, status) VALUES (:name, :slug, :description, :category_id, :address, :latitude, :longitude, :phone, :website, :facebook, :line, :x, :instagram, :youtube, :tiktok, :line_qr, :cover_image, :owner_user_id, 'pending')");
+        $status     = $data['status']     ?? 'pending';
+        $place_type = $data['place_type'] ?? 'business';
+        $this->db->query("INSERT INTO places (name, slug, description, category_id, address, latitude, longitude, phone, website, facebook, line, x, instagram, youtube, tiktok, line_qr, cover_image, owner_user_id, status, place_type) VALUES (:name, :slug, :description, :category_id, :address, :latitude, :longitude, :phone, :website, :facebook, :line, :x, :instagram, :youtube, :tiktok, :line_qr, :cover_image, :owner_user_id, :status, :place_type)");
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':slug', $data['slug']);
         $this->db->bind(':description', $data['description']);
@@ -185,7 +189,9 @@ class Place extends Model {
         $this->db->bind(':line_qr', $data['line_qr']);
         $this->db->bind(':cover_image', $data['cover_image']);
         $this->db->bind(':owner_user_id', $data['owner_user_id']);
-        
+        $this->db->bind(':status', $status);
+        $this->db->bind(':place_type', $place_type);
+
         return $this->db->execute();
     }
 

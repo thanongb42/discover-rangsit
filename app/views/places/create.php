@@ -37,6 +37,29 @@
                 <input type="hidden" name="cover_base64" id="coverBase64">
                 <input type="hidden" name="qr_base64" id="qrBase64">
                 
+                <?php $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'; ?>
+                <?php if ($isAdmin): ?>
+                <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                    <label class="block text-sm font-bold text-amber-800 mb-3"><i class="fas fa-shield-alt mr-1"></i> ประเภทสถานที่ (Admin)</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-3 p-3 bg-white border-2 border-[#0088CC] rounded-xl cursor-pointer has-[:checked]:border-[#0088CC] has-[:checked]:bg-blue-50">
+                            <input type="radio" name="place_type" value="business" checked class="text-[#0088CC]">
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm">ร้านค้า / ธุรกิจ</p>
+                                <p class="text-xs text-slate-500">แสดงบน homepage และแผนที่</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 bg-white border-2 border-slate-200 rounded-xl cursor-pointer has-[:checked]:border-amber-400 has-[:checked]:bg-amber-50">
+                            <input type="radio" name="place_type" value="facility" class="text-amber-500">
+                            <div>
+                                <p class="font-bold text-slate-800 text-sm">สิ่งอำนวยความสะดวก</p>
+                                <p class="text-xs text-slate-500">แสดงแผนที่และ category เท่านั้น</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">ชื่อธุรกิจ</label>

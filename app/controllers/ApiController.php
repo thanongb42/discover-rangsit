@@ -4,7 +4,7 @@ class ApiController extends Controller {
     public function places() {
         header('Content-Type: application/json');
         $placeModel = $this->model('Place');
-        $places = $placeModel->getAllApproved();
+        $places = $placeModel->getAllApproved('business');
         echo json_encode($places);
     }
 
@@ -199,10 +199,11 @@ class ApiController extends Controller {
             }
 
             $data = [
-                'id' => $id,
-                'slug' => $newSlug,
-                'name' => trim($_POST['name']),
-                'category_id' => $_POST['category_id'],
+                'id'         => $id,
+                'slug'       => $newSlug,
+                'place_type' => $isAdmin ? ($_POST['place_type'] ?? $currentPlace->place_type ?? 'business') : ($currentPlace->place_type ?? 'business'),
+                'name'       => trim($_POST['name']),
+                'category_id'=> $_POST['category_id'],
                 'description' => trim($_POST['description']),
                 'address' => trim($_POST['address']),
                 'latitude' => $_POST['latitude'],

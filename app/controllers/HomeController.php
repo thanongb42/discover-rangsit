@@ -2,7 +2,7 @@
 class HomeController extends Controller {
     public function index() {
         $placeModel = $this->model('Place');
-        $places = $placeModel->getAllApproved();
+        $places = $placeModel->getAllApproved('business');
         $categories = $placeModel->getCategories();
 
         $recommendations = [];

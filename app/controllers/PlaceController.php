@@ -120,25 +120,29 @@ class PlaceController extends Controller {
                 $slug = $baseSlug . '-' . $counter++;
             }
 
+            $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+
             $data = [
-                'name' => $name,
-                'slug' => $slug,
-                'description' => trim($_POST['description'] ?? ''),
-                'category_id' => $_POST['category_id'] ?? null,
-                'address' => trim($_POST['address'] ?? ''),
-                'latitude' => !empty($_POST['latitude']) ? $_POST['latitude'] : NULL,
-                'longitude' => !empty($_POST['longitude']) ? $_POST['longitude'] : NULL,
-                'phone' => trim($_POST['phone'] ?? ''),
-                'website' => trim($_POST['website'] ?? ''),
-                'facebook' => trim($_POST['facebook'] ?? ''),
-                'line' => trim($_POST['line'] ?? ''),
-                'instagram' => trim($_POST['instagram'] ?? ''),
-                'tiktok' => trim($_POST['tiktok'] ?? ''),
-                'x' => '', 
-                'youtube' => '', 
-                'owner_user_id' => $_SESSION['user_id'],
-                'cover_image' => 'default.jpg',
-                'line_qr' => NULL
+                'name'         => $name,
+                'slug'         => $slug,
+                'description'  => trim($_POST['description'] ?? ''),
+                'category_id'  => $_POST['category_id'] ?? null,
+                'address'      => trim($_POST['address'] ?? ''),
+                'latitude'     => !empty($_POST['latitude'])  ? $_POST['latitude']  : NULL,
+                'longitude'    => !empty($_POST['longitude']) ? $_POST['longitude'] : NULL,
+                'phone'        => trim($_POST['phone']    ?? ''),
+                'website'      => trim($_POST['website']  ?? ''),
+                'facebook'     => trim($_POST['facebook'] ?? ''),
+                'line'         => trim($_POST['line']     ?? ''),
+                'instagram'    => trim($_POST['instagram'] ?? ''),
+                'tiktok'       => trim($_POST['tiktok']   ?? ''),
+                'x'            => '',
+                'youtube'      => '',
+                'owner_user_id'=> $isAdmin ? NULL : $_SESSION['user_id'],
+                'cover_image'  => 'default.jpg',
+                'line_qr'      => NULL,
+                'status'       => $isAdmin ? 'approved' : 'pending',
+                'place_type'   => $isAdmin ? ($_POST['place_type'] ?? 'business') : 'business',
             ];
 
             // Handle Cover Image Upload (Prioritize Base64 from client-side resizing)
