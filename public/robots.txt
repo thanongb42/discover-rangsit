@@ -10,5 +10,6 @@ Disallow: /admin/
 Disallow: /api/
 Disallow: /lang/
 Disallow: /track-click
+Disallow: /uploads/
 
 Sitemap: https://discover.rangsitcity.go.th/sitemap.xml

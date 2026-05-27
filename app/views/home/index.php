@@ -296,6 +296,7 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
 </div>
 
 <script>
+    const BASE = '<?= BASE_URL ?>';
     const allPlaces = <?= json_encode($data['places']) ?>;
     const HOME_LANG = {
         seeMore:    '<?= addslashes(isLang('en') ? 'See details' : 'ดูรายละเอียด') ?>',
@@ -435,7 +436,7 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
         div.className = 'group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-teal-100 transition-all duration-500 overflow-hidden flex flex-col';
         div.innerHTML = `
             <div class="relative h-56 overflow-hidden">
-                <img src="<?= BASE_URL ?>/uploads/covers/${p.cover_image || 'default.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                <img src="${BASE}/uploads/covers/${p.cover_image || 'default.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                 <div class="absolute top-4 left-4">
                     <span class="bg-white/90 backdrop-blur text-navy-800 text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-sm border border-white">
                         ${p.category_name}
@@ -455,7 +456,7 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
                 <p class="text-slate-500 text-sm mb-6 line-clamp-2 leading-relaxed flex-1">
                     ${p.description || 'ไม่มีคำอธิบายข้อมูล'}
                 </p>
-                <a href="<?= BASE_URL ?>/place/${p.slug}" class="bg-slate-900 group-hover:bg-teal-600 text-white text-center py-3 rounded-2xl font-black text-sm transition-colors duration-300">
+                <a href="${BASE}/place/${p.slug}" class="bg-slate-900 group-hover:bg-teal-600 text-white text-center py-3 rounded-2xl font-black text-sm transition-colors duration-300">
                     ${HOME_LANG.seeMore}
                 </a>
             </div>
@@ -468,7 +469,7 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
         div.className = 'group bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-teal-100 transition-all duration-300 p-4 flex gap-6 items-center';
         div.innerHTML = `
             <div class="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0">
-                <img src="<?= BASE_URL ?>/uploads/covers/${p.cover_image || 'default.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                <img src="${BASE}/uploads/covers/${p.cover_image || 'default.jpg'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
             </div>
             <div class="flex-1 min-w-0">
                 <div class="flex justify-between items-start mb-1">
@@ -490,7 +491,7 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
                 </p>
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-bold text-navy-800"><i class="fas fa-phone-alt mr-1"></i> ${p.phone || '-'}</span>
-                    <a href="<?= BASE_URL ?>/place/${p.slug}" class="bg-slate-50 text-navy-800 hover:bg-teal-600 hover:text-white px-6 py-2 rounded-xl font-bold text-xs transition duration-300">
+                    <a href="${BASE}/place/${p.slug}" class="bg-slate-50 text-navy-800 hover:bg-teal-600 hover:text-white px-6 py-2 rounded-xl font-bold text-xs transition duration-300">
                         ${HOME_LANG.seeMore}
                     </a>
                 </div>
