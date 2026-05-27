@@ -3,8 +3,8 @@ class Router {
     protected $routes = [];
 
     public function add($method, $route, $controller, $action) {
-        $route = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<\1>[a-zA-Z0-9_-]+)', $route);
-        $route = '#^' . $route . '$#';
+        $route = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<\1>[a-zA-Z0-9_\\x{0E00}-\\x{0E7F}-]+)', $route);
+        $route = '#^' . $route . '$#u';
         $this->routes[] = [
             'method' => $method,
             'route' => $route,
