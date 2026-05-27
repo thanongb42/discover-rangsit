@@ -22,7 +22,7 @@ class Router {
     }
 
     public function dispatch($url) {
-        $url = parse_url($url, PHP_URL_PATH);
+        $url = rawurldecode(parse_url($url, PHP_URL_PATH));
         
         // ดึงเอาเฉพาะส่วนที่เป็น Path จาก BASE_URL ใน config
         // เช่น ถ้า BASE_URL คือ https://domain.com/public ค่า $basePath จะเป็น /public
