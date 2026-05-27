@@ -19,7 +19,8 @@ class PlaceController extends Controller {
         $place = $placeModel->getBySlug($slug);
 
         if (!$place) {
-            die("Place not found");
+            http_response_code(404);
+            die("404 - Place not found");
         }
 
         // Add view count
@@ -99,8 +100,11 @@ class PlaceController extends Controller {
                 exit;
             }
 
-            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
-            if (empty($slug) || !preg_match('/[a-z0-9]/', $slug)) {
+            $slug = strtolower(trim($name));
+            $slug = preg_replace('/[\s\/]+/', '-', $slug);
+            $slug = preg_replace('/[^\w\-\x{0E00}-\x{0E7F}]/u', '', $slug);
+            $slug = trim($slug, '-');
+            if (empty($slug)) {
                 $slug = 'place-' . time() . '-' . rand(100, 999);
             }
 

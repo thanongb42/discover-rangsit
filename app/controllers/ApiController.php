@@ -190,8 +190,17 @@ class ApiController extends Controller {
                 return;
             }
 
+            $newSlug = $currentPlace->slug;
+            if ($isAdmin && !empty($_POST['slug'])) {
+                $candidate = trim($_POST['slug']);
+                if (!$placeModel->slugExists($candidate, $id)) {
+                    $newSlug = $candidate;
+                }
+            }
+
             $data = [
                 'id' => $id,
+                'slug' => $newSlug,
                 'name' => trim($_POST['name']),
                 'category_id' => $_POST['category_id'],
                 'description' => trim($_POST['description']),

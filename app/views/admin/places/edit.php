@@ -115,6 +115,12 @@ $deliveryUrl = $data['current_page'] === 'my_businesses'
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">ชื่อสถานที่</label>
                             <input type="text" name="name" value="<?= htmlspecialchars($data['place']->name) ?>" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 focus:ring-primary-500 focus:border-primary-500 transition" required>
+                            <?php if($data['current_page'] !== 'my_businesses'): ?>
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="text-xs text-gray-400">URL:</span>
+                                <input type="text" name="slug" value="<?= htmlspecialchars($data['place']->slug) ?>" class="flex-1 text-xs bg-white border border-dashed border-gray-300 rounded-lg px-3 py-1.5 text-gray-600 focus:ring-primary-500 focus:border-primary-500 transition font-mono" placeholder="slug-url">
+                            </div>
+                            <?php endif; ?>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-2">หมวดหมู่</label>

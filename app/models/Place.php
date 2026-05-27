@@ -17,8 +17,9 @@ class Place extends Model {
     }
 
     public function update($data) {
-        $this->db->query("UPDATE places SET name = :name, category_id = :category_id, description = :description, address = :address, latitude = :latitude, longitude = :longitude, phone = :phone, website = :website, facebook = :facebook, line = :line, x = :x, instagram = :instagram, youtube = :youtube, tiktok = :tiktok, line_qr = :line_qr, cover_image = :cover_image, status = :status WHERE id = :id");
+        $this->db->query("UPDATE places SET name = :name, slug = :slug, category_id = :category_id, description = :description, address = :address, latitude = :latitude, longitude = :longitude, phone = :phone, website = :website, facebook = :facebook, line = :line, x = :x, instagram = :instagram, youtube = :youtube, tiktok = :tiktok, line_qr = :line_qr, cover_image = :cover_image, status = :status WHERE id = :id");
         $this->db->bind(':name', $data['name']);
+        $this->db->bind(':slug', $data['slug']);
         $this->db->bind(':category_id', $data['category_id']);
         $this->db->bind(':description', $data['description']);
         $this->db->bind(':address', $data['address']);
