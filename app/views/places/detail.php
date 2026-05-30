@@ -375,6 +375,29 @@
                             <i class="fas fa-qrcode text-[#0088CC]"></i> QR Code ร้านนี้
                         </button>
                     </div>
+
+                    <!-- Business Claim -->
+                    <?php
+                    $claimStatus = $data['claim_status'] ?? null;
+                    $canClaim    = isset($_SESSION['user_id']) && empty($place->owner_user_id);
+                    ?>
+                    <?php if ($canClaim): ?>
+                    <div class="mt-4">
+                        <?php if ($claimStatus === 'pending'): ?>
+                            <div class="flex items-center gap-2 w-full bg-amber-50 border border-amber-200 text-amber-700 font-bold py-3 px-4 rounded-2xl text-sm">
+                                <i class="fas fa-clock"></i> อยู่ระหว่างรอการตรวจสอบ
+                            </div>
+                        <?php elseif ($claimStatus === 'rejected'): ?>
+                            <div class="flex items-center gap-2 w-full bg-red-50 border border-red-200 text-red-600 font-bold py-3 px-4 rounded-2xl text-sm">
+                                <i class="fas fa-times-circle"></i> คำขอถูกปฏิเสธ
+                            </div>
+                        <?php else: ?>
+                            <button onclick="openClaimForm()" class="flex items-center justify-center gap-2 w-full bg-blue-50 hover:bg-blue-100 text-[#0088CC] font-bold py-3 rounded-2xl border border-blue-200 transition text-sm">
+                                <i class="fas fa-handshake"></i> ขอเป็นเจ้าของร้านนี้
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Delivery Platforms -->
@@ -767,6 +790,92 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
+<!-- Business Claim Modal -->
+<?php if (isset($_SESSION['user_id']) && empty($place->owner_user_id) && ($data['claim_status'] ?? null) === null): ?>
+<div id="claim-modal" class="hidden fixed inset-0 bg-black/60 z-[3500] items-center justify-center p-4" onclick="if(event.target===this)closeClaimForm()">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm">
+        <div class="flex items-center justify-between mb-5">
+            <h4 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                <i class="fas fa-handshake text-[#0088CC]"></i> ขอเป็นเจ้าของร้านนี้
+            </h4>
+            <button onclick="closeClaimForm()" class="text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+        <p class="text-xs text-slate-400 mb-5">กรอกข้อมูลเพื่อยืนยันตัวตน เจ้าหน้าที่จะตรวจสอบภายใน 3-5 วันทำการ</p>
+        <form id="claim-form" class="space-y-3">
+            <input type="hidden" name="place_id" value="<?= (int)$place->id ?>">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">ชื่อผู้ติดต่อ <span class="text-red-400">*</span></label>
+                <input type="text" name="contact_name" required
+                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC] focus:border-transparent"
+                       placeholder="ชื่อ-นามสกุล">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">เบอร์โทรศัพท์ <span class="text-red-400">*</span></label>
+                <input type="tel" name="phone" required
+                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC] focus:border-transparent"
+                       placeholder="08x-xxx-xxxx">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">LINE ID</label>
+                <input type="text" name="line_id"
+                       class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC] focus:border-transparent"
+                       placeholder="ไม่บังคับ">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 mb-1">รายละเอียดเพิ่มเติม</label>
+                <textarea name="message" rows="2"
+                          class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0088CC] focus:border-transparent resize-none"
+                          placeholder="เช่น เอกสารที่ยืนยันความเป็นเจ้าของ (ไม่บังคับ)"></textarea>
+            </div>
+            <button type="submit" id="claim-submit-btn"
+                    class="w-full bg-[#0088CC] hover:bg-[#005A8E] text-white font-bold py-3 rounded-2xl text-sm transition mt-2">
+                ส่งคำขอ
+            </button>
+        </form>
+    </div>
+</div>
+<script>
+window.openClaimForm  = function () {
+    const m = document.getElementById('claim-modal');
+    m.classList.remove('hidden'); m.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+};
+window.closeClaimForm = function () {
+    const m = document.getElementById('claim-modal');
+    m.classList.add('hidden'); m.classList.remove('flex');
+    document.body.style.overflow = '';
+};
+document.getElementById('claim-form')?.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const btn  = document.getElementById('claim-submit-btn');
+    const data = new FormData(this);
+    btn.disabled    = true;
+    btn.textContent = 'กำลังส่ง...';
+    try {
+        const res  = await fetch('<?= BASE_URL ?>/place/claim', { method: 'POST', body: data });
+        const json = await res.json();
+        closeClaimForm();
+        Swal.fire({
+            icon: json.success ? 'success' : 'error',
+            title: json.success ? 'ส่งคำขอสำเร็จ' : 'เกิดข้อผิดพลาด',
+            text: json.message,
+            confirmButtonColor: '#0088CC'
+        }).then(function () { if (json.success) location.reload(); });
+    } catch (err) {
+        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'กรุณาลองใหม่', confirmButtonColor: '#0088CC' });
+    } finally {
+        btn.disabled    = false;
+        btn.textContent = 'ส่งคำขอ';
+    }
+});
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeClaimForm();
+});
+</script>
+<?php endif; ?>
 
 <!-- Place QR Modal -->
 <div id="place-qr-modal" class="hidden fixed inset-0 bg-black/60 z-[3500] items-center justify-center p-4" onclick="if(event.target===this)closePlaceQR()">

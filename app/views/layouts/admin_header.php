@@ -13,12 +13,19 @@ $is_member = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'membe
 
 // Pending count badge (admin only)
 $pending_count = 0;
+$claim_count   = 0;
 if ($is_admin) {
     try {
         $db = new Database();
         $db->query("SELECT COUNT(*) as cnt FROM places WHERE status = 'pending'");
         $row = $db->single();
         $pending_count = (int)($row->cnt ?? 0);
+    } catch (Exception $e) {}
+    try {
+        $db2 = new Database();
+        $db2->query("SELECT COUNT(*) as cnt FROM business_claim_requests WHERE status = 'pending'");
+        $row2 = $db2->single();
+        $claim_count = (int)($row2->cnt ?? 0);
     } catch (Exception $e) {}
 }
 
@@ -40,7 +47,8 @@ if ($is_admin) {
         'items' => [
             ['id' => 'executive_dashboard', 'icon' => 'fa-chart-pie', 'label' => 'Executive Dashboard', 'url' => BASE_URL . '/admin/dashboard/economic'],
             ['id' => 'city_dashboard', 'icon' => 'fa-city', 'label' => 'City Dashboard', 'url' => BASE_URL . '/admin/city-dashboard'],
-            ['id' => 'pending', 'icon' => 'fa-clock', 'label' => 'รอการอนุมัติ', 'url' => BASE_URL . '/admin/pending', 'badge' => $pending_count],
+            ['id' => 'pending', 'icon' => 'fa-clock',     'label' => 'รอการอนุมัติ',        'url' => BASE_URL . '/admin/pending',  'badge' => $pending_count],
+            ['id' => 'claims', 'icon' => 'fa-handshake', 'label' => 'Claim ร้านค้า',         'url' => BASE_URL . '/admin/claims',   'badge' => $claim_count],
             ['id' => 'rejected', 'icon' => 'fa-times-circle', 'label' => 'ไม่อนุมัติ', 'url' => BASE_URL . '/admin/places?tab=rejected'],
             ['id' => 'admin_places', 'icon' => 'fa-map-location-dot', 'label' => 'จัดการสถานที่', 'url' => BASE_URL . '/admin/places'],
             ['id' => 'usermanager', 'icon' => 'fa-users-cog', 'label' => 'จัดการผู้ใช้งาน', 'url' => BASE_URL . '/admin/users'],

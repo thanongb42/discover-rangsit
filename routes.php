@@ -27,6 +27,12 @@ $router->get('/api/place/likers', 'ApiController', 'placeLikers');
 // Category pages (SEO)
 $router->get('/category/{slug}', 'CategoryController', 'index');
 
+// Business Claim
+$router->post('/place/claim',               'ClaimController', 'submit');
+$router->get('/admin/claims',               'ClaimController', 'adminList');
+$router->post('/api/admin/claims/approve',  'ClaimController', 'approve');
+$router->post('/api/admin/claims/reject',   'ClaimController', 'reject');
+
 // Businesses
 $router->get('/place/{slug}', 'PlaceController', 'detail');
 $router->post('/place/rate', 'PlaceController', 'rate');

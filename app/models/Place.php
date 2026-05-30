@@ -644,6 +644,13 @@ class Place extends Model {
         return $this->db->single();
     }
 
+    public function setOwner($placeId, $userId) {
+        $this->db->query("UPDATE places SET owner_user_id = :uid WHERE id = :pid AND (owner_user_id IS NULL OR owner_user_id = 0)");
+        $this->db->bind(':uid', $userId);
+        $this->db->bind(':pid', $placeId);
+        return $this->db->execute();
+    }
+
     public function getOwnerUserId($id) {
         $this->db->query("SELECT owner_user_id FROM places WHERE id = :id");
         $this->db->bind(':id', $id);

@@ -41,6 +41,14 @@ class PlaceController extends Controller {
         $likeCount = $placeModel->getLikeCount($place->id);
         $hasLiked  = isset($_SESSION['user_id']) ? $placeModel->hasLiked($place->id, $_SESSION['user_id']) : false;
 
+        // Claim status
+        $claimStatus = null;
+        if (isset($_SESSION['user_id']) && empty($place->owner_user_id)) {
+            $claimModel  = $this->model('Claim');
+            $existClaim  = $claimModel->getByPlaceAndUser($place->id, (int)$_SESSION['user_id']);
+            $claimStatus = $existClaim ? $existClaim->status : null;
+        }
+
         // Build SEO description from place data
         $seoDesc = trim(strip_tags($place->description ?? ''));
         if (empty($seoDesc)) {
@@ -66,6 +74,7 @@ class PlaceController extends Controller {
             'like_count'     => $likeCount,
             'has_liked'      => $hasLiked,
             'delivery_links' => $deliveryLinks,
+            'claim_status'   => $claimStatus,
         ]);
     }
 
