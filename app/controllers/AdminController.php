@@ -36,6 +36,30 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function executiveDashboard() {
+        $placeModel  = $this->model('Place');
+
+        $summary     = $placeModel->getCitySummary();
+        $growth      = $placeModel->getGrowthThisMonth();
+        $completeness = $placeModel->getDataCompleteness();
+        $topKeywords = $placeModel->getTopSearchKeywords(10, 30);
+        $topPlaces   = $placeModel->getTopPlacesByViews(10);
+        $catStats    = $placeModel->getCategoryStats();
+        $newByMonth  = $placeModel->getNewBusinessesByMonth(6);
+
+        $this->view('admin/executive_dashboard', [
+            'title'        => 'Executive Dashboard — เทศบาลนครรังสิต',
+            'summary'      => $summary,
+            'growth'       => $growth,
+            'completeness' => $completeness,
+            'top_keywords' => $topKeywords,
+            'top_places'   => $topPlaces,
+            'cat_stats'    => $catStats,
+            'new_by_month' => $newByMonth,
+            'current_page' => 'executive_dashboard',
+        ]);
+    }
+
     public function cityDashboard() {
         $placeModel = $this->model('Place');
 

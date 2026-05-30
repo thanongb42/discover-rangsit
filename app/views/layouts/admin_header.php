@@ -38,6 +38,7 @@ if ($is_admin) {
     $menu_groups['manage'] = [
         'label' => 'จัดการระบบ',
         'items' => [
+            ['id' => 'executive_dashboard', 'icon' => 'fa-chart-pie', 'label' => 'Executive Dashboard', 'url' => BASE_URL . '/admin/dashboard/economic'],
             ['id' => 'city_dashboard', 'icon' => 'fa-city', 'label' => 'City Dashboard', 'url' => BASE_URL . '/admin/city-dashboard'],
             ['id' => 'pending', 'icon' => 'fa-clock', 'label' => 'รอการอนุมัติ', 'url' => BASE_URL . '/admin/pending', 'badge' => $pending_count],
             ['id' => 'rejected', 'icon' => 'fa-times-circle', 'label' => 'ไม่อนุมัติ', 'url' => BASE_URL . '/admin/places?tab=rejected'],

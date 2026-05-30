@@ -590,6 +590,54 @@ class Place extends Model {
         return $this->db->resultSet();
     }
 
+    public function getTopSearchKeywords(int $limit = 10, int $days = 30): array
+    {
+        $this->db->query("
+            SELECT keyword, COUNT(*) AS count
+            FROM search_logs
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
+              AND keyword != ''
+            GROUP BY keyword
+            ORDER BY count DESC
+            LIMIT :lim
+        ");
+        $this->db->bind(':days', $days);
+        $this->db->bind(':lim',  $limit);
+        return $this->db->resultSet();
+    }
+
+    public function getDataCompleteness(): object|false
+    {
+        $this->db->query("
+            SELECT
+                COUNT(*)                                                                    AS total,
+                SUM(phone IS NOT NULL AND phone != '')                                      AS has_phone,
+                SUM(cover_image IS NOT NULL AND cover_image != '')                          AS has_cover,
+                SUM(latitude IS NOT NULL AND longitude IS NOT NULL)                         AS has_coords,
+                SUM(description IS NOT NULL AND description != '')                          AS has_desc,
+                SUM(facebook IS NOT NULL AND facebook != ''
+                    OR line IS NOT NULL AND line != ''
+                    OR instagram IS NOT NULL AND instagram != '')                            AS has_social
+            FROM places
+            WHERE status = 'approved'
+        ");
+        return $this->db->single();
+    }
+
+    public function getGrowthThisMonth(): object|false
+    {
+        $this->db->query("
+            SELECT
+                SUM(MONTH(created_at) = MONTH(NOW())
+                    AND YEAR(created_at) = YEAR(NOW()))                         AS this_month,
+                SUM(MONTH(created_at) = MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH))
+                    AND YEAR(created_at) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH))) AS last_month
+            FROM places
+            WHERE status != 'trash'
+        ");
+        return $this->db->single();
+    }
+
     public function getOwnerUserId($id) {
         $this->db->query("SELECT owner_user_id FROM places WHERE id = :id");
         $this->db->bind(':id', $id);
