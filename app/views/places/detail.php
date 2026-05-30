@@ -368,6 +368,13 @@
                         <?php endif; ?>
                     </div>
                     <?php endif; ?>
+
+                    <!-- Place QR Code Button -->
+                    <div class="mt-6 pt-6 border-t border-slate-100">
+                        <button onclick="openPlaceQR()" class="flex items-center justify-center gap-2 w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-3 rounded-2xl border border-slate-200 transition text-sm">
+                            <i class="fas fa-qrcode text-[#0088CC]"></i> QR Code ร้านนี้
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Delivery Platforms -->
@@ -408,7 +415,6 @@
                         <button type="button" class="delivery-qr-close w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl transition">ปิด</button>
                     </div>
                 </div>
-                <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
                 <script src="<?= BASE_URL ?>/js/delivery-qr.js"></script>
                 <?php endif; ?>
 
@@ -760,6 +766,84 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(() => {});
     }
 });
+</script>
+
+<!-- Place QR Modal -->
+<div id="place-qr-modal" class="hidden fixed inset-0 bg-black/60 z-[3500] items-center justify-center p-4" onclick="if(event.target===this)closePlaceQR()">
+    <div class="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-xs w-full">
+        <div class="flex items-center justify-between mb-4">
+            <h4 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                <i class="fas fa-qrcode text-[#0088CC]"></i> QR Code ร้านนี้
+            </h4>
+            <button onclick="closePlaceQR()" class="text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+        <p class="text-xs text-slate-400 mb-4 break-all" id="place-qr-url"></p>
+        <div id="place-qr-canvas" class="flex justify-center mb-4 bg-white p-3 rounded-2xl border border-slate-100 mx-auto" style="width:fit-content"></div>
+        <p class="text-[10px] text-slate-400 mb-5">สแกนเพื่อดูข้อมูลร้านบนมือถือ</p>
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="downloadPlaceQR()" class="flex items-center justify-center gap-2 bg-[#0088CC] hover:bg-[#005A8E] text-white font-bold py-2.5 rounded-2xl text-sm transition">
+                <i class="fas fa-download"></i> ดาวน์โหลด
+            </button>
+            <button onclick="copyPlaceURL()" id="copy-url-btn" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-2xl text-sm transition">
+                <i class="fas fa-copy"></i> คัดลอก URL
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+(function () {
+    const PLACE_URL = '<?= BASE_URL ?>/place/<?= htmlspecialchars($place->slug, ENT_QUOTES) ?>';
+    const modal     = document.getElementById('place-qr-modal');
+    const canvas    = document.getElementById('place-qr-canvas');
+
+    window.openPlaceQR = function () {
+        document.getElementById('place-qr-url').textContent = PLACE_URL;
+        canvas.innerHTML = '';
+        QRCode.toCanvas(PLACE_URL, { width: 220, margin: 2, color: { dark: '#1e293b', light: '#ffffff' } }, function (err, c) {
+            if (!err) canvas.appendChild(c);
+        });
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closePlaceQR = function () {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    };
+
+    window.downloadPlaceQR = function () {
+        const c = canvas.querySelector('canvas');
+        if (!c) return;
+        const a    = document.createElement('a');
+        a.download = 'qr-<?= htmlspecialchars($place->slug, ENT_QUOTES) ?>.png';
+        a.href     = c.toDataURL('image/png');
+        a.click();
+    };
+
+    window.copyPlaceURL = function () {
+        const btn = document.getElementById('copy-url-btn');
+        navigator.clipboard.writeText(PLACE_URL).then(function () {
+            btn.innerHTML = '<i class="fas fa-check"></i> คัดลอกแล้ว';
+            btn.classList.add('bg-green-100', 'text-green-700');
+            btn.classList.remove('bg-slate-100', 'text-slate-700');
+            setTimeout(function () {
+                btn.innerHTML = '<i class="fas fa-copy"></i> คัดลอก URL';
+                btn.classList.remove('bg-green-100', 'text-green-700');
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+            }, 2000);
+        });
+    };
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) closePlaceQR();
+    });
+})();
 </script>
 
 <?php require_once APP_ROOT . '/app/views/layouts/footer.php'; ?>
