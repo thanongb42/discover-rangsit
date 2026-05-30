@@ -56,6 +56,9 @@
                         <a href="<?= BASE_URL ?>/dashboard/analytics/<?= $place->id ?>" class="flex items-center justify-center gap-2 w-full bg-primary-500 hover:bg-primary-600 text-white py-2.5 rounded-xl text-xs font-bold transition shadow-sm shadow-primary-500/30">
                             <i class="fas fa-chart-line"></i> ดู Analytics
                         </a>
+                        <a href="<?= BASE_URL ?>/dashboard/events/<?= $place->id ?>" class="flex items-center justify-center gap-2 w-full bg-orange-50 hover:bg-orange-100 text-orange-600 py-2.5 rounded-xl text-xs font-bold transition border border-orange-200">
+                            <i class="fas fa-tag"></i> โปรโมชั่น / กิจกรรม
+                        </a>
                         <div class="flex gap-2">
                             <a href="<?= BASE_URL ?>/dashboard/edit-place/<?= $place->id ?>" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-center py-2.5 rounded-xl text-xs font-bold transition">
                                 <i class="fas fa-edit mr-1"></i> แก้ไข

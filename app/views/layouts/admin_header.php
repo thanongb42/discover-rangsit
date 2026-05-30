@@ -49,6 +49,7 @@ if ($is_admin) {
             ['id' => 'city_dashboard', 'icon' => 'fa-city', 'label' => 'City Dashboard', 'url' => BASE_URL . '/admin/city-dashboard'],
             ['id' => 'pending', 'icon' => 'fa-clock',     'label' => 'รอการอนุมัติ',        'url' => BASE_URL . '/admin/pending',  'badge' => $pending_count],
             ['id' => 'claims', 'icon' => 'fa-handshake', 'label' => 'Claim ร้านค้า',         'url' => BASE_URL . '/admin/claims',   'badge' => $claim_count],
+            ['id' => 'events', 'icon' => 'fa-tag',       'label' => 'โปรโมชั่น / กิจกรรม', 'url' => BASE_URL . '/admin/events'],
             ['id' => 'rejected', 'icon' => 'fa-times-circle', 'label' => 'ไม่อนุมัติ', 'url' => BASE_URL . '/admin/places?tab=rejected'],
             ['id' => 'admin_places', 'icon' => 'fa-map-location-dot', 'label' => 'จัดการสถานที่', 'url' => BASE_URL . '/admin/places'],
             ['id' => 'usermanager', 'icon' => 'fa-users-cog', 'label' => 'จัดการผู้ใช้งาน', 'url' => BASE_URL . '/admin/users'],

@@ -41,6 +41,10 @@ class PlaceController extends Controller {
         $likeCount = $placeModel->getLikeCount($place->id);
         $hasLiked  = isset($_SESSION['user_id']) ? $placeModel->hasLiked($place->id, $_SESSION['user_id']) : false;
 
+        // Active events
+        $eventModel    = $this->model('PlaceEvent');
+        $activeEvents  = $eventModel->getActiveByPlace($place->id);
+
         // Claim status
         $claimStatus = null;
         if (isset($_SESSION['user_id']) && empty($place->owner_user_id)) {
@@ -75,6 +79,7 @@ class PlaceController extends Controller {
             'has_liked'      => $hasLiked,
             'delivery_links' => $deliveryLinks,
             'claim_status'   => $claimStatus,
+            'active_events'  => $activeEvents,
         ]);
     }
 

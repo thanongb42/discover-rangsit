@@ -155,6 +155,48 @@
                 </div>
                 <?php endif; ?>
 
+                <!-- Events / Promotions Section -->
+                <?php $activeEvents = $data['active_events'] ?? []; ?>
+                <?php if (!empty($activeEvents)): ?>
+                <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="px-8 pt-7 pb-4 flex items-center gap-2 border-b border-slate-50">
+                        <span class="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></span>
+                        <h3 class="text-xl font-bold text-slate-800">โปรโมชั่น / กิจกรรม</h3>
+                        <span class="text-xs bg-orange-100 text-orange-600 font-bold px-2 py-0.5 rounded-full ml-1"><?= count($activeEvents) ?> รายการ</span>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <?php foreach ($activeEvents as $ev): ?>
+                        <?php
+                            $isNew = strtotime($ev->start_date) >= strtotime('-7 days');
+                            $endLabel = $ev->end_date
+                                ? 'ถึง ' . date('d M', strtotime($ev->end_date)) . (date('Y', strtotime($ev->end_date)) != date('Y') ? ' ' . (date('Y', strtotime($ev->end_date)) + 543) : '')
+                                : 'ไม่มีวันหมดอายุ';
+                        ?>
+                        <div class="flex gap-4 p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                            <div class="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0 text-orange-500">
+                                <i class="fas fa-tag text-lg"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <h4 class="font-bold text-slate-800 text-sm"><?= htmlspecialchars($ev->title) ?></h4>
+                                    <?php if ($isNew): ?>
+                                    <span class="text-[10px] bg-red-500 text-white font-bold px-1.5 py-0.5 rounded-full">NEW</span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($ev->description): ?>
+                                <p class="text-xs text-slate-500 leading-relaxed mb-1"><?= nl2br(htmlspecialchars($ev->description)) ?></p>
+                                <?php endif; ?>
+                                <p class="text-[10px] text-orange-500 font-bold">
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    <?= date('d M', strtotime($ev->start_date)) ?> — <?= $endLabel ?>
+                                </p>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <!-- Reviews Section -->
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8">
                     <div class="flex items-center justify-between mb-8">

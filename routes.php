@@ -66,6 +66,12 @@ $router->post('/dashboard/add-place', 'PlaceController', 'store');
 $router->get('/dashboard/edit-place/{id}',  'PlaceController', 'editPlace');
 $router->get('/dashboard/analytics/{id}',   'PlaceController', 'analytics');
 
+// Place Events
+$router->get('/dashboard/events/{id}',  'EventController', 'index');
+$router->post('/api/events/save',        'EventController', 'save');
+$router->post('/api/events/delete',      'EventController', 'delete');
+$router->get('/admin/events',            'EventController', 'adminList');
+
 // Delivery Links
 $router->get('/admin/places/delivery/{id}', 'DeliveryController', 'index');
 $router->get('/dashboard/delivery/{id}',    'DeliveryController', 'index');
