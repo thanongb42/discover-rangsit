@@ -36,6 +36,13 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function heatmap() {
+        $this->view('admin/heatmap', [
+            'title'        => 'Heatmap Analytics — เทศบาลนครรังสิต',
+            'current_page' => 'heatmap',
+        ]);
+    }
+
     public function executiveDashboard() {
         $placeModel = $this->model('Place');
 

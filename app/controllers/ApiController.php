@@ -1109,4 +1109,33 @@ class ApiController extends Controller {
 
         echo json_encode($result);
     }
+
+    public function heatmapData() {
+        header('Content-Type: application/json');
+        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            return;
+        }
+        $days       = (int)($_GET['days'] ?? 30);
+        $placeModel = $this->model('Place');
+        try {
+            $points = $placeModel->getHeatmapData($days);
+            $stats  = $placeModel->getHeatmapStats($days) ?: (object)[];
+            $maxViews = $points ? max(array_map(fn($p) => (int)$p->view_count, $points)) : 1;
+            $heat = array_map(fn($p) => [
+                (float)$p->latitude,
+                (float)$p->longitude,
+                round((int)$p->view_count / max($maxViews, 1), 4),
+                $p->name,
+                $p->view_count,
+            ], $points);
+            echo json_encode([
+                'success' => true,
+                'points'  => $heat,
+                'stats'   => $stats,
+            ]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'points' => [], 'stats' => (object)[]]);
+        }
+    }
 }

@@ -80,6 +80,8 @@ $router->post('/api/delivery/delete',       'DeliveryController', 'delete');
 $router->get('/track-click',               'DeliveryController', 'trackClick');
 
 // Admin Actions
+$router->get('/admin/heatmap',            'AdminController', 'heatmap');
+$router->get('/api/admin/heatmap-data',   'ApiController',   'heatmapData');
 $router->get('/admin/dashboard/economic', 'AdminController', 'executiveDashboard');
 $router->get('/admin/city-dashboard', 'AdminController', 'cityDashboard');
 $router->get('/admin/pending', 'AdminController', 'pending');

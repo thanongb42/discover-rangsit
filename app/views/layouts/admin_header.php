@@ -45,7 +45,8 @@ if ($is_admin) {
     $menu_groups['manage'] = [
         'label' => 'จัดการระบบ',
         'items' => [
-            ['id' => 'executive_dashboard', 'icon' => 'fa-chart-pie', 'label' => 'Executive Dashboard', 'url' => BASE_URL . '/admin/dashboard/economic'],
+            ['id' => 'executive_dashboard', 'icon' => 'fa-chart-pie',  'label' => 'Executive Dashboard', 'url' => BASE_URL . '/admin/dashboard/economic'],
+            ['id' => 'heatmap',             'icon' => 'fa-fire-alt',  'label' => 'Heatmap Analytics',   'url' => BASE_URL . '/admin/heatmap'],
             ['id' => 'city_dashboard', 'icon' => 'fa-city', 'label' => 'City Dashboard', 'url' => BASE_URL . '/admin/city-dashboard'],
             ['id' => 'pending', 'icon' => 'fa-clock',     'label' => 'รอการอนุมัติ',        'url' => BASE_URL . '/admin/pending',  'badge' => $pending_count],
             ['id' => 'claims', 'icon' => 'fa-handshake', 'label' => 'Claim ร้านค้า',         'url' => BASE_URL . '/admin/claims',   'badge' => $claim_count],

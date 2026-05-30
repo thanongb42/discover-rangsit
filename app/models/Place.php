@@ -594,6 +594,54 @@ class Place extends Model {
         return $this->db->resultSet();
     }
 
+    public function getHeatmapData(int $days = 30): array
+    {
+        $sql = "
+            SELECT p.latitude, p.longitude,
+                   p.name, p.slug, p.category_id,
+                   COUNT(pv.id) AS view_count
+            FROM places p
+            JOIN place_views pv ON p.id = pv.place_id
+            WHERE p.latitude IS NOT NULL
+              AND p.longitude IS NOT NULL
+              AND p.status = 'approved'
+        ";
+        if ($days > 0) {
+            $sql .= " AND pv.viewed_at >= DATE_SUB(NOW(), INTERVAL :days DAY)";
+        }
+        $sql .= " GROUP BY p.id ORDER BY view_count DESC";
+
+        $this->db->query($sql);
+        if ($days > 0) $this->db->bind(':days', $days);
+        return $this->db->resultSet();
+    }
+
+    public function getHeatmapStats(int $days = 30): object|false
+    {
+        $sql = "
+            SELECT
+                COUNT(DISTINCT pv.place_id)                          AS active_places,
+                COUNT(pv.id)                                         AS total_views,
+                HOUR(MAX(pv.viewed_at))                              AS last_hour,
+                (SELECT HOUR(viewed_at)
+                 FROM place_views
+                 WHERE viewed_at >= DATE_SUB(NOW(), INTERVAL :days2 DAY)
+                 GROUP BY HOUR(viewed_at)
+                 ORDER BY COUNT(*) DESC LIMIT 1)                     AS peak_hour
+            FROM place_views pv
+            JOIN places p ON pv.place_id = p.id
+            WHERE p.latitude IS NOT NULL
+              AND p.longitude IS NOT NULL
+        ";
+        if ($days > 0) {
+            $sql .= " AND pv.viewed_at >= DATE_SUB(NOW(), INTERVAL :days DAY)";
+        }
+        $this->db->query($sql);
+        $this->db->bind(':days2', $days);
+        if ($days > 0) $this->db->bind(':days', $days);
+        return $this->db->single();
+    }
+
     public function getTopSearchKeywords(int $limit = 10, int $days = 30): array
     {
         $this->db->query("
