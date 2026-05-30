@@ -157,6 +157,14 @@
                     </a>
                 <?php else: ?>
                     <div class="w-px h-5 bg-white/20"></div>
+                    <?php
+                        $dashUrl = in_array($_SESSION['user_role'] ?? '', ['admin','operator'])
+                            ? BASE_URL . '/admin/dashboard/economic'
+                            : BASE_URL . '/dashboard';
+                    ?>
+                    <a href="<?= $dashUrl ?>" class="hover:text-blue-100 transition font-medium flex items-center gap-1.5">
+                        <i class="fas fa-chart-pie text-sm"></i> Dashboard
+                    </a>
                     <a href="<?= BASE_URL ?>/my-businesses" class="hover:text-blue-100 transition font-medium flex items-center gap-1.5">
                         <i class="fas fa-building text-sm"></i> ธุรกิจของฉัน
                     </a>
@@ -193,6 +201,9 @@
                                 <p class="text-sm font-bold text-gray-800 truncate"><?= htmlspecialchars($_SESSION['user_name'] ?? 'User') ?></p>
                                 <p class="text-[10px] text-gray-400 uppercase tracking-wider"><?= $_SESSION['user_role'] ?? 'member' ?></p>
                             </div>
+                            <a href="<?= $dashUrl ?>" class="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition font-semibold">
+                                <i class="fas fa-chart-pie mr-3 text-primary-400 w-4 text-center"></i> Dashboard
+                            </a>
                             <a href="<?= BASE_URL ?>/my-businesses" class="flex items-center px-4 py-2.5 text-sm text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition font-semibold">
                                 <i class="fas fa-building mr-3 text-primary-400 w-4 text-center"></i> ธุรกิจของฉัน
                             </a>
