@@ -393,9 +393,17 @@ function renderPlaceCard($p, $baseUrl, $badge = null) {
         document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
     }
 
+    let _searchLogTimer = null;
     function filterLandingPlaces() {
         const keyword = document.getElementById('homeSearch').value.toLowerCase();
         const catId = document.getElementById('catFilter').value;
+
+        if (keyword.length > 1) {
+            clearTimeout(_searchLogTimer);
+            _searchLogTimer = setTimeout(function () {
+                fetch('<?= BASE_URL ?>/api/search?q=' + encodeURIComponent(keyword));
+            }, 800);
+        }
 
         const filtered = allPlaces.filter(p => {
             const matchKeyword = p.name.toLowerCase().includes(keyword) ||
