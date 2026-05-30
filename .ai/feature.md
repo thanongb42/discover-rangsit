@@ -132,3 +132,35 @@ Executive Dashboard · City Dashboard · Heatmap Analytics · Search Trends · D
 
 ### กลุ่มที่ 5 — สิ่งแวดล้อมเมือง
 PM2.5 Real-time · พยากรณ์อากาศ · GIS-ready
+
+---
+
+## BACKLOG — Feature ที่ยังไม่ได้ทำ (มาต่อพรุ่งนี้)
+
+### Phase 2 — เหลือ 1 feature
+
+| Feature | รายละเอียด | Priority |
+|---------|-----------|---------|
+| Feature 5 — AI Search Ready | เตรียม architecture: SearchService, SemanticSearchService, RecommendationService — ยังไม่ integrate AI จริง แค่วาง structure | ต่ำ |
+
+---
+
+### Phase 3 — Smart City Platform (ยังไม่เริ่ม)
+
+| Feature | รายละเอียด | Priority |
+|---------|-----------|---------|
+| Complaint System | ระบบรับเรื่องร้องเรียนจากประชาชน | สูง |
+| Tourism Page | หน้ารวมสถานที่ท่องเที่ยวในเมืองรังสิต | กลาง |
+| Events Calendar | ปฏิทินกิจกรรมเมือง (ต่อยอดจาก place_events) | กลาง |
+| Open Data | เปิดข้อมูลสถิติเมืองให้สาธารณะ | ต่ำ |
+| Refill City | จุดเติมน้ำสะอาดในเมือง | ต่ำ |
+| Smart Water | ข้อมูลคุณภาพน้ำ | ต่ำ |
+
+---
+
+### Housekeeping (ต้องทำก่อน merge)
+
+| งาน | หมายเหตุ |
+|-----|---------|
+| Merge branch `feature/discover-vnext-smart-city` → `Version-Beta01` | ยังไม่ได้ merge |
+| Push to GitHub | backup code ขึ้น remote |
