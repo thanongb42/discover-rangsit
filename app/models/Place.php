@@ -599,14 +599,12 @@ class Place extends Model {
         $this->db->query("
             SELECT keyword, COUNT(*) AS count
             FROM search_logs
-            WHERE created_at >= DATE_SUB(NOW(), INTERVAL :days DAY)
-              AND keyword != ''
+            WHERE keyword != ''
             GROUP BY keyword
             ORDER BY count DESC
             LIMIT :lim
         ");
-        $this->db->bind(':days', $days);
-        $this->db->bind(':lim',  $limit);
+        $this->db->bind(':lim', $limit);
         return $this->db->resultSet();
     }
 
