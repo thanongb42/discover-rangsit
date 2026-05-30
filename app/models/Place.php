@@ -617,7 +617,11 @@ class Place extends Model {
                 SUM(description IS NOT NULL AND description != '')                          AS has_desc,
                 SUM(facebook IS NOT NULL AND facebook != ''
                     OR line IS NOT NULL AND line != ''
-                    OR instagram IS NOT NULL AND instagram != '')                            AS has_social
+                    OR instagram IS NOT NULL AND instagram != '')                            AS has_social,
+                SUM(EXISTS(
+                    SELECT 1 FROM place_delivery_links pdl
+                    WHERE pdl.place_id = places.id AND pdl.is_active = 1
+                ))                                                                          AS has_delivery
             FROM places
             WHERE status = 'approved'
         ");

@@ -19,12 +19,14 @@ $hasPhone   = (int)(isset($completeness->has_phone)  ? $completeness->has_phone 
 $hasCover   = (int)(isset($completeness->has_cover)  ? $completeness->has_cover  : 0);
 $hasCoords  = (int)(isset($completeness->has_coords) ? $completeness->has_coords : 0);
 $hasDesc    = (int)(isset($completeness->has_desc)   ? $completeness->has_desc   : 0);
-$hasSocial  = (int)(isset($completeness->has_social) ? $completeness->has_social : 0);
-$pctPhone   = $total > 0 ? round($hasPhone  / $total * 100) : 0;
-$pctCover   = $total > 0 ? round($hasCover  / $total * 100) : 0;
-$pctCoords  = $total > 0 ? round($hasCoords / $total * 100) : 0;
-$pctDesc    = $total > 0 ? round($hasDesc   / $total * 100) : 0;
-$pctSocial  = $total > 0 ? round($hasSocial / $total * 100) : 0;
+$hasSocial   = (int)(isset($completeness->has_social)   ? $completeness->has_social   : 0);
+$hasDelivery = (int)(isset($completeness->has_delivery) ? $completeness->has_delivery : 0);
+$pctPhone    = $total > 0 ? round($hasPhone   / $total * 100) : 0;
+$pctCover    = $total > 0 ? round($hasCover   / $total * 100) : 0;
+$pctCoords   = $total > 0 ? round($hasCoords  / $total * 100) : 0;
+$pctDesc     = $total > 0 ? round($hasDesc    / $total * 100) : 0;
+$pctSocial   = $total > 0 ? round($hasSocial  / $total * 100) : 0;
+$pctDelivery = $total > 0 ? round($hasDelivery / $total * 100) : 0;
 
 $monthLabels = array_map(fn($r) => $r->label, $newByMonth);
 $monthCounts = array_map(fn($r) => (int)$r->count, $newByMonth);
@@ -117,11 +119,12 @@ $catColors   = array_map(fn($c) => $c->color ?: '#94a3b8', $catStats);
     </div>
     <?php
     $bars = [
-        ['label' => 'มีรูปภาพหน้าปก',     'pct' => $pctCover,  'color' => 'bg-blue-500'],
-        ['label' => 'มีคำอธิบายร้าน',       'pct' => $pctDesc,   'color' => 'bg-sky-500'],
-        ['label' => 'มีเบอร์โทรศัพท์',       'pct' => $pctPhone,  'color' => 'bg-emerald-500'],
-        ['label' => 'มีพิกัด GPS',           'pct' => $pctCoords, 'color' => 'bg-violet-500'],
-        ['label' => 'มี Social Media',       'pct' => $pctSocial, 'color' => 'bg-rose-500'],
+        ['label' => 'มีรูปภาพหน้าปก',        'pct' => $pctCover,    'color' => 'bg-blue-500'],
+        ['label' => 'มีคำอธิบายร้าน',          'pct' => $pctDesc,     'color' => 'bg-sky-500'],
+        ['label' => 'มีเบอร์โทรศัพท์',          'pct' => $pctPhone,    'color' => 'bg-emerald-500'],
+        ['label' => 'มีพิกัด GPS',              'pct' => $pctCoords,   'color' => 'bg-violet-500'],
+        ['label' => 'มี Social Media',          'pct' => $pctSocial,   'color' => 'bg-rose-500'],
+        ['label' => 'เชื่อมต่อ Delivery App',   'pct' => $pctDelivery, 'color' => 'bg-orange-500'],
     ];
     foreach ($bars as $bar): ?>
     <div class="mb-3">
