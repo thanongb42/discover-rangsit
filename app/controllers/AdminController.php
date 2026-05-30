@@ -37,15 +37,20 @@ class AdminController extends Controller {
     }
 
     public function executiveDashboard() {
-        $placeModel  = $this->model('Place');
+        $placeModel = $this->model('Place');
 
-        $summary     = $placeModel->getCitySummary();
-        $growth      = $placeModel->getGrowthThisMonth();
-        $completeness = $placeModel->getDataCompleteness();
-        $topKeywords = $placeModel->getTopSearchKeywords(10, 30);
-        $topPlaces   = $placeModel->getTopPlacesByViews(10);
-        $catStats    = $placeModel->getCategoryStats();
-        $newByMonth  = $placeModel->getNewBusinessesByMonth(6);
+        $summary      = $placeModel->getCitySummary()      ?: (object)[];
+        $growth       = $placeModel->getGrowthThisMonth()  ?: (object)[];
+        $completeness = $placeModel->getDataCompleteness() ?: (object)[];
+        $topPlaces    = $placeModel->getTopPlacesByViews(10);
+        $catStats     = $placeModel->getCategoryStats();
+        $newByMonth   = $placeModel->getNewBusinessesByMonth(6);
+
+        try {
+            $topKeywords = $placeModel->getTopSearchKeywords(10, 30);
+        } catch (Exception $e) {
+            $topKeywords = [];
+        }
 
         $this->view('admin/executive_dashboard', [
             'title'        => 'Executive Dashboard — เทศบาลนครรังสิต',

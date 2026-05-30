@@ -1,25 +1,25 @@
 <?php require_once APP_ROOT . '/app/views/layouts/admin_header.php'; ?>
 <?php
-$summary      = $data['summary'];
-$growth       = $data['growth'];
-$completeness = $data['completeness'];
-$topKeywords  = $data['top_keywords'];
-$topPlaces    = $data['top_places'];
-$catStats     = $data['cat_stats'];
-$newByMonth   = $data['new_by_month'];
+$summary      = $data['summary']      ?? (object)[];
+$growth       = $data['growth']       ?? (object)[];
+$completeness = $data['completeness'] ?? (object)[];
+$topKeywords  = $data['top_keywords'] ?? [];
+$topPlaces    = $data['top_places']   ?? [];
+$catStats     = $data['cat_stats']    ?? [];
+$newByMonth   = $data['new_by_month'] ?? [];
 
-$approved   = (int)($summary->approved   ?? 0);
-$pending    = (int)($summary->pending    ?? 0);
-$thisMonth  = (int)($growth->this_month  ?? 0);
-$lastMonth  = (int)($growth->last_month  ?? 0);
+$approved   = (int)(isset($summary->approved)   ? $summary->approved   : 0);
+$pending    = (int)(isset($summary->pending)    ? $summary->pending    : 0);
+$thisMonth  = (int)(isset($growth->this_month)  ? $growth->this_month  : 0);
+$lastMonth  = (int)(isset($growth->last_month)  ? $growth->last_month  : 0);
 $growthPct  = $lastMonth > 0 ? round(($thisMonth - $lastMonth) / $lastMonth * 100) : ($thisMonth > 0 ? 100 : 0);
 
-$total      = (int)($completeness->total      ?? 0);
-$hasPhone   = (int)($completeness->has_phone  ?? 0);
-$hasCover   = (int)($completeness->has_cover  ?? 0);
-$hasCoords  = (int)($completeness->has_coords ?? 0);
-$hasDesc    = (int)($completeness->has_desc   ?? 0);
-$hasSocial  = (int)($completeness->has_social ?? 0);
+$total      = (int)(isset($completeness->total)      ? $completeness->total      : 0);
+$hasPhone   = (int)(isset($completeness->has_phone)  ? $completeness->has_phone  : 0);
+$hasCover   = (int)(isset($completeness->has_cover)  ? $completeness->has_cover  : 0);
+$hasCoords  = (int)(isset($completeness->has_coords) ? $completeness->has_coords : 0);
+$hasDesc    = (int)(isset($completeness->has_desc)   ? $completeness->has_desc   : 0);
+$hasSocial  = (int)(isset($completeness->has_social) ? $completeness->has_social : 0);
 $pctPhone   = $total > 0 ? round($hasPhone  / $total * 100) : 0;
 $pctCover   = $total > 0 ? round($hasCover  / $total * 100) : 0;
 $pctCoords  = $total > 0 ? round($hasCoords / $total * 100) : 0;
@@ -73,7 +73,7 @@ $catColors   = array_map(fn($c) => $c->color ?: '#94a3b8', $catStats);
             </div>
             <p class="text-3xl font-black text-gray-800 leading-none mb-1"><?= number_format($approved) ?></p>
             <p class="text-xs font-bold text-gray-600">ธุรกิจอนุมัติแล้ว</p>
-            <p class="text-[10px] text-gray-400 mt-1"><?= number_format($summary->total_businesses ?? 0) ?> รายการในระบบ</p>
+            <p class="text-[10px] text-gray-400 mt-1"><?= number_format(isset($summary->total_businesses) ? $summary->total_businesses : 0) ?> รายการในระบบ</p>
         </div>
     </div>
 
@@ -101,9 +101,9 @@ $catColors   = array_map(fn($c) => $c->color ?: '#94a3b8', $catStats);
             <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-violet-400 flex items-center justify-center mb-3">
                 <i class="fas fa-users text-white text-sm"></i>
             </div>
-            <p class="text-3xl font-black text-gray-800 leading-none mb-1"><?= number_format($summary->total_users ?? 0) ?></p>
+            <p class="text-3xl font-black text-gray-800 leading-none mb-1"><?= number_format(isset($summary->total_users) ? $summary->total_users : 0) ?></p>
             <p class="text-xs font-bold text-gray-600">สมาชิกทั้งหมด</p>
-            <p class="text-[10px] text-gray-400 mt-1"><?= number_format($summary->total_reviews ?? 0) ?> รีวิวในระบบ</p>
+            <p class="text-[10px] text-gray-400 mt-1"><?= number_format(isset($summary->total_reviews) ? $summary->total_reviews : 0) ?> รีวิวในระบบ</p>
         </div>
     </div>
 </div>
