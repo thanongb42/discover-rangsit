@@ -102,7 +102,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="<?= BASE_URL ?>/js/qrcode.min.js"></script>
 <script>
 (function () {
     const modal  = document.getElementById('business-qr-modal');
@@ -114,12 +114,17 @@
         document.getElementById('biz-qr-name').textContent = name;
         document.getElementById('biz-qr-url').textContent  = url;
         canvas.innerHTML = '';
-        QRCode.toCanvas(url, { width: 220, margin: 2, color: { dark: '#1e293b', light: '#ffffff' } }, function (err, c) {
-            if (!err) canvas.appendChild(c);
-        });
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
+        new QRCode(canvas, {
+            text: url,
+            width: 220,
+            height: 220,
+            colorDark: '#1e293b',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
     };
 
     window.closeBusinessQR = function () {
@@ -129,12 +134,12 @@
     };
 
     window.downloadBusinessQR = function () {
-        const c = canvas.querySelector('canvas');
+        const c = canvas.querySelector('canvas') || canvas.querySelector('img');
         if (!c) return;
         const slug = currentURL.split('/').pop();
         const a    = document.createElement('a');
         a.download = 'qr-' + slug + '.png';
-        a.href     = c.toDataURL('image/png');
+        a.href     = (c instanceof HTMLCanvasElement) ? c.toDataURL('image/png') : c.src;
         a.click();
     };
 

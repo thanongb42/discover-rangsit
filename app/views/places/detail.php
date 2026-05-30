@@ -793,7 +793,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="<?= BASE_URL ?>/js/qrcode.min.js"></script>
 <script>
 (function () {
     const PLACE_URL = '<?= BASE_URL ?>/place/<?= htmlspecialchars($place->slug, ENT_QUOTES) ?>';
@@ -802,22 +802,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.openPlaceQR = function () {
         document.getElementById('place-qr-url').textContent = PLACE_URL;
-        canvas.innerHTML = '<div class="py-8 text-slate-400 text-xs"><i class="fas fa-circle-notch fa-spin text-2xl block mb-2 mx-auto"></i>กำลังสร้าง QR...</div>';
+        canvas.innerHTML = '';
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
-
-        if (typeof QRCode === 'undefined') {
-            canvas.innerHTML = '<p class="text-red-400 text-xs py-6">โหลด QR library ไม่สำเร็จ<br>กรุณาลองใหม่</p>';
-            return;
-        }
-        QRCode.toCanvas(PLACE_URL, { width: 220, margin: 2, color: { dark: '#1e293b', light: '#ffffff' } }, function (err, c) {
-            canvas.innerHTML = '';
-            if (!err) {
-                canvas.appendChild(c);
-            } else {
-                canvas.innerHTML = '<p class="text-red-400 text-xs py-6">เกิดข้อผิดพลาด กรุณาลองใหม่</p>';
-            }
+        new QRCode(canvas, {
+            text: PLACE_URL,
+            width: 220,
+            height: 220,
+            colorDark: '#1e293b',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
         });
     };
 
@@ -828,11 +823,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.downloadPlaceQR = function () {
-        const c = canvas.querySelector('canvas');
+        const c = canvas.querySelector('canvas') || canvas.querySelector('img');
         if (!c) return;
         const a    = document.createElement('a');
         a.download = 'qr-<?= htmlspecialchars($place->slug, ENT_QUOTES) ?>.png';
-        a.href     = c.toDataURL('image/png');
+        a.href     = (c instanceof HTMLCanvasElement) ? c.toDataURL('image/png') : c.src;
         a.click();
     };
 
