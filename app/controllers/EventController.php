@@ -25,9 +25,9 @@ class EventController extends Controller {
         return $isOwner || $isAdmin;
     }
 
-    public function index($placeId) {
+    public function index($id) {
         $this->requireLogin();
-        $placeId = (int)$placeId;
+        $placeId = (int)$id;
 
         if (!$this->ownsPlace($placeId)) {
             header('Location: ' . BASE_URL . '/my-businesses');
