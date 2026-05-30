@@ -802,13 +802,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.openPlaceQR = function () {
         document.getElementById('place-qr-url').textContent = PLACE_URL;
-        canvas.innerHTML = '';
-        QRCode.toCanvas(PLACE_URL, { width: 220, margin: 2, color: { dark: '#1e293b', light: '#ffffff' } }, function (err, c) {
-            if (!err) canvas.appendChild(c);
-        });
+        canvas.innerHTML = '<div class="py-8 text-slate-400 text-xs"><i class="fas fa-circle-notch fa-spin text-2xl block mb-2 mx-auto"></i>กำลังสร้าง QR...</div>';
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
+
+        if (typeof QRCode === 'undefined') {
+            canvas.innerHTML = '<p class="text-red-400 text-xs py-6">โหลด QR library ไม่สำเร็จ<br>กรุณาลองใหม่</p>';
+            return;
+        }
+        QRCode.toCanvas(PLACE_URL, { width: 220, margin: 2, color: { dark: '#1e293b', light: '#ffffff' } }, function (err, c) {
+            canvas.innerHTML = '';
+            if (!err) {
+                canvas.appendChild(c);
+            } else {
+                canvas.innerHTML = '<p class="text-red-400 text-xs py-6">เกิดข้อผิดพลาด กรุณาลองใหม่</p>';
+            }
+        });
     };
 
     window.closePlaceQR = function () {
