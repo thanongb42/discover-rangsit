@@ -114,10 +114,14 @@ class Place extends Model {
     }
 
     public function logSearch($keyword, $ip) {
-        $this->db->query("INSERT INTO search_logs (keyword, result_count, ip_address) VALUES (:keyword, 0, :ip)");
-        $this->db->bind(':keyword', $keyword);
-        $this->db->bind(':ip', $ip);
-        $this->db->execute();
+        try {
+            $this->db->query("INSERT INTO search_logs (keyword, result_count, ip_address) VALUES (:keyword, 0, :ip)");
+            $this->db->bind(':keyword', $keyword);
+            $this->db->bind(':ip', $ip);
+            $this->db->execute();
+        } catch (Exception $e) {
+            // table may not exist yet — fail silently
+        }
     }
 
     public function getTrending() {
