@@ -5,4 +5,10 @@ class MapController extends Controller {
             'title' => 'Discover Rangsit - Smart City Platform'
         ]);
     }
+
+    public function threeD() {
+        $this->view('map/three_d', [
+            'title' => 'Discover Rangsit - 3D City Map'
+        ]);
+    }
 }

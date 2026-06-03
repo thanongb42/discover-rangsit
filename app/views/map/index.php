@@ -47,6 +47,11 @@
 
         <!-- Map Controls Overlays -->
         <div class="absolute top-4 right-4 z-[998] flex flex-col gap-2">
+            <a href="<?= BASE_URL ?>/3dmap" class="bg-white/95 backdrop-blur px-4 py-3 rounded-2xl shadow-lg border border-white flex items-center gap-2 text-xs font-black text-slate-700 hover:text-[#0088CC] hover:shadow-xl transition">
+                <i class="fas fa-cube text-[#0088CC]"></i>
+                <span>3D Map</span>
+            </a>
+
             <!-- Heatmap Toggle -->
             <div class="bg-white/90 backdrop-blur p-3 rounded-2xl shadow-lg border border-white flex items-center gap-3">
                 <span class="text-xs font-bold text-slate-700">Heatmap</span>

@@ -81,4 +81,36 @@ class PlaceEvent extends Model {
         ");
         return $this->db->resultSet();
     }
+
+    public function getUpcomingPublic(int $limit = 100): array {
+        $this->db->query("
+            SELECT
+                e.*, p.name AS place_name, p.slug AS place_slug,
+                p.cover_image, p.address, p.latitude, p.longitude,
+                c.name AS category_name, c.color AS category_color
+            FROM place_events e
+            JOIN places p ON e.place_id = p.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE e.status = 'active'
+              AND p.status = 'approved'
+              AND (e.end_date IS NULL OR e.end_date >= CURDATE())
+            ORDER BY e.start_date ASC, e.id DESC
+            LIMIT :limit
+        ");
+        $this->db->bind(':limit', $limit);
+        return $this->db->resultSet();
+    }
+
+    public function countUpcomingPublic(): int {
+        $this->db->query("
+            SELECT COUNT(*) AS total
+            FROM place_events e
+            JOIN places p ON e.place_id = p.id
+            WHERE e.status = 'active'
+              AND p.status = 'approved'
+              AND (e.end_date IS NULL OR e.end_date >= CURDATE())
+        ");
+        $row = $this->db->single();
+        return $row ? (int)$row->total : 0;
+    }
 }

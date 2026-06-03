@@ -20,6 +20,11 @@ $staticPages = [
     ['url' => BASE_URL,                  'priority' => '1.0', 'freq' => 'daily',   'lastmod' => $today],
     ['url' => BASE_URL . '/trending',    'priority' => '0.9', 'freq' => 'daily',   'lastmod' => $today],
     ['url' => BASE_URL . '/city-map',    'priority' => '0.8', 'freq' => 'weekly',  'lastmod' => $today],
+    ['url' => BASE_URL . '/3dmap',       'priority' => '0.8', 'freq' => 'weekly',  'lastmod' => $today],
+    ['url' => BASE_URL . '/tourism',     'priority' => '0.8', 'freq' => 'weekly',  'lastmod' => $today],
+    ['url' => BASE_URL . '/events',      'priority' => '0.7', 'freq' => 'daily',   'lastmod' => $today],
+    ['url' => BASE_URL . '/open-data',   'priority' => '0.6', 'freq' => 'weekly',  'lastmod' => $today],
+    ['url' => BASE_URL . '/refill-city', 'priority' => '0.6', 'freq' => 'weekly',  'lastmod' => $today],
     ['url' => BASE_URL . '/pr',          'priority' => '0.6', 'freq' => 'monthly', 'lastmod' => $today],
 ];
 foreach ($staticPages as $page) {

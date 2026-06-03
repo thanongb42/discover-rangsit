@@ -4,7 +4,8 @@ class ApiController extends Controller {
     public function places() {
         header('Content-Type: application/json');
         $placeModel = $this->model('Place');
-        $places = $placeModel->getAllApproved('business');
+        $type = preg_replace('/[^a-z_]/', '', $_GET['type'] ?? '');
+        $places = $type ? $placeModel->getAllApproved($type) : $placeModel->getMapApproved();
         echo json_encode($places);
     }
 

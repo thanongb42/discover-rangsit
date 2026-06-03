@@ -98,6 +98,66 @@ class Place extends Model {
         return $this->db->resultSet();
     }
 
+    public function getMapApproved(): array {
+        $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color
+                          FROM places p
+                          LEFT JOIN categories c ON p.category_id = c.id
+                          WHERE p.status = 'approved'
+                            AND (p.place_type IN ('business', 'facility') OR p.place_type IS NULL)
+                          ORDER BY
+                            CASE WHEN p.place_type = 'facility' THEN 1 ELSE 0 END ASC,
+                            p.rating_avg DESC,
+                            p.rating_count DESC");
+        return $this->db->resultSet();
+    }
+
+    public function getPublicOpenDataPlaces(): array {
+        $this->db->query("
+            SELECT
+                p.id, p.name, p.slug, p.description, p.address,
+                p.latitude, p.longitude, p.phone, p.website,
+                p.place_type, p.views_count, p.rating_avg, p.rating_count,
+                p.created_at, c.name AS category_name
+            FROM places p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.status = 'approved'
+            ORDER BY p.name ASC
+        ");
+        return $this->db->resultSet();
+    }
+
+    public function getOpenDataStats(): object {
+        $this->db->query("
+            SELECT
+                COUNT(*) AS total_places,
+                SUM(CASE WHEN place_type = 'business' THEN 1 ELSE 0 END) AS business_places,
+                SUM(CASE WHEN place_type = 'tourism' THEN 1 ELSE 0 END) AS tourism_places,
+                SUM(CASE WHEN place_type = 'facility' THEN 1 ELSE 0 END) AS refill_places,
+                SUM(CASE WHEN latitude IS NOT NULL AND longitude IS NOT NULL THEN 1 ELSE 0 END) AS mapped_places,
+                SUM(CASE WHEN cover_image IS NOT NULL AND cover_image != '' AND cover_image != 'default.jpg' THEN 1 ELSE 0 END) AS places_with_images,
+                COALESCE(SUM(views_count), 0) AS total_views
+            FROM places
+            WHERE status = 'approved'
+        ");
+        return $this->db->single();
+    }
+
+    public function getCategoryOpenDataStats(): array {
+        $this->db->query("
+            SELECT
+                COALESCE(c.name, 'Uncategorized') AS category_name,
+                COUNT(p.id) AS total_places,
+                COALESCE(SUM(p.views_count), 0) AS total_views,
+                ROUND(AVG(NULLIF(p.rating_avg, 0)), 2) AS average_rating
+            FROM places p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.status = 'approved'
+            GROUP BY c.name
+            ORDER BY total_places DESC, category_name ASC
+        ");
+        return $this->db->resultSet();
+    }
+
     public function getByCategoryId($categoryId) {
         $this->db->query("SELECT p.*, c.name as category_name, c.icon as category_icon, c.color as category_color
                           FROM places p

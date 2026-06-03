@@ -4,6 +4,41 @@
 
 ---
 
+# Roadmap Status Memory — 2026-05-31
+
+## Completed / Implemented
+
+| Feature | Status | Files / Notes |
+|---|---|---|
+| 3D Map Page | Done | Added `/3dmap`, `app/views/map/three_d.php`, `public/js/map-3d.js`, mobile layer toggle, map icon popup behavior, 2D/3D menu toggle. |
+| 3D Map Prompt Docs | Done | `.ai/3d.md`, `.ai/cdp-3dmap-nextjs-prompt.md` for future Next.js/CDP map work. |
+| Tourism Page | Done | Added `/tourism` via `CivicController::tourism()`, `app/views/civic/tourism.php`, header nav, sitemap. |
+| Events Calendar | Done | Added `/events` via `CivicController::events()`, `app/views/civic/events.php`, uses public upcoming events from `place_events`. |
+| Open Data | Done | Added `/open-data`, `/open-data/places.json`, `/open-data/places.csv`; stats and export methods added to `Place`/`PlaceEvent`. |
+| Refill City Page | Done | Added `/refill-city`, Leaflet + MarkerCluster map, search/list/sidebar, popup QR image support. |
+| Refill City DB Sync | Done | Added `WaterKiosk` model, `database/import_water_kiosks_facility_points.sql`, `database/update_refill_city_after_import.sql`. Production should use update-only SQL because data was already imported once. |
+| Facility Map/Search Support | Done | `Place::getMapApproved()` and `/api/places` now include `facility` with `business` for map/search use. |
+| QR Code Handling | Done | Refill City uses `places.line_qr` / `water_kiosks.qrcode_img` filename convention and looks in `public/uploads/gallery/`; fallback reads `RSCxxxx` from slug/name/line_qr/address. |
+
+## Production Update Checklist
+
+| Item | Status | Notes |
+|---|---|---|
+| Upload Civic pages/controllers/models | To verify on production | Upload changed app files when deploying roadmap pages. |
+| Import Refill City update SQL | Needed if not yet run | Use `database/update_refill_city_after_import.sql` only. Do not re-import `database/import_water_kiosks_facility_points.sql` unless installing fresh. |
+| QR images | Done by user / verify | Files moved to `public/uploads/gallery/qrcode_RSC0001.png ... qrcode_RSC0030.png`. |
+| Cover images | Deferred | User will update cover images manually later. |
+
+## Deferred / Not Yet Done
+
+| Feature | Status | Reason / Next Step |
+|---|---|---|
+| Complaint System | Deferred | Must connect with Rangsit City App. Waiting for their API before integration. |
+| QGIS + DEM + OSM 3D Terrain | Later | Better free path than TopoExport, but intentionally postponed. |
+| TopoExport-like Export | Later | TopoExport is not free; revisit after QGIS/DEM/OSM workflow is chosen. |
+| Refill City Admin Workflow | Not done | Current work imports/syncs data and public map display. Future work could add admin CRUD/import UI. |
+| Production QA | Pending | Verify routes, QR popup image, search, sitemap, and `/api/places` after FTP/import. |
+
 ## TAGLINE
 
 > "ค้นพบของดีรังสิต — แพลตฟอร์มเศรษฐกิจดิจิทัลของเมืองรังสิต"
@@ -164,3 +199,28 @@ PM2.5 Real-time · พยากรณ์อากาศ · GIS-ready
 |-----|---------|
 | Merge branch `feature/discover-vnext-smart-city` → `Version-Beta01` | ยังไม่ได้ merge |
 | Push to GitHub | backup code ขึ้น remote |
+# Backlog Update — 2026-05-31
+
+## Features To Keep In Next Phase
+
+| Feature | Status | Note |
+|---------|--------|------|
+| Tourism Page | Todo | หน้ารวมสถานที่ท่องเที่ยวในเมืองรังสิต |
+| Events Calendar | Todo | ปฏิทินกิจกรรมเมือง ต่อยอดจากข้อมูล `place_events` |
+| Open Data | Todo | เปิดข้อมูลสถิติ/ข้อมูลเมืองให้ประชาชนและหน่วยงานนำไปใช้ต่อ |
+| Refill City | Todo | จุดเติมน้ำสะอาดหรือจุดบริการสาธารณะในเมือง |
+
+## Deferred / Waiting For External API
+
+| Feature | Status | Note |
+|---------|--------|------|
+| Complaint System | Deferred | ต้องเชื่อมกับ Rangsit City App และรอทีมที่เกี่ยวข้องเขียน API ให้ก่อน จึงค่อยเริ่ม integrate |
+
+## Refill City Import Notes — 2026-05-31
+
+- ใช้ข้อมูลจาก `water_kiosks` ของระบบ iService
+- SQL สำหรับ production: `database/import_water_kiosks_facility_points.sql`
+- Sync เป็น `places.place_type = facility`
+- Category ที่ใช้: `refill-city` / `Refill City`
+
+---

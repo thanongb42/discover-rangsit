@@ -15,6 +15,11 @@ class SitemapController extends Controller {
         $staticPages = [
             ['url' => BASE_URL,              'priority' => '1.0', 'freq' => 'daily'],
             ['url' => BASE_URL . '/city-map','priority' => '0.9', 'freq' => 'weekly'],
+            ['url' => BASE_URL . '/3dmap','priority' => '0.8', 'freq' => 'weekly'],
+            ['url' => BASE_URL . '/tourism','priority' => '0.8', 'freq' => 'weekly'],
+            ['url' => BASE_URL . '/events','priority' => '0.7', 'freq' => 'daily'],
+            ['url' => BASE_URL . '/open-data','priority' => '0.6', 'freq' => 'weekly'],
+            ['url' => BASE_URL . '/refill-city','priority' => '0.6', 'freq' => 'weekly'],
             ['url' => BASE_URL . '/trending','priority' => '0.8', 'freq' => 'daily'],
         ];
         foreach ($staticPages as $page) {

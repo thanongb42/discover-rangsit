@@ -148,6 +148,10 @@
             <div class="hidden md:flex items-center space-x-6">
                 <a href="<?= BASE_URL ?>" class="hover:text-blue-100 transition font-medium"><?= t('nav.home') ?></a>
                 <a href="<?= BASE_URL ?>/city-map" class="hover:text-blue-100 transition font-medium"><?= t('nav.map') ?></a>
+                <a href="<?= BASE_URL ?>/3dmap" class="hover:text-blue-100 transition font-medium">3D Map</a>
+                <a href="<?= BASE_URL ?>/tourism" class="hover:text-blue-100 transition font-medium">Tourism</a>
+                <a href="<?= BASE_URL ?>/events" class="hover:text-blue-100 transition font-medium">Events</a>
+                <a href="<?= BASE_URL ?>/open-data" class="hover:text-blue-100 transition font-medium">Open Data</a>
                 <a href="<?= BASE_URL ?>/trending" class="hover:text-blue-100 transition font-medium"><?= t('nav.trending') ?></a>
 
                 <?php if(!isset($_SESSION['user_id'])): ?>
@@ -238,6 +242,11 @@
             <div class="container mx-auto px-4 py-6 flex flex-col space-y-4">
                 <a href="<?= BASE_URL ?>" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition"><?= t('nav.home') ?></a>
                 <a href="<?= BASE_URL ?>/city-map" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition"><?= t('nav.map') ?></a>
+                <a href="<?= BASE_URL ?>/3dmap" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition">3D Map</a>
+                <a href="<?= BASE_URL ?>/tourism" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition">Tourism</a>
+                <a href="<?= BASE_URL ?>/events" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition">Events</a>
+                <a href="<?= BASE_URL ?>/open-data" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition">Open Data</a>
+                <a href="<?= BASE_URL ?>/refill-city" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition">Refill City</a>
                 <a href="<?= BASE_URL ?>/trending" class="text-white hover:text-blue-100 font-bold py-2 border-b border-white/5 transition"><?= t('nav.trending') ?></a>
 
                 <?php if(!isset($_SESSION['user_id'])): ?>

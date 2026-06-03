@@ -1,0 +1,22 @@
+{
+    "hero": {
+        "title_th": "",
+        "title_en": "",
+        "desc_th": "",
+        "desc_en": "",
+        "bg_color": "#0088CC"
+    },
+    "footer": {
+        "platform_name": "",
+        "dev_credit": ""
+    },
+    "email": {
+        "host": "",
+        "port": "587",
+        "encryption": "tls",
+        "username": "",
+        "password": "",
+        "from_name": "Discover Rangsit",
+        "from_email": ""
+    }
+}
