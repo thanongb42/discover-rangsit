@@ -1,0 +1,428 @@
+﻿<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discover Rangsit VM1 Installation and Cutover Runbook - 2026-06-24</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #536078;
+      --line: #d8dee9;
+      --panel: #f7f9fc;
+      --accent: #006ba8;
+      --ok: #137333;
+      --warn: #9a6700;
+      --code: #101827;
+      --codeText: #eef4ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Tahoma, "Noto Sans Thai", Arial, sans-serif;
+      line-height: 1.65;
+      background: #ffffff;
+    }
+    header {
+      padding: 40px 24px 28px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #f7fbff, #ffffff);
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 24px 56px;
+    }
+    h1, h2, h3 { line-height: 1.3; margin: 0 0 14px; }
+    h1 { font-size: 30px; }
+    h2 {
+      margin-top: 34px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 23px;
+    }
+    h3 { margin-top: 24px; font-size: 18px; }
+    p { margin: 8px 0 14px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 22px;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th { background: var(--panel); }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      background: #eef3f8;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    pre {
+      margin: 12px 0 18px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      color: var(--codeText);
+      background: var(--code);
+      border-radius: 8px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre;
+    }
+    pre code {
+      display: block;
+      color: var(--codeText);
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+    .lead { color: var(--muted); max-width: 900px; }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #f3f8fc;
+      padding: 12px 14px;
+      margin: 14px 0 20px;
+    }
+    .ok { color: var(--ok); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      margin: 16px 0 20px;
+    }
+    .box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+    ul { padding-left: 24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <main style="padding-top:0;padding-bottom:0">
+      <h1>Discover Rangsit VM1 Installation and Cutover Runbook</h1>
+      <p class="lead">บันทึกการย้ายระบบ <code>discover_rangsit</code> ขึ้น VM1 พร้อมคำสั่ง SSH/Linux, Nginx, Docker, DNS, SSL และผลลัพธ์จริง วันที่ 2026-06-24</p>
+      <p class="warn">หมายเหตุ: เอกสารนี้ตั้งใจไม่แสดง password, private key, OAuth client secret หรือ secret อื่น ๆ</p>
+    </main>
+  </header>
+
+  <main>
+    <h2>1. สรุปสถานะล่าสุด</h2>
+    <table>
+      <tr><th>รายการ</th><th>ค่า</th></tr>
+      <tr><td>VM1 IP</td><td><code>112.121.157.74</code></td></tr>
+      <tr><td>SSH user</td><td><code>rssc</code></td></tr>
+      <tr><td>Host workspace</td><td><code>/home/rssc/web-server</code></td></tr>
+      <tr><td>Actual storage</td><td><code>/data/rssc/web-server</code></td></tr>
+      <tr><td>Project path</td><td><code>/home/rssc/web-server/project-php/discover_rangsit</code></td></tr>
+      <tr><td>Nginx config</td><td><code>/home/rssc/web-server/nginx/conf.d/discover.conf</code></td></tr>
+      <tr><td>Docker PHP service</td><td><code>php-app</code> / container <code>php_app</code></td></tr>
+      <tr><td>Docker reverse proxy service</td><td><code>reverse-proxy</code> / container <code>reverse_proxy</code></td></tr>
+      <tr><td>Database container</td><td><code>id_booking_db</code></td></tr>
+      <tr><td>Database</td><td><code>discoverdb</code></td></tr>
+      <tr><td>Database user</td><td><code>discover_user</code></td></tr>
+      <tr><td>Domains</td><td><code>discover.rangsitcity.go.th</code>, <code>www.discover.rangsitcity.go.th</code>, staging <code>discovery.rangsitcity.go.th</code></td></tr>
+    </table>
+
+    <div class="note">
+      Cutover สำเร็จแล้ว: DNS ผ่าน, SSL ออกสำเร็จ, HTTPS ได้ 200, route <code>/city-map</code> ได้ 200, upload image ได้ 200
+    </div>
+
+    <h2>2. SSH เข้า VM1</h2>
+    <pre><code>ssh rssc@112.121.157.74</code></pre>
+
+    <p>Prompt ที่ใช้ระหว่างทำงาน:</p>
+    <pre><code>rssc@rssc-webapp:~$</code></pre>
+
+    <h2>3. ตรวจ DNS บน VM1</h2>
+    <pre><code>getent hosts discover.rangsitcity.go.th
+getent hosts www.discover.rangsitcity.go.th</code></pre>
+
+    <p>ผลลัพธ์ที่ได้:</p>
+    <pre><code>112.121.157.74  discover.rangsitcity.go.th
+112.121.157.74  www.discover.rangsitcity.go.th</code></pre>
+
+    <p>DNS records ที่ตั้งใน cPanel:</p>
+    <pre><code>discover.rangsitcity.go.th.      A  112.121.157.74
+www.discover.rangsitcity.go.th.  A  112.121.157.74</code></pre>
+
+    <h2>4. ตรวจ Docker services</h2>
+    <pre><code>cd ~/web-server
+sudo docker compose ps</code></pre>
+
+    <p>ผลลัพธ์สำคัญ:</p>
+    <pre><code>NAME                    IMAGE                      SERVICE         STATUS                 PORTS
+id_booking_db           mariadb:11                 id-booking-db   Up                     3306/tcp
+id_booking_phpmyadmin   phpmyadmin:latest          phpmyadmin      Up                     127.0.0.1:8081-&gt;80/tcp
+metabase                metabase/metabase:latest   metabase        Up                     0.0.0.0:3100-&gt;3000/tcp
+nextjs_app              node:20-alpine             nextjs-app      Up (healthy)
+pgadmin4                dpage/pgadmin4             pgadmin         Up                     0.0.0.0:5050-&gt;80/tcp
+php_app                 web-server-php-app         php-app         Up                     80/tcp
+reverse_proxy           nginx:alpine               reverse-proxy   Up                     0.0.0.0:80-&gt;80/tcp, 0.0.0.0:443-&gt;443/tcp</code></pre>
+
+    <h2>5. ตรวจ path ใน PHP container</h2>
+    <pre><code>sudo docker compose exec php-app pwd</code></pre>
+    <pre><code>/var/www/html</code></pre>
+
+    <pre><code>sudo docker compose exec php-app ls -la /var/www/html</code></pre>
+    <pre><code>total 20
+drwxrwxr-x  5 1001 1001 4096 Jun 24 07:24 .
+drwxr-xr-x  3 root root   18 Feb 24 19:05 ..
+drwxrwxr-x  3 1001 1001 4096 Jun 23 14:09 .well-known
+drwxrwxr-x  7 1001 1001 4096 Jun 24 07:27 discover_rangsit
+drwxrwxr-x 12 1001 1001 4096 Jun 24 11:07 id-booking
+-rw-rw-r--  1 1001 1001   71 Feb 27 02:33 index.php</code></pre>
+
+    <p class="note">จุดสำคัญ: โปรเจกต์อยู่ที่ <code>/var/www/html/discover_rangsit</code> ใน container ดังนั้น Nginx ต้อง proxy ไป <code>/discover_rangsit/public/...</code></p>
+
+    <h2>6. HTTP test ก่อน SSL</h2>
+    <p>ใช้ <code>curl -s -o /dev/null -w "%{http_code}\n"</code> เพราะ <code>curl -I</code> เป็น HEAD และ router ของแอปรับ GET/POST เป็นหลัก</p>
+
+    <pre><code>curl -s -o /dev/null -w "%{http_code}\n" http://discover.rangsitcity.go.th/
+curl -s -o /dev/null -w "%{http_code}\n" http://discover.rangsitcity.go.th/city-map
+curl -s -o /dev/null -w "%{http_code}\n" http://www.discover.rangsitcity.go.th/
+curl -s -o /dev/null -w "%{http_code}\n" http://discovery.rangsitcity.go.th/</code></pre>
+
+    <pre><code>200
+200
+200
+200</code></pre>
+
+    <h2>7. ออก SSL ด้วย Certbot</h2>
+    <pre><code>sudo certbot certonly --webroot \
+  -w /home/rssc/web-server/project-php/discover_rangsit/public \
+  -d discover.rangsitcity.go.th \
+  -d www.discover.rangsitcity.go.th</code></pre>
+
+    <p>ผลลัพธ์:</p>
+    <pre><code>Saving debug log to /var/log/letsencrypt/letsencrypt.log
+Requesting a certificate for discover.rangsitcity.go.th and www.discover.rangsitcity.go.th
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/discover.rangsitcity.go.th/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/discover.rangsitcity.go.th/privkey.pem
+This certificate expires on 2026-09-22.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.</code></pre>
+
+    <p class="warn">ห้ามแสดงหรือคัดลอกเนื้อหาไฟล์ <code>privkey.pem</code></p>
+
+    <h2>8. ปัญหาที่เจอและวิธีแก้</h2>
+
+    <h3>8.1 HTTPS ได้ curl 000 เพราะ cert ผิดโดเมน</h3>
+    <pre><code>curl -v https://discover.rangsitcity.go.th/ 2&gt;&amp;1 | tail -40</code></pre>
+    <pre><code>* Server certificate:
+*  subject: CN=cdp.rangsitcity.go.th
+*  subjectAltName does not match discover.rangsitcity.go.th
+* SSL: no alternative certificate subject name matches target host name 'discover.rangsitcity.go.th'
+curl: (60) SSL: no alternative certificate subject name matches target host name 'discover.rangsitcity.go.th'</code></pre>
+
+    <p>สาเหตุ: Nginx reload config ใหม่ไม่สำเร็จ เพราะ upstream ผิดชื่อ</p>
+    <pre><code>sudo docker compose exec reverse-proxy nginx -T | grep -n "listen 443\|server_name discover"</code></pre>
+    <pre><code>[emerg] host not found in upstream "php-apache" in /etc/nginx/conf.d/discovery.conf:9
+nginx: configuration file /etc/nginx/nginx.conf test failed</code></pre>
+
+    <p>แก้จาก <code>php-apache</code> เป็น service จริง <code>php-app</code></p>
+
+    <h3>8.2 /city-map ได้ Apache 404</h3>
+    <pre><code>curl -s https://discover.rangsitcity.go.th/city-map | head -20</code></pre>
+    <pre><code>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"&gt;
+&lt;html&gt;&lt;head&gt;
+&lt;title&gt;404 Not Found&lt;/title&gt;
+&lt;/head&gt;&lt;body&gt;
+&lt;h1&gt;Not Found&lt;/h1&gt;
+&lt;p&gt;The requested URL was not found on this server.&lt;/p&gt;
+&lt;hr&gt;
+&lt;address&gt;Apache/2.4.66 (Debian) Server at discover.rangsitcity.go.th Port 80&lt;/address&gt;</code></pre>
+
+    <p>สาเหตุ: Nginx ส่ง <code>/city-map</code> ไป Apache ตรง ๆ ทำให้ไม่เข้า PHP router จึงต้อง proxy dynamic route ไป <code>/discover_rangsit/public/index.php</code> และส่ง path จริงผ่าน <code>X-Original-URI</code></p>
+
+    <h3>8.3 Regex location ใช้ proxy_pass แบบมี URI ไม่ได้</h3>
+    <pre><code>sudo docker compose exec reverse-proxy nginx -t</code></pre>
+    <pre><code>[emerg] "proxy_pass" cannot have URI part in location given by regular expression
+nginx: configuration file /etc/nginx/nginx.conf test failed</code></pre>
+
+    <p>แก้โดยเปลี่ยนจาก <code>location ~</code> เป็น prefix/exact locations แยกราย path เช่น <code>location /uploads/</code>, <code>location /images/</code>, <code>location = /robots.txt</code></p>
+
+    <h2>9. Final Nginx config</h2>
+    <p>ไฟล์สุดท้าย:</p>
+    <pre><code>~/web-server/nginx/conf.d/discover.conf</code></pre>
+
+    <pre><code>server {
+    listen 80;
+    server_name discovery.rangsitcity.go.th discover.rangsitcity.go.th www.discover.rangsitcity.go.th;
+
+    location /uploads/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/uploads/;
+        proxy_set_header Host $host;
+    }
+
+    location /images/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/images/;
+        proxy_set_header Host $host;
+    }
+
+    location /js/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/js/;
+        proxy_set_header Host $host;
+    }
+
+    location /css/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/css/;
+        proxy_set_header Host $host;
+    }
+
+    location /assets/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/assets/;
+        proxy_set_header Host $host;
+    }
+
+    location /pr/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/pr/;
+        proxy_set_header Host $host;
+    }
+
+    location = /presentation.html {
+        proxy_pass http://php-app:80/discover_rangsit/public/presentation.html;
+        proxy_set_header Host $host;
+    }
+
+    location = /robots.txt {
+        proxy_pass http://php-app:80/discover_rangsit/public/robots.txt;
+        proxy_set_header Host $host;
+    }
+
+    location = /favicon.ico {
+        proxy_pass http://php-app:80/discover_rangsit/public/favicon.ico;
+        proxy_set_header Host $host;
+    }
+
+    location / {
+        proxy_pass http://php-app:80/discover_rangsit/public/index.php;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto http;
+        proxy_set_header X-Original-URI $request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name discover.rangsitcity.go.th www.discover.rangsitcity.go.th;
+
+    ssl_certificate /etc/letsencrypt/live/discover.rangsitcity.go.th/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/discover.rangsitcity.go.th/privkey.pem;
+
+    location /uploads/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/uploads/;
+        proxy_set_header Host $host;
+    }
+
+    location /images/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/images/;
+        proxy_set_header Host $host;
+    }
+
+    location /js/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/js/;
+        proxy_set_header Host $host;
+    }
+
+    location /css/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/css/;
+        proxy_set_header Host $host;
+    }
+
+    location /assets/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/assets/;
+        proxy_set_header Host $host;
+    }
+
+    location /pr/ {
+        proxy_pass http://php-app:80/discover_rangsit/public/pr/;
+        proxy_set_header Host $host;
+    }
+
+    location = /presentation.html {
+        proxy_pass http://php-app:80/discover_rangsit/public/presentation.html;
+        proxy_set_header Host $host;
+    }
+
+    location = /robots.txt {
+        proxy_pass http://php-app:80/discover_rangsit/public/robots.txt;
+        proxy_set_header Host $host;
+    }
+
+    location = /favicon.ico {
+        proxy_pass http://php-app:80/discover_rangsit/public/favicon.ico;
+        proxy_set_header Host $host;
+    }
+
+    location / {
+        proxy_pass http://php-app:80/discover_rangsit/public/index.php;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Original-URI $request_uri;
+    }
+}</code></pre>
+
+    <h2>10. Rename config file</h2>
+    <p>เปลี่ยนชื่อจาก <code>discovery.conf</code> เป็น <code>discover.conf</code> เพื่อไม่สับสนกับ staging domain</p>
+    <pre><code>mv nginx/conf.d/discovery.conf nginx/conf.d/discover.conf</code></pre>
+
+    <h2>11. ตรวจและ reload Nginx</h2>
+    <pre><code>sudo docker compose exec reverse-proxy nginx -t</code></pre>
+    <pre><code>nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful</code></pre>
+
+    <pre><code>sudo docker compose exec reverse-proxy nginx -s reload</code></pre>
+    <pre><code>2026/06/24 15:32:18 [notice] 299#299: signal process started</code></pre>
+
+    <h2>12. Final verification</h2>
+    <pre><code>curl -s -o /dev/null -w "%{http_code}\n" https://discover.rangsitcity.go.th/</code></pre>
+    <pre><code>200</code></pre>
+
+    <pre><code>curl -s -o /dev/null -w "%{http_code}\n" https://discover.rangsitcity.go.th/city-map</code></pre>
+    <pre><code>200</code></pre>
+
+    <pre><code>curl -s -o /dev/null -w "%{http_code}\n" https://www.discover.rangsitcity.go.th/</code></pre>
+    <pre><code>200</code></pre>
+
+    <pre><code>curl -s -o /dev/null -w "%{http_code}\n" https://discover.rangsitcity.go.th/uploads/covers/1774295712_cover.jpeg</code></pre>
+    <pre><code>200</code></pre>
+
+    <h2>13. Safe next steps</h2>
+    <ul>
+      <li>ตรวจหน้าเว็บจริงใน browser ทั้ง desktop/mobile</li>
+      <li>ตรวจ login/admin/social callback flows ก่อนบังคับ redirect HTTP ไป HTTPS</li>
+      <li>หลังระบบนิ่ง 1-2 วัน ค่อยจัดการ staging หรือ folder เก่าใน cPanel</li>
+      <li>ไม่ต้องแก้ <code>autodiscover.rangsitcity.go.th</code> เพราะเป็น email autodiscovery ไม่เกี่ยวกับเว็บ</li>
+    </ul>
+
+    <h2>14. Quick commands สำหรับเช็คซ้ำภายหลัง</h2>
+    <pre><code>ssh rssc@112.121.157.74
+cd ~/web-server
+getent hosts discover.rangsitcity.go.th
+getent hosts www.discover.rangsitcity.go.th
+sudo docker compose ps
+sudo docker compose exec reverse-proxy nginx -t
+curl -s -o /dev/null -w "%{http_code}\n" https://discover.rangsitcity.go.th/
+curl -s -o /dev/null -w "%{http_code}\n" https://discover.rangsitcity.go.th/city-map
+curl -s -o /dev/null -w "%{http_code}\n" https://www.discover.rangsitcity.go.th/
+curl -s -o /dev/null -w "%{http_code}\n" https://discover.rangsitcity.go.th/uploads/covers/1774295712_cover.jpeg</code></pre>
+  </main>
+</body>
+</html>
+

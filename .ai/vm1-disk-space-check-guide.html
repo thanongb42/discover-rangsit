@@ -1,0 +1,489 @@
+﻿<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VM1 Disk Space Check Guide</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #536078;
+      --line: #d8dee9;
+      --panel: #f7f9fc;
+      --code: #101827;
+      --codeText: #eef4ff;
+      --accent: #006ba8;
+      --warn: #9a6700;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Tahoma, "Noto Sans Thai", Arial, sans-serif;
+      line-height: 1.65;
+      background: #fff;
+    }
+    header {
+      padding: 36px 24px 24px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fbff;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 24px 56px;
+    }
+    h1, h2 { line-height: 1.3; margin: 0 0 14px; }
+    h1 { font-size: 30px; }
+    h2 {
+      margin-top: 32px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 22px;
+    }
+    p { margin: 8px 0 14px; }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      background: #eef3f8;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    pre {
+      margin: 12px 0 18px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      color: var(--codeText);
+      background: var(--code);
+      border-radius: 8px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre;
+    }
+    pre code {
+      display: block;
+      color: var(--codeText);
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 22px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: var(--panel); }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: #f3f8fc;
+      padding: 12px 14px;
+      margin: 14px 0 20px;
+    }
+    .warn {
+      border-left-color: var(--warn);
+      background: #fff8e8;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <main style="padding-top:0;padding-bottom:0">
+      <h1>คู่มือ SSH เข้า VM1 เพื่อเช็คพื้นที่ว่าง</h1>
+      <p>ใช้สำหรับตรวจ disk, mount, พื้นที่ของ Docker และโฟลเดอร์โปรเจกต์บน VM1 ของระบบ Discover Rangsit</p>
+    </main>
+  </header>
+
+  <main>
+    <h2>1. ข้อมูล VM1</h2>
+    <table>
+      <tr><th>รายการ</th><th>ค่า</th></tr>
+      <tr><td>IP</td><td><code>112.121.157.74</code></td></tr>
+      <tr><td>SSH user</td><td><code>rssc</code></td></tr>
+      <tr><td>Workspace</td><td><code>/home/rssc/web-server</code></td></tr>
+      <tr><td>Actual storage</td><td><code>/data/rssc/web-server</code></td></tr>
+      <tr><td>Project</td><td><code>/home/rssc/web-server/project-php/discover_rangsit</code></td></tr>
+    </table>
+
+    <h2>2. SSH เข้า VM1</h2>
+    <pre><code>ssh rssc@112.121.157.74</code></pre>
+
+    <p>เมื่อเข้าได้แล้ว prompt จะคล้ายแบบนี้:</p>
+    <pre><code>rssc@rssc-webapp:~$</code></pre>
+
+    <h2>3. เช็คพื้นที่ว่างทุก filesystem</h2>
+    <pre><code>df -h</code></pre>
+
+    <p>ผลลัพธ์จริงล่าสุด:</p>
+    <pre><code>Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           1.6G  3.9M  1.6G   1% /run
+/dev/sda3        20G   18G  1.6G  92% /
+tmpfs           7.9G  4.0K  7.9G   1% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+efivarfs        256K   73K  179K  29% /sys/firmware/efi/efivars
+/dev/sda2       488M  101M  352M  23% /boot
+/dev/sda1       197M  5.1M  192M   3% /boot/efi
+tmpfs           1.6G   12K  1.6G   1% /run/user/1001
+/dev/sdb         98G  1.4G   92G   2% /data</code></pre>
+
+    <div class="note">
+      ดูคอลัมน์ <code>Use%</code> ถ้าเกิน 80% เริ่มควรตรวจว่าพื้นที่หายไปไหน ถ้าเกิน 90% ควรรีบจัดการ
+    </div>
+
+    <h2>4. วิเคราะห์ข้อมูลจริงวันที่ 2026-06-24</h2>
+
+    <div class="note warn">
+      สรุปจากข้อมูลจริง: root partition <code>/</code> คือ <code>/dev/sda3</code> ขนาด 20G ใช้ไป 18G เหลือ 1.6G หรือ 92% ถือว่าใกล้เต็มและควรตรวจต่อ ส่วน disk ใหม่ <code>/data</code> คือ <code>/dev/sdb</code> ขนาด 98G ใช้ไปเพียง 1.4G เหลือ 92G หรือ 2% ยังโล่งมาก
+    </div>
+
+    <p>สิ่งที่ควรทำต่อเมื่อ root <code>/</code> ใช้เกิน 90%:</p>
+    <pre><code>sudo du -h --max-depth=1 / | sort -hr | head -20
+sudo du -h --max-depth=1 /var | sort -hr | head -20
+sudo du -h --max-depth=1 /var/lib | sort -hr | head -20
+sudo docker system df</code></pre>
+
+    <p>ผลตรวจจริงต่อจาก VM1:</p>
+    <pre><code>23G     /
+12G     /var
+5.5G    /home
+4.0G    /usr
+1.4G    /data
+120M    /opt
+106M    /boot
+26M     /tmp
+6.3M    /etc
+4.0M    /run
+64K     /root
+
+12G     /var
+11G     /var/lib
+619M    /var/log
+20M     /var/cache
+
+11G     /var/lib
+5.2G    /var/lib/containerd
+3.6G    /var/lib/docker
+2.0G    /var/lib/registry
+67M     /var/lib/apt
+43M     /var/lib/dpkg
+
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          8         8         5.541GB   5.541GB (100%)
+Containers      8         8         669MB     0B (0%)
+Local Volumes   4         4         293.6MB   0B (0%)
+Build Cache     17        0         175.9MB   0B</code></pre>
+
+    <div class="note warn">
+      วิเคราะห์จากผลจริง: พื้นที่ root หนักที่ <code>/var/lib</code> โดยเฉพาะ <code>containerd</code>, <code>docker</code>, และ <code>registry</code>. ยังไม่ควรลบอะไรทันที ควรตรวจว่า image/container/registry ตัวไหนยังใช้งานอยู่ก่อน
+    </div>
+
+    <p>ผลจริงจาก <code>sudo docker images</code>:</p>
+    <pre><code>IMAGE                           ID             DISK USAGE   CONTENT SIZE   EXTRA
+dpage/pgadmin4:latest           d243a4bcc02d        726MB          174MB    U
+mariadb:11                      be1ef4fe5f14        452MB          108MB    U
+metabase/metabase:latest        7fb43cf2bc6a       1.68GB          723MB    U
+nginx:alpine                    1d13701a5f9f       91.9MB         26.9MB    U
+node:20-alpine                  09e2b3d97260        190MB         48.3MB    U
+phpmyadmin:latest               51b74806646f        811MB          197MB    U
+portainer/portainer-ce:latest   3267f1869e0f        242MB         59.4MB    U
+web-server-php-app:latest       34d0bc23db6d        701MB          176MB    U</code></pre>
+
+    <div class="note warn">
+      สรุปจาก <code>docker images</code>: ทุก image ขึ้น <code>U</code> หรือ In Use ดังนั้นไม่ควรลบ image เหล่านี้โดยตรง และไม่ควรใช้ <code>docker system prune -a</code> ในจุดนี้
+    </div>
+
+    <p>ผลจริงจาก <code>sudo du -h --max-depth=1 /var/lib/containerd</code>:</p>
+    <pre><code>5.2G    /var/lib/containerd
+3.8G    /var/lib/containerd/io.containerd.snapshotter.v1.overlayfs
+1.5G    /var/lib/containerd/io.containerd.content.v1.content
+1.8M    /var/lib/containerd/io.containerd.metadata.v1.bolt
+4.0K    /var/lib/containerd/io.containerd.runtime.v2.task
+4.0K    /var/lib/containerd/io.containerd.grpc.v1.introspection
+0       /var/lib/containerd/tmpmounts</code></pre>
+
+    <div class="note warn">
+      ห้ามลบไฟล์ใต้ <code>/var/lib/containerd</code> ด้วย <code>rm</code> โดยตรง เพราะเป็น runtime storage ของ containerd/Docker และอาจทำให้ container พัง ควรตรวจ logs และ Docker metadata ก่อน
+    </div>
+
+    <p>ผลจริงจาก <code>sudo du -h --max-depth=1 /var/log</code>:</p>
+    <pre><code>623M    /var/log
+203M    /var/log/journal
+160M    /var/log/atop
+36M     /var/log/audit
+2.9M    /var/log/tuned
+152K    /var/log/letsencrypt
+92K     /var/log/apt</code></pre>
+
+    <div class="note">
+      วิเคราะห์ log: <code>/var/log</code> รวม 623M ไม่ใช่ต้นเหตุหลักของ root เต็ม แต่ถ้าต้องคืนพื้นที่เล็กน้อย สามารถพิจารณา rotate/vacuum <code>journal</code> และตรวจ retention ของ <code>atop</code> ได้
+    </div>
+
+    <p>ผลจริงจาก <code>sudo du -h --max-depth=1 /var/lib/docker</code>:</p>
+    <pre><code>3.6G    /var/lib/docker
+3.2G    /var/lib/docker/rootfs
+328M    /var/lib/docker/volumes
+124M    /var/lib/docker/containers
+340K    /var/lib/docker/buildkit
+92K     /var/lib/docker/network
+0       /var/lib/docker/tmp</code></pre>
+
+    <div class="note">
+      วิเคราะห์ Docker path: <code>/var/lib/docker/rootfs</code> เป็นส่วนใหญ่ที่สุด 3.2G ส่วน volumes และ container logs ไม่ใหญ่มาก จึงยังไม่ควรลบจาก filesystem โดยตรง
+    </div>
+
+    <p>ผลจริงจาก <code>sudo du -h --max-depth=2 /var/lib/registry</code>:</p>
+    <pre><code>2.0G    /var/lib/registry/docker/registry
+2.0G    /var/lib/registry/docker
+2.0G    /var/lib/registry</code></pre>
+
+    <div class="note warn">
+      วิเคราะห์ registry: <code>/var/lib/registry</code> กิน 2.0G ต้องเช็คก่อนว่ามี local registry container/service ใช้งานอยู่หรือไม่ และเก็บ image อะไรไว้บ้าง ก่อนตัดสินใจลบหรือย้าย
+    </div>
+
+    <p>ผลจริงจาก <code>sudo docker ps --format ...</code>:</p>
+    <pre><code>NAMES                   IMAGE                           STATUS                 PORTS
+reverse_proxy           nginx:alpine                    Up 8 hours             0.0.0.0:80-&gt;80/tcp, 0.0.0.0:443-&gt;443/tcp
+nextjs_app              node:20-alpine                  Up 8 hours (healthy)
+php_app                 web-server-php-app              Up 8 hours             80/tcp
+id_booking_phpmyadmin   phpmyadmin:latest               Up 28 hours            127.0.0.1:8081-&gt;80/tcp
+id_booking_db           mariadb:11                      Up 28 hours            3306/tcp
+metabase                metabase/metabase:latest        Up 6 weeks             0.0.0.0:3100-&gt;3000/tcp
+pgadmin4                dpage/pgadmin4                  Up 3 months            0.0.0.0:5050-&gt;80/tcp
+portainer               portainer/portainer-ce:latest   Up 3 months            0.0.0.0:8000-&gt;8000/tcp, 0.0.0.0:9000-&gt;9000/tcp, 0.0.0.0:9443-&gt;9443/tcp</code></pre>
+
+    <div class="note">
+      จาก container list ไม่พบ container/image ชื่อ <code>registry</code> ที่กำลังรันอยู่ แต่ก่อนลบ <code>/var/lib/registry</code> ต้องเช็ค service/package/mount เพิ่มก่อน
+    </div>
+
+    <p>ผลจริงจาก <code>systemctl list-units --type=service --all | grep -i registry</code>:</p>
+    <pre><code>registry.service  loaded  active  running  Docker Registr: Local Registry serving all the images required by Kubernetes</code></pre>
+
+    <div class="note warn">
+      พบ <code>registry.service</code> active/running อยู่จริง และ description ระบุว่าเป็น local registry สำหรับ Kubernetes images ดังนั้น <code>/var/lib/registry</code> ไม่ควรถูกลบแบบ manual cleanup
+    </div>
+
+    <p>ผลจริงจาก <code>systemctl status registry.service --no-pager</code>:</p>
+    <pre><code>● registry.service - Docker Registry: Local Registry serving all the images required by Kubernetes
+     Loaded: loaded (/etc/systemd/system/registry.service; enabled; preset: enabled)
+     Active: active (running) since Thu 2026-02-26 15:13:15 +07; 3 months 27 days ago
+       Docs: https://distribution.github.io/distribution/
+   Main PID: 1339 (registry)
+      Tasks: 7 (limit: 19069)
+     Memory: 20.4M (peak: 23.6M)
+        CPU: 4min 26.887s
+     CGroup: /system.slice/registry.service
+             └─1339 /usr/bin/registry serve /etc/docker/registry/config.yaml</code></pre>
+
+    <div class="note">
+      สรุป registry service: เป็น systemd service ที่ enable อยู่ ใช้ binary <code>/usr/bin/registry</code> และ config <code>/etc/docker/registry/config.yaml</code> ไม่ใช่ container ค้าง
+    </div>
+
+    <p>ผลจริงจาก <code>sudo cat /etc/docker/registry/config.yaml</code>:</p>
+    <pre><code>version: 0.1
+log:
+  level: debug
+  fields:
+    service: registry
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+  maintenance:
+    uploadpurging:
+      enabled: false
+    readonly:
+      enabled: true
+  delete:
+    enabled: true
+http:
+  addr: :5000
+  secret: placeholder
+  debug:
+    addr: localhost:5001</code></pre>
+
+    <div class="note warn">
+      วิเคราะห์ registry config: storage ชี้ไป <code>/var/lib/registry</code>, registry อยู่ในโหมด <code>readonly: true</code>, เปิด <code>delete: enabled</code>, แต่ปิด <code>uploadpurging</code>. ถ้าจะคืนพื้นที่ registry ต้องวางแผนผ่าน registry garbage collection/service maintenance ไม่ควรลบไฟล์เอง
+    </div>
+
+    <p>ผลจริงจาก <code>sudo find /var/lib/docker/containers -name '*-json.log' -exec ls -lh {} \;</code>:</p>
+    <pre><code>74K   /var/lib/docker/containers/.../931ca1...-json.log
+88M   /var/lib/docker/containers/.../c419e6...-json.log
+36M   /var/lib/docker/containers/.../5efa7e...-json.log
+13K   /var/lib/docker/containers/.../6284b3...-json.log
+80K   /var/lib/docker/containers/.../715df4...-json.log
+374K  /var/lib/docker/containers/.../6a2c10...-json.log
+22K   /var/lib/docker/containers/.../0969fa...-json.log
+855K  /var/lib/docker/containers/.../5e0234...-json.log</code></pre>
+
+    <div class="note">
+      วิเคราะห์ container logs: log ของ Docker containers รวมไม่ใหญ่มาก ตัวใหญ่สุด 88M และ 36M จึงไม่ใช่สาเหตุหลักของ root เต็ม ยังไม่จำเป็นต้อง truncate log ในรอบนี้
+    </div>
+
+    <p>คำสั่ง cleanup แบบปลอดภัยที่รันแล้ว:</p>
+    <pre><code>sudo apt clean
+sudo journalctl --disk-usage</code></pre>
+
+    <p>ผลจริง:</p>
+    <pre><code>Archived and active journals take up 202.9M in the file system.</code></pre>
+
+    <div class="note">
+      วิเคราะห์หลัง cleanup เบื้องต้น: <code>apt clean</code> ปลอดภัย แต่โดยรวมคืนพื้นที่ได้ไม่มาก ส่วน journal ใช้เพียง 202.9M จึงไม่ใช่ต้นเหตุหลักของ root เต็ม
+    </div>
+
+    <p>ผลจริงหลัง <code>apt clean</code>:</p>
+    <pre><code>df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda3        20G   18G  1.6G  92% /
+
+df -h /data
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sdb         98G  1.4G   92G   2% /data</code></pre>
+
+    <div class="note warn">
+      สรุปหลัง clean: root <code>/</code> ยังอยู่ที่ 92% เหลือ 1.6G เหมือนเดิม ส่วน <code>/data</code> ยังเหลือ 92G. การคืนพื้นที่จริงควรพิจารณาย้าย Docker/containerd/registry data ไป <code>/data</code> หรือขยาย root disk มากกว่าลบไฟล์ manual
+    </div>
+
+    <h2>5. เช็คเฉพาะ /data</h2>
+    <pre><code>df -h /data</code></pre>
+
+    <p>ใช้คำสั่งนี้เพราะโปรเจกต์จริงถูกย้ายมาอยู่ใต้ <code>/data/rssc/web-server</code></p>
+
+    <h2>6. เช็คว่า /home/rssc/web-server เป็น symlink ไป /data หรือไม่</h2>
+    <pre><code>ls -ld /home/rssc/web-server</code></pre>
+
+    <p>ผลลัพธ์ที่คาดหวังจะเห็นลูกศร <code>-&gt;</code> ประมาณนี้:</p>
+    <pre><code>lrwxrwxrwx 1 root root 21 Jun 24  /home/rssc/web-server -&gt; /data/rssc/web-server</code></pre>
+
+    <h2>7. เช็คขนาด workspace หลัก</h2>
+    <pre><code>du -sh /home/rssc/web-server</code></pre>
+
+    <p>หรือเช็ค path จริง:</p>
+    <pre><code>du -sh /data/rssc/web-server</code></pre>
+
+    <h2>8. เช็คโฟลเดอร์ใหญ่ใน web-server</h2>
+    <pre><code>du -h --max-depth=1 /home/rssc/web-server | sort -hr | head -20</code></pre>
+
+    <p>คำสั่งนี้ช่วยดูว่าโฟลเดอร์ไหนกินพื้นที่มากที่สุด เช่น <code>project-php</code>, logs, database backups หรือ uploads</p>
+
+    <h2>9. เช็คขนาดโปรเจกต์ Discover Rangsit</h2>
+    <pre><code>du -sh /home/rssc/web-server/project-php/discover_rangsit</code></pre>
+
+    <p>เช็คโฟลเดอร์ย่อยที่ใหญ่:</p>
+    <pre><code>du -h --max-depth=1 /home/rssc/web-server/project-php/discover_rangsit | sort -hr | head -20</code></pre>
+
+    <h2>10. เช็ค uploads โดยเฉพาะ</h2>
+    <pre><code>du -sh /home/rssc/web-server/project-php/discover_rangsit/public/uploads
+du -h --max-depth=1 /home/rssc/web-server/project-php/discover_rangsit/public/uploads | sort -hr</code></pre>
+
+    <h2>11. เช็ค Docker ใช้พื้นที่เท่าไร</h2>
+    <pre><code>docker system df</code></pre>
+
+    <p>ถ้าต้องใช้ sudo:</p>
+    <pre><code>sudo docker system df</code></pre>
+
+    <p>ตัวอย่างผลลัพธ์:</p>
+    <pre><code>TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          12        8         4.2GB     1.1GB
+Containers      8         8         320MB     0B
+Local Volumes   6         5         9.8GB     300MB
+Build Cache     15        0         1.4GB     1.4GB</code></pre>
+
+    <div class="note warn">
+      อย่ารันคำสั่งลบ Docker เช่น <code>docker system prune</code> ถ้ายังไม่แน่ใจ เพราะอาจลบ image/cache ที่ต้องใช้ deploy หรือ service อื่น
+    </div>
+
+    <h2>12. เช็คขนาด Docker volumes</h2>
+    <pre><code>sudo docker volume ls</code></pre>
+
+    <p>ถ้าต้องดู path จริงของ volume ใด volume หนึ่ง:</p>
+    <pre><code>sudo docker volume inspect VOLUME_NAME</code></pre>
+
+    <h2>13. เพิ่ม Volume ใหม่ 200 GiB เป็น /data2 วันที่ 2026-06-24</h2>
+    <p>เพิ่ม volume ใหม่จากหน้า VM <code>webapp-svr</code>:</p>
+    <table>
+      <tr><th>รายการ</th><th>ค่า</th></tr>
+      <tr><td>Volume name</td><td><code>webapp-svr-pvc-2</code></td></tr>
+      <tr><td>Capacity</td><td><code>200 GiB</code></td></tr>
+      <tr><td>Linux device</td><td><code>/dev/sdc</code></td></tr>
+      <tr><td>Filesystem</td><td><code>ext4</code></td></tr>
+      <tr><td>Label</td><td><code>data2</code></td></tr>
+      <tr><td>Mount point</td><td><code>/data2</code></td></tr>
+      <tr><td>UUID</td><td><code>208fbfd1-e391-412e-a1ae-c3d7f58044ca</code></td></tr>
+    </table>
+
+    <p>คำสั่งที่ใช้จริง:</p>
+    <pre><code>lsblk -o NAME,SIZE,FSTYPE,TYPE,MOUNTPOINTS
+sudo file -s /dev/sdc
+sudo mkfs.ext4 -L data2 /dev/sdc
+sudo mkdir -p /data2
+sudo mount /dev/sdc /data2
+df -h /data2
+sudo cp /etc/fstab /etc/fstab.bak-$(date +%F-%H%M%S)
+sudo blkid /dev/sdc
+echo 'UUID=208fbfd1-e391-412e-a1ae-c3d7f58044ca /data2 ext4 defaults,nofail 0 2' | sudo tee -a /etc/fstab
+sudo systemctl daemon-reload
+sudo mount -a
+lsblk -o NAME,SIZE,FSTYPE,TYPE,MOUNTPOINTS</code></pre>
+
+    <p>ผล format จริง:</p>
+    <pre><code>mke2fs 1.47.0 (5-Feb-2023)
+Creating filesystem with 52428800 4k blocks and 13107200 inodes
+Filesystem UUID: 208fbfd1-e391-412e-a1ae-c3d7f58044ca
+Creating journal (262144 blocks): done
+Writing superblocks and filesystem accounting information: done</code></pre>
+
+    <p>รายการใน <code>/etc/fstab</code> ที่เพิ่มแล้ว:</p>
+    <pre><code>UUID=208fbfd1-e391-412e-a1ae-c3d7f58044ca /data2 ext4 defaults,nofail 0 2</code></pre>
+
+    <p>ผล <code>lsblk</code> หลัง mount สำเร็จ:</p>
+    <pre><code>NAME    SIZE FSTYPE TYPE MOUNTPOINTS
+sda      20G        disk
+├─sda1  200M vfat   part /boot/efi
+├─sda2  512M ext4   part /boot
+└─sda3 19.3G xfs    part /
+sdb     100G ext4   disk /data
+sdc     200G ext4   disk /data2</code></pre>
+
+    <p>สถานะพื้นที่ล่าสุด:</p>
+    <pre><code>Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda3        20G   18G  1.6G  92% /
+/dev/sdb         98G  1.4G   92G   2% /data
+/dev/sdc        196G   28K  186G   1% /data2</code></pre>
+
+    <div class="note">
+      สรุป: เพิ่มพื้นที่ data ใหม่สำเร็จแล้วที่ <code>/data2</code>. Root <code>/</code> ยังเต็ม 92% เหมือนเดิม เพราะยังไม่ได้ย้าย Docker/containerd/registry data ออกจาก root
+    </div>
+    <h2>14. ชุดคำสั่งเร็วสำหรับเช็คประจำ</h2>
+    <pre><code>ssh rssc@112.121.157.74
+df -h
+df -h /data
+ls -ld /home/rssc/web-server
+du -sh /home/rssc/web-server
+du -h --max-depth=1 /home/rssc/web-server | sort -hr | head -20
+du -sh /home/rssc/web-server/project-php/discover_rangsit
+du -sh /home/rssc/web-server/project-php/discover_rangsit/public/uploads
+sudo docker system df</code></pre>
+  </main>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
